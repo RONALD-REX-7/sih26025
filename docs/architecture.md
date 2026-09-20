@@ -146,23 +146,20 @@ sih26025/
 ├── src/
 │   ├── app/                       # Next.js App Router pages
 │   │   ├── (auth)/                # Auth routes (login, callback)
-│   │   ├── (dashboard)/           # Protected dashboard routes
-│   │   │   ├── overview/
-│   │   │   ├── telemetry/
-│   │   │   ├── gis/
-│   │   │   ├── alerts/
-│   │   │   ├── nodes/
-│   │   │   ├── analytics/
-│   │   │   ├── simulator/
-│   │   │   ├── audit/
-│   │   │   ├── settings/
-│   │   │   └── layout.tsx
-│   │   ├── api/                   # API route handlers
-│   │   │   ├── telemetry/
-│   │   │   ├── alerts/
-│   │   │   └── simulator/
-│   │   ├── layout.tsx
-│   │   └── page.tsx               # Landing/redirect
+│   │   ├── (dashboard)/           # Protected/operational dashboard routes
+│   │   │   ├── dashboard/         # MONITOR: Operations Overview
+│   │   │   ├── mine/              # MONITOR: Colliery & Extraction Panels
+│   │   │   ├── gis/               # MONITOR: Underground Spatial Surveillance
+│   │   │   ├── sensors/           # INTELLIGENCE: Sensor Fleet (16 Nodes)
+│   │   │   ├── events/            # INTELLIGENCE: Subsidence Events Log
+│   │   │   ├── analytics/         # INTELLIGENCE: AI Anomaly & Risk Analysis
+│   │   │   ├── alerts/            # RESPONSE: Emergency Warnings & Evac
+│   │   │   ├── infrastructure/    # RESPONSE: Surface & Underground Structures
+│   │   │   ├── audit/             # TRACEABILITY: Immutable Compliance Log
+│   │   │   ├── reports/           # TRACEABILITY: DGMS Shift & Formal Reports
+│   │   │   ├── settings/          # SYSTEM: Geotechnical Safety Thresholds
+│   │   │   ├── layout.tsx         # Industrial application shell layout
+│   │   │   └── page.tsx           # Default redirect to /dashboard
 │   ├── components/                # Shared UI components
 │   │   ├── ui/                    # shadcn/ui primitives
 │   │   ├── charts/                # Recharts wrappers

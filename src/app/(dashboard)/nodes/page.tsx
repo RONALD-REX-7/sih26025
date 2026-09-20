@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { SensorNode } from '@/lib/domain/types';
+import { DEMO_NODES } from '@/lib/data/mock-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,6 +13,7 @@ import { Button } from '@/components/ui/button';
 export default function NodesPage() {
   const [nodes, setNodes] = useState<SensorNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiveSupabase, setIsLiveSupabase] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchNodes = async () => {
@@ -24,13 +26,16 @@ export default function NodesPage() {
         .select('*, panel:panels(name, code)')
         .order('node_code', { ascending: true });
 
-      if (queryError) {
-        throw queryError;
+      if (queryError || !data || data.length === 0) {
+        setNodes(DEMO_NODES);
+        setIsLiveSupabase(false);
+      } else {
+        setNodes((data as unknown as SensorNode[]) || []);
+        setIsLiveSupabase(true);
       }
-      setNodes((data as unknown as SensorNode[]) || []);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to query nodes';
-      setError(msg);
+    } catch {
+      setNodes(DEMO_NODES);
+      setIsLiveSupabase(false);
     } finally {
       setIsLoading(false);
     }
@@ -47,12 +52,17 @@ export default function NodesPage() {
           .order('node_code', { ascending: true });
 
         if (!isMounted) return;
-        if (queryError) throw queryError;
-        setNodes((data as unknown as SensorNode[]) || []);
-      } catch (err: unknown) {
+        if (queryError || !data || data.length === 0) {
+          setNodes(DEMO_NODES);
+          setIsLiveSupabase(false);
+        } else {
+          setNodes((data as unknown as SensorNode[]) || []);
+          setIsLiveSupabase(true);
+        }
+      } catch {
         if (!isMounted) return;
-        const msg = err instanceof Error ? err.message : 'Failed to query nodes';
-        setError(msg);
+        setNodes(DEMO_NODES);
+        setIsLiveSupabase(false);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -71,9 +81,15 @@ export default function NodesPage() {
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
               Hardware Fleet Management
             </span>
-            <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border-blue-300">
-              16 NODES SEEDED
-            </Badge>
+            {isLiveSupabase ? (
+              <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-300">
+                SUPABASE POSTGRESQL LIVE
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border-blue-300">
+                OFFLINE DEMO FLEET (16 NODES)
+              </Badge>
+            )}
           </div>
           <h1 className="text-xl font-bold tracking-tight">Sensor Nodes & Hardware Health</h1>
           <p className="text-xs text-slate-500">
@@ -101,9 +117,11 @@ export default function NodesPage() {
 
       <Card className="border-slate-200 dark:border-slate-800">
         <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-sm font-semibold">Active Sensor Fleet (Supabase Live Query)</CardTitle>
+          <CardTitle className="text-sm font-semibold">
+            {isLiveSupabase ? 'Active Sensor Fleet (Supabase Live Query)' : 'Active Sensor Fleet (Offline Baseline)'}
+          </CardTitle>
           <CardDescription className="text-xs">
-            Directly queried from Supabase PostgreSQL &bull; Table <code className="font-mono text-[11px]">sensor_nodes</code>
+            {isLiveSupabase ? 'Directly queried from Supabase PostgreSQL • Table sensor_nodes' : 'Local deterministic hardware registry (16 ESP32 Nodes)'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
