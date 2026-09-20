@@ -153,7 +153,7 @@ export default function GisPage() {
               {/* Map Canvas SVG */}
               <svg
                 viewBox="0 0 700 500"
-                className="w-full h-auto max-h-[520px] rounded border border-slate-800 bg-[#080c14]"
+                className="w-full h-auto max-h-130 rounded border border-slate-800 bg-[#080c14]"
               >
                 {/* Geodetic Grid Lines */}
                 <defs>
