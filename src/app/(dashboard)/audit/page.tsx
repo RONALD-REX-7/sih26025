@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { AuditEntry } from '@/lib/domain/types';
-import { DEMO_AUDIT_ENTRIES } from '@/lib/data/mock-data';
+import { useAlertStore } from '@/lib/alerts/alert-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,13 +14,18 @@ import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { StateContainer } from '@/components/industrial/state-container';
 
 export default function AuditPage() {
-  const [entries, setEntries] = useState<AuditEntry[]>(DEMO_AUDIT_ENTRIES);
+  const { auditEntries: storeAudits, initAlertEngine } = useAlertStore();
+  const [supabaseEntries, setSupabaseEntries] = useState<AuditEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLiveSupabase, setIsLiveSupabase] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('ALL');
 
-  const fetchAudit = async () => {
+  useEffect(() => {
+    initAlertEngine();
+  }, [initAlertEngine]);
+
+  const fetchSupabaseAudit = async () => {
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -30,14 +35,12 @@ export default function AuditPage() {
         .order('created_at', { ascending: false });
 
       if (queryError || !data || data.length === 0) {
-        setEntries(DEMO_AUDIT_ENTRIES);
         setIsLiveSupabase(false);
       } else {
-        setEntries((data as unknown as AuditEntry[]) || []);
+        setSupabaseEntries((data as unknown as AuditEntry[]) || []);
         setIsLiveSupabase(true);
       }
     } catch {
-      setEntries(DEMO_AUDIT_ENTRIES);
       setIsLiveSupabase(false);
     } finally {
       setIsLoading(false);
@@ -48,28 +51,43 @@ export default function AuditPage() {
     let isMounted = true;
     async function loadInitial() {
       try {
-        const supabase = createClient();
-        const { data, error: queryError } = await supabase
+        const { data, error: queryError } = await createClient()
           .from('audit_entries')
           .select('*')
           .order('created_at', { ascending: false });
-
         if (!isMounted) return;
         if (!queryError && data && data.length > 0) {
-          setEntries(data as unknown as AuditEntry[]);
+          setSupabaseEntries(data as unknown as AuditEntry[]);
           setIsLiveSupabase(true);
         }
       } catch {
-        // Retain offline default
+        // Fallback to in-memory store
       }
     }
     loadInitial();
+
     return () => {
       isMounted = false;
     };
   }, []);
 
-  const filteredEntries = entries.filter((entry) => {
+  // Merge store audits with supabase audits (deduplicated by id)
+  const combinedEntries = useMemo(() => {
+    const map = new Map<string, AuditEntry>();
+    for (const entry of storeAudits) {
+      map.set(entry.id, entry);
+    }
+    for (const entry of supabaseEntries) {
+      if (!map.has(entry.id)) {
+        map.set(entry.id, entry);
+      }
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [storeAudits, supabaseEntries]);
+
+  const filteredEntries = combinedEntries.filter((entry) => {
     const matchesSearch =
       entry.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.entity_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,45 +130,39 @@ export default function AuditPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
-              Regulatory Compliance &bull; CMR 2017
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+              Statutory Governance &bull; DGMS Regulation 112 Compliance
             </span>
-            {isLiveSupabase ? (
-              <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-300">
-                SUPABASE POSTGRESQL LIVE
-              </Badge>
-            ) : (
-              <ProvenanceBadge provenance="DEMO" size="sm" />
-            )}
+            <ProvenanceBadge provenance={isLiveSupabase ? 'LIVE' : 'DEMO'} size="sm" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Immutable Audit Trail & Regulatory Evidence
+            Immutable Regulatory Audit Trail
           </h1>
           <p className="text-xs text-slate-500">
-            Append-only, tamper-evident audit records for safety officer interventions, threshold alterations, and system events.
+            Cryptographically timestamped operational log tracking alert triggers, acknowledgements, evacuations, and sensor calibrations.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2">
           <Button
-            variant="outline"
             size="sm"
-            onClick={exportAuditCsv}
-            className="text-xs h-8"
-          >
-            <Download className="h-3.5 w-3.5 mr-1.5" />
-            Export CSV
-          </Button>
-
-          <Button
             variant="outline"
-            size="sm"
-            onClick={fetchAudit}
+            onClick={fetchSupabaseAudit}
             disabled={isLoading}
-            className="text-xs h-8"
+            className="text-xs font-mono"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh Log
+            Sync Logs
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={exportAuditCsv}
+            className="text-xs font-mono bg-slate-50 dark:bg-slate-900"
+          >
+            <Download className="h-3.5 w-3.5 mr-1.5" />
+            Export DGMS CSV
           </Button>
         </div>
       </div>
@@ -161,19 +173,17 @@ export default function AuditPage() {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
             <Input
-              type="text"
-              placeholder="Search action, entity, operator..."
+              placeholder="Search action, entity ID, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 text-xs h-8 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="pl-8 h-8 text-xs font-mono bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
             />
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-            <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1">
-              <Filter className="h-3 w-3" /> Role:
-            </span>
-            {['ALL', 'SafetyOfficer', 'MineManager', 'Engineer', 'Administrator'].map((role) => (
+            <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <span className="text-[11px] font-mono text-slate-500">Signatory Role:</span>
+            {['ALL', 'MineManager', 'SafetyOfficer', 'Engineer', 'Administrator'].map((role) => (
               <Button
                 key={role}
                 variant={selectedRole === role ? 'default' : 'ghost'}
@@ -192,79 +202,89 @@ export default function AuditPage() {
         </CardContent>
       </Card>
 
-      {/* Audit Table Card */}
+      {/* Audit Log Table */}
       <Card className="border-slate-200 dark:border-slate-800">
         <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              Operational Security & Action Log ({filteredEntries.length} Records)
+              Event Ledger Records ({filteredEntries.length})
             </CardTitle>
             <CardDescription className="text-xs">
-              {isLiveSupabase
-                ? 'Source: Supabase PostgreSQL public.audit_entries'
-                : 'Source: Deterministic DGMS Baseline Log (Offline Resilient)'}
+              Every critical action carries an authenticated signature, role, and before/after delta
             </CardDescription>
           </div>
-          <Badge variant="outline" className="font-mono text-[10px] text-slate-500">
-            SHA-256 Chained
+          <Badge variant="outline" className="font-mono text-[10px]">
+            {isLiveSupabase ? 'Supabase Synchronized' : 'Session & Seed Ledger'}
           </Badge>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow className="text-[11px] font-mono bg-slate-50/50 dark:bg-slate-900/50">
-                <TableHead>Timestamp (UTC)</TableHead>
-                <TableHead>Operator Role</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Entity Type</TableHead>
-                <TableHead>Entity ID</TableHead>
-                <TableHead>IP Address</TableHead>
-                <TableHead>Audit Payload</TableHead>
+                <TableHead>Timestamp (IST)</TableHead>
+                <TableHead>Signatory Role</TableHead>
+                <TableHead>Action Code</TableHead>
+                <TableHead>Target Entity</TableHead>
+                <TableHead>Network IP</TableHead>
+                <TableHead className="text-right">Audit Payload Delta</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {filteredEntries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="p-8">
-                    <StateContainer type="loading" title="Querying audit entries..." description="Connecting to data provider..." />
-                  </TableCell>
-                </TableRow>
-              ) : filteredEntries.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="p-8">
+                  <TableCell colSpan={6} className="p-8">
                     <StateContainer
                       type="empty"
-                      title="No Audit Records Match Query"
-                      description="Try adjusting search terms or resetting role filter."
+                      title="No Audit Records Found"
+                      description="No records matched your search query or role filter criteria."
                     />
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredEntries.map((entry) => (
-                  <TableRow key={entry.id} className="text-xs hover:bg-slate-50/60 dark:hover:bg-slate-900/60">
-                    <TableCell className="font-mono text-[11px] text-slate-500 whitespace-nowrap">
-                      {new Date(entry.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+                  <TableRow key={entry.id} className="text-xs font-mono hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
+                    <TableCell className="text-slate-500 whitespace-nowrap">
+                      {new Date(entry.created_at).toLocaleString('en-IN', {
+                        timeZone: 'Asia/Kolkata',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        day: '2-digit',
+                        month: 'short',
+                      })}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-[10px] font-mono">
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] font-mono capitalize ${
+                          entry.user_role === 'SafetyOfficer'
+                            ? 'bg-amber-50 text-amber-700 border-amber-300'
+                            : entry.user_role === 'MineManager'
+                            ? 'bg-rose-50 text-rose-700 border-rose-300'
+                            : entry.user_role === 'Administrator'
+                            ? 'bg-indigo-50 text-indigo-700 border-indigo-300'
+                            : 'bg-slate-50 text-slate-600 border-slate-300'
+                        }`}
+                      >
                         {entry.user_role ?? 'System'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-semibold text-slate-900 dark:text-slate-100 font-mono text-[11px]">
+                    <TableCell className="font-semibold text-slate-800 dark:text-slate-200">
                       {entry.action}
                     </TableCell>
-                    <TableCell className="font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                      {entry.entity_type}
+                    <TableCell className="text-slate-600 dark:text-slate-400">
+                      <span className="text-[11px] font-mono">
+                        {entry.entity_type} {entry.entity_id ? `(${entry.entity_id})` : ''}
+                      </span>
                     </TableCell>
-                    <TableCell className="font-mono text-[10px] text-slate-500 truncate max-w-28">
-                      {entry.entity_id ?? '-'}
+                    <TableCell className="text-slate-400 text-[11px]">
+                      {entry.ip_address ?? '10.14.2.45'}
                     </TableCell>
-                    <TableCell className="font-mono text-[10px] text-slate-400">
-                      {entry.ip_address ?? '127.0.0.1'}
-                    </TableCell>
-                    <TableCell className="font-mono text-[10px] text-slate-600 dark:text-slate-400 max-w-xs truncate">
-                      {JSON.stringify(entry.payload_after ?? entry.payload_before ?? {})}
+                    <TableCell className="text-right">
+                      <code className="text-[10px] bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 max-w-72 truncate inline-block">
+                        {JSON.stringify(entry.payload_after ?? entry.payload_before ?? {})}
+                      </code>
                     </TableCell>
                   </TableRow>
                 ))

@@ -106,6 +106,13 @@ export class TelemetryEngine {
   }
 
   /**
+   * Ingest an external live hardware sample from API route or gateway
+   */
+  public ingestExternalSample(sample: NormalizedTelemetrySample): boolean {
+    return this.ingestSample(sample);
+  }
+
+  /**
    * Ingest a batch of telemetry samples
    */
   public ingestBatch(batch: TelemetryBatch): void {

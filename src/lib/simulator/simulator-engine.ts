@@ -159,9 +159,6 @@ export class SimulatorEngine {
     const samples: NormalizedTelemetrySample[] = [];
     const healths: NodeHealthSample[] = [];
 
-    // Track highest detected risk state in this tick
-    let highestRisk: RiskState = 'Normal';
-
     for (const node of DEMO_NODES) {
       const isAffected = this.state.affectedNodeCodes.includes(node.node_code);
 
@@ -174,7 +171,6 @@ export class SimulatorEngine {
         packetLoss = 100.0;
         rssiDbm = -128;
         nodeStatus = 'offline';
-        if (highestRisk === 'Normal') highestRisk = 'Advisory';
       }
 
       healths.push({
@@ -271,18 +267,6 @@ export class SimulatorEngine {
           }
         }
 
-        // Evaluate Risk State dynamically based on DGMS thresholds
-        if (ch === 'DISP_Z') {
-          if (val > 48.0) highestRisk = 'Critical';
-          else if (val > 32.0 && highestRisk !== 'Critical') highestRisk = 'Warning';
-          else if (val > 24.0 && highestRisk !== 'Critical' && highestRisk !== 'Warning') highestRisk = 'Watch';
-          else if (val > 20.0 && highestRisk === 'Normal') highestRisk = 'Advisory';
-        }
-
-        if (ch === 'TILT_X' && Math.abs(val) > 120.0 && highestRisk !== 'Critical') {
-          highestRisk = 'Warning';
-        }
-
         samples.push({
           nodeId: node.node_code,
           sensorCode: `${node.node_code}-${ch}`,
@@ -298,8 +282,6 @@ export class SimulatorEngine {
         });
       }
     }
-
-    this.state.currentRiskState = highestRisk;
 
     // Broadcast tick to all engine listeners
     for (const listener of this.listeners) {

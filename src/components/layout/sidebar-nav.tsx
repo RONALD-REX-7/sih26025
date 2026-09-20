@@ -17,15 +17,20 @@ import {
   Settings,
   Flame,
   ShieldCheck,
+  Radio,
+  Server,
+  Play,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useAlertStore } from '@/lib/alerts/alert-store';
 
 interface NavItem {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  isAlert?: boolean;
 }
 
 interface NavGroup {
@@ -40,20 +45,23 @@ const NAV_GROUPS: NavGroup[] = [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Mine & Panels', href: '/mine', icon: Layers },
       { name: 'Underground GIS', href: '/gis', icon: MapPin },
+      { name: 'Live Telemetry', href: '/telemetry', icon: Radio },
     ],
   },
   {
     groupName: 'INTELLIGENCE',
     items: [
-      { name: 'Sensor Fleet', href: '/sensors', icon: Cpu, badge: '16' },
+      { name: 'Node Fleet', href: '/nodes', icon: Server, badge: '16' },
+      { name: 'Sensor Metrology', href: '/sensors', icon: Cpu, badge: '80' },
       { name: 'Subsidence Events', href: '/events', icon: Activity },
       { name: 'AI Risk Analytics', href: '/analytics', icon: TrendingUp },
+      { name: 'Mine Simulator', href: '/simulator', icon: Play },
     ],
   },
   {
     groupName: 'RESPONSE',
     items: [
-      { name: 'Alerts & Evac', href: '/alerts', icon: AlertOctagon },
+      { name: 'Alerts & Evac', href: '/alerts', icon: AlertOctagon, isAlert: true },
       { name: 'Infrastructure', href: '/infrastructure', icon: Building2 },
     ],
   },
@@ -74,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { activeCount, criticalCount } = useAlertStore();
 
   return (
     <aside className="w-60 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0">
@@ -110,6 +119,9 @@ export function SidebarNav() {
                   pathname === item.href || (item.href === '/dashboard' && pathname === '/');
                 const Icon = item.icon;
 
+                const displayBadge = item.isAlert && activeCount > 0 ? `${activeCount}` : item.badge;
+                const isAlertBadge = item.isAlert && activeCount > 0;
+
                 return (
                   <Link
                     key={item.href}
@@ -130,16 +142,20 @@ export function SidebarNav() {
                       />
                       <span>{item.name}</span>
                     </div>
-                    {item.badge && (
+                    {displayBadge && (
                       <span
                         className={cn(
                           'text-[9px] font-mono px-1 py-0.2 rounded font-semibold',
-                          isActive
+                          isAlertBadge
+                            ? criticalCount > 0
+                              ? 'bg-rose-600 text-white animate-pulse font-bold'
+                              : 'bg-amber-500 text-slate-950 font-bold'
+                            : isActive
                             ? 'bg-slate-800 text-amber-300 dark:bg-slate-200 dark:text-amber-700'
                             : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                         )}
                       >
-                        {item.badge}
+                        {displayBadge}
                       </span>
                     )}
                   </Link>

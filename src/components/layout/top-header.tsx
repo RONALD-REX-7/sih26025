@@ -1,23 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useSimulatorStore } from '@/lib/simulator/simulator-store';
+import { useAlertStore } from '@/lib/alerts/alert-store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Bell,
   LogOut,
   Radio,
+  Volume2,
+  VolumeX,
+  PlayCircle,
 } from 'lucide-react';
 
 export function TopHeader() {
   const { profile, role, signOut } = useAuth();
-  const { currentRiskState, latestHealths } = useSimulatorStore();
+  const { currentRiskState, latestHealths, state: simState } = useSimulatorStore();
+  const { activeCount, criticalCount, isAlarmMuted, toggleMuteAlarm, initAlertEngine } = useAlertStore();
+
+  useEffect(() => {
+    initAlertEngine();
+  }, [initAlertEngine]);
 
   const offlineNodesCount = Object.values(latestHealths).filter((h) => h.status === 'offline').length;
   const onlineCount = 16 - offlineNodesCount;
+  const isSimActive = simState.status === 'running';
 
   return (
     <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 flex items-center justify-between sticky top-0 z-30">
@@ -44,7 +54,14 @@ export function TopHeader() {
       </div>
 
       {/* Center: Live Operational Telemetry Pulse */}
-      <div className="hidden lg:flex items-center gap-4 text-xs">
+      <div className="hidden lg:flex items-center gap-3 text-xs">
+        {isSimActive && (
+          <Link href="/simulator" className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-[11px] font-mono hover:bg-amber-500/20 transition-colors">
+            <PlayCircle className="h-3 w-3 text-amber-600 dark:text-amber-400 animate-spin" />
+            <span>SIM: {simState.scenarioId} ({simState.speed}x)</span>
+          </Link>
+        )}
+
         <div className="flex items-center gap-2 px-3 py-1 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
           <Radio className={`h-3.5 w-3.5 ${offlineNodesCount > 0 ? 'text-amber-500' : 'text-emerald-500'} animate-pulse`} />
           <span className="text-slate-600 dark:text-slate-300 font-medium">Edge Telemetry:</span>
@@ -72,7 +89,7 @@ export function TopHeader() {
               currentRiskState === 'Critical' || currentRiskState === 'Warning' ? 'bg-rose-500' : 'bg-emerald-500'
             }`} />
           </span>
-          <span className="text-slate-600 dark:text-slate-300 font-medium">Mine Risk State:</span>
+          <span className="text-slate-600 dark:text-slate-300 font-medium">Mine Risk:</span>
           <span className="font-semibold uppercase tracking-wider font-mono">
             {currentRiskState}
           </span>
@@ -81,10 +98,34 @@ export function TopHeader() {
 
       {/* Right: User Role & Actions */}
       <div className="flex items-center gap-2">
+        {/* Siren Mute Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMuteAlarm}
+          className="h-8 w-8 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+          title={isAlarmMuted ? 'Unmute Audio Alarm Siren' : 'Mute Audio Alarm Siren'}
+        >
+          {isAlarmMuted ? (
+            <VolumeX className="h-4 w-4 text-amber-500" />
+          ) : (
+            <Volume2 className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+          )}
+        </Button>
+
+        {/* Live Notification Bell with Active Count */}
         <Link href="/alerts">
-          <Button variant="ghost" size="icon" className="h-8 w-8 relative text-slate-600 dark:text-slate-300">
+          <Button variant="ghost" size="icon" className="h-8 w-8 relative text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
             <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-slate-400" />
+            {activeCount > 0 ? (
+              <span className={`absolute -top-0.5 -right-0.5 h-4 min-w-[1rem] px-1 rounded-full text-[10px] font-mono font-bold flex items-center justify-center text-white ${
+                criticalCount > 0 ? 'bg-rose-600 animate-bounce' : 'bg-amber-500 animate-pulse'
+              }`}>
+                {activeCount}
+              </span>
+            ) : (
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600" />
+            )}
           </Button>
         </Link>
 

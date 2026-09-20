@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { RiskBadge } from '@/components/industrial/risk-badge';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { MetricBlock } from '@/components/industrial/metric-block';
+import { RiskEvidencePanel } from '@/components/industrial/risk-evidence-panel';
 import { DEMO_NODES } from '@/lib/data/mock-data';
 import {
   Play,
@@ -31,6 +32,9 @@ export default function SimulatorPage() {
     state,
     latestReadings,
     historyByChannel,
+    currentRiskState,
+    currentEvidence,
+    activeAnomalies,
     initEngine,
     start,
     pause,
@@ -129,7 +133,7 @@ export default function SimulatorPage() {
           >
             STATUS: {state.status.toUpperCase()} &bull; {formatTime(state.elapsedSec)} / {formatTime(activeDef.durationSeconds)}
           </Badge>
-          <RiskBadge state={state.currentRiskState} size="md" />
+          <RiskBadge state={currentRiskState} size="md" />
         </div>
       </div>
 
@@ -371,6 +375,13 @@ export default function SimulatorPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Explainable Risk & Sensor Fusion Evidence Panel */}
+      <RiskEvidencePanel
+        riskState={currentRiskState}
+        evidence={currentEvidence}
+        activeAnomalies={activeAnomalies}
+      />
 
       {/* Scenario Selection Matrix (All 9 Required Scenarios) */}
       <div className="space-y-3">

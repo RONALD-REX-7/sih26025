@@ -7,6 +7,8 @@ import { RiskState } from './risk-states';
 import { DataProvenance } from './provenance';
 import { SensorType, UserRole } from './constants';
 
+export type { UserRole };
+
 export type AlertSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type NodeStatus = 'online' | 'offline' | 'degraded' | 'maintenance';
 export type AlertStatus = 'active' | 'acknowledged' | 'escalated' | 'resolved';

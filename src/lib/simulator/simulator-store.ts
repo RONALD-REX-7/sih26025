@@ -7,6 +7,8 @@ import { NormalizedTelemetrySample, NodeHealthSample } from '@/lib/telemetry/typ
 import { TelemetryEngine } from '@/lib/telemetry/telemetry-engine';
 import { SimulatedTelemetrySource } from '@/lib/telemetry/simulated-source';
 import { RiskState } from '@/lib/domain/risk-states';
+import { RiskEngine } from '@/lib/ai/risk-engine';
+import { RiskEvidence, AnomalyRecord } from '@/lib/ai/types';
 
 interface HistoryPoint {
   timestamp: string;
@@ -22,6 +24,8 @@ export interface SimulatorStore {
   historyByChannel: Record<string, HistoryPoint[]>; // Rolling 60s history
   latestHealths: Record<string, NodeHealthSample>;
   currentRiskState: RiskState;
+  currentEvidence: RiskEvidence | null;
+  activeAnomalies: AnomalyRecord[];
 
   // Actions
   initEngine: (seed?: number, scenario?: SimulationScenarioId) => void;
@@ -58,6 +62,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
   },
   latestHealths: {},
   currentRiskState: 'Normal',
+  currentEvidence: null,
+  activeAnomalies: [],
 
   initEngine: (seed = 1025, scenario = 'NORMAL_BASELINE') => {
     // Prevent duplicate instantiation
@@ -70,6 +76,21 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     // Register with central TelemetryEngine
     const telemetryEngine = TelemetryEngine.getInstance();
     telemetryEngine.setSource(simulatedSource);
+
+    // Bind AI Risk Engine
+    const riskEngine = RiskEngine.getInstance();
+    riskEngine.subscribeToRiskAssessments((assessment) => {
+      set({
+        currentRiskState: assessment.riskState,
+        currentEvidence: assessment.evidence,
+      });
+    });
+
+    riskEngine.subscribeToAnomalies(() => {
+      set({
+        activeAnomalies: riskEngine.getActiveAnomalies(),
+      });
+    });
 
     // Subscribe to engine ticks
     engine.subscribe((samples, healths, simState) => {
@@ -94,7 +115,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         const channelType = parts[parts.length - 1]; // e.g. DISP_Z
 
         // If from primary affected node (or SN-102 baseline), push to rolling history
-        const isPrimaryTracked = s.nodeId === 'SN-102' || (simState.affectedNodeCodes.length > 0 && s.nodeId === simState.affectedNodeCodes[0]);
+        const isPrimaryTracked =
+          s.nodeId === 'SN-102' ||
+          (simState.affectedNodeCodes.length > 0 && s.nodeId === simState.affectedNodeCodes[0]);
 
         if (isPrimaryTracked && historyUpdate[channelType]) {
           const currentList = historyUpdate[channelType] || [];
@@ -112,7 +135,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         latestReadings: readingsUpdate,
         historyByChannel: historyUpdate,
         latestHealths: healthsUpdate,
-        currentRiskState: simState.currentRiskState,
+        // currentRiskState is dynamically driven by the AI riskEngine subscriber
+        activeAnomalies: riskEngine.getActiveAnomalies(),
       });
     });
 
@@ -123,6 +147,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       engine,
       simulatedSource,
       state: engine.getState(),
+      currentRiskState: riskEngine.getCurrentRiskState(),
+      currentEvidence: riskEngine.getCurrentEvidence(),
     });
   },
 
@@ -145,6 +171,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     const { engine } = get();
     if (engine) {
       engine.reset();
+      RiskEngine.getInstance().reset();
+      const riskEngine = RiskEngine.getInstance();
       // Clear history on reset
       set({
         historyByChannel: {
@@ -154,6 +182,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           VIB_RMS: [],
           STRAIN: [],
         },
+        currentRiskState: 'Normal',
+        currentEvidence: riskEngine.getCurrentEvidence(),
+        activeAnomalies: [],
       });
     }
   },
@@ -170,6 +201,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     const { engine } = get();
     if (engine) {
       engine.setScenario(scenario);
+      RiskEngine.getInstance().reset();
+      const riskEngine = RiskEngine.getInstance();
       set({
         state: engine.getState(),
         historyByChannel: {
@@ -179,6 +212,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           VIB_RMS: [],
           STRAIN: [],
         },
+        currentRiskState: 'Normal',
+        currentEvidence: riskEngine.getCurrentEvidence(),
+        activeAnomalies: [],
       });
     }
   },
@@ -187,6 +223,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     const { engine } = get();
     if (engine) {
       engine.setSeed(seed);
+      RiskEngine.getInstance().reset();
+      const riskEngine = RiskEngine.getInstance();
       set({
         state: engine.getState(),
         historyByChannel: {
@@ -196,6 +234,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           VIB_RMS: [],
           STRAIN: [],
         },
+        currentRiskState: 'Normal',
+        currentEvidence: riskEngine.getCurrentEvidence(),
+        activeAnomalies: [],
       });
     }
   },
