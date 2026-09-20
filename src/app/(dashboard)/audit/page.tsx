@@ -146,10 +146,10 @@ export default function AuditPage() {
                     <TableCell className="font-mono text-[11px] text-slate-600 dark:text-slate-400">
                       {entry.entity_type}
                     </TableCell>
-                    <TableCell className="font-mono text-[10px] text-slate-500 truncate max-w-[120px]">
+                    <TableCell className="font-mono text-[10px] text-slate-500 truncate max-w-30">
                       {entry.entity_id ?? '-'}
                     </TableCell>
-                    <TableCell className="font-mono text-[11px] text-slate-600 dark:text-slate-400 max-w-[280px] truncate">
+                    <TableCell className="font-mono text-[11px] text-slate-600 dark:text-slate-400 max-w-70 truncate">
                       {JSON.stringify(entry.payload_after ?? entry.payload_before ?? {})}
                     </TableCell>
                   </TableRow>
