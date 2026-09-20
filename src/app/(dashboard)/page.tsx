@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/industrial/risk-badge';
@@ -21,9 +22,40 @@ import {
 
 export default function DashboardOverviewPage() {
   const { role, profile } = useAuth();
+  const {
+    latestReadings,
+    currentRiskState,
+    state: simState,
+    initEngine,
+  } = useSimulatorStore();
+
+  useEffect(() => {
+    initEngine(1025, 'NORMAL_BASELINE');
+  }, [initEngine]);
+
+  const tiltVal = latestReadings['SN-102-TILT_X']?.value ?? 12.4;
+  const dispVal = latestReadings['SN-102-DISP_Z']?.value ?? 18.5;
+  const vibVal = latestReadings['SN-101-VIB_RMS']?.value ?? 3.2;
+  const strainVal = latestReadings['SN-102-STRAIN']?.value ?? 420.0;
+
+  const isSimActive = simState.status === 'running';
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Simulation Active Indicator Banner if running */}
+      {isSimActive && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
+            <span className="font-semibold font-mono">SIMULATION STREAM ACTIVE:</span>
+            <span>Scenario: {simState.scenarioId} &bull; Seed: {simState.seed} &bull; Speed: {simState.speed}x</span>
+          </div>
+          <Link href="/simulator" className="font-semibold underline text-amber-700 dark:text-amber-300">
+            Open Simulation Controls &rarr;
+          </Link>
+        </div>
+      )}
+
       {/* Top Banner / Welcome */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-950 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xs">
         <div>
@@ -31,7 +63,7 @@ export default function DashboardOverviewPage() {
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
               Colliery Operations Command
             </span>
-            <ProvenanceBadge provenance="DEMO" size="sm" />
+            <ProvenanceBadge provenance={isSimActive ? 'SIMULATED' : 'DEMO'} size="sm" />
             <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-300 font-mono">
               SYSTEM ACTIVE
             </Badge>
@@ -49,7 +81,7 @@ export default function DashboardOverviewPage() {
             <div className="text-xs font-medium text-slate-900 dark:text-slate-100">Active Persona</div>
             <div className="text-xs text-slate-500 font-mono">{role} ({profile?.full_name?.split(' ')[0]})</div>
           </div>
-          <RiskBadge state="Normal" size="lg" />
+          <RiskBadge state={currentRiskState} size="lg" />
         </div>
       </div>
 
@@ -58,45 +90,45 @@ export default function DashboardOverviewPage() {
         <MetricBlock
           label="Biaxial Tilt (X-Axis)"
           channelCode="TILT_X"
-          value={12.4}
+          value={tiltVal}
           unit="arcsec"
           nominalRange={[-150, 150]}
-          riskState="Normal"
-          rateOfChange={0.8}
-          provenance="DEMO"
+          riskState={Math.abs(tiltVal) > 120 ? 'Warning' : Math.abs(tiltVal) > 80 ? 'Advisory' : 'Normal'}
+          rateOfChange={isSimActive ? 0.8 : 0.05}
+          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
         />
 
         <MetricBlock
           label="Surface Displacement"
           channelCode="DISP_Z"
-          value={18.5}
+          value={dispVal}
           unit="mm"
           nominalRange={[0, 40]}
-          riskState="Normal"
-          rateOfChange={0.2}
-          provenance="DEMO"
+          riskState={dispVal > 32 ? 'Warning' : dispVal > 24 ? 'Watch' : dispVal > 20 ? 'Advisory' : 'Normal'}
+          rateOfChange={isSimActive ? 0.35 : 0.02}
+          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
         />
 
         <MetricBlock
           label="Peak Particle Velocity"
           channelCode="VIB_RMS"
-          value={3.2}
+          value={vibVal}
           unit="mm/s"
           nominalRange={[0, 5]}
-          riskState="Normal"
-          rateOfChange={-0.4}
-          provenance="DEMO"
+          riskState={vibVal > 6.0 ? 'Warning' : vibVal > 4.0 ? 'Watch' : 'Normal'}
+          rateOfChange={isSimActive ? -0.4 : 0.01}
+          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
         />
 
         <MetricBlock
           label="Rockbolt / Pillar Strain"
           channelCode="STRAIN"
-          value={420.0}
+          value={strainVal}
           unit="microstrain"
           nominalRange={[-800, 1200]}
-          riskState="Normal"
-          rateOfChange={5.0}
-          provenance="DEMO"
+          riskState={strainVal > 800 ? 'Watch' : 'Normal'}
+          rateOfChange={isSimActive ? 5.0 : 0.5}
+          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
         />
       </div>
 

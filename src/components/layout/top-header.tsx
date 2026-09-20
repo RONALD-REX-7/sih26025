@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -13,6 +14,10 @@ import {
 
 export function TopHeader() {
   const { profile, role, signOut } = useAuth();
+  const { currentRiskState, latestHealths } = useSimulatorStore();
+
+  const offlineNodesCount = Object.values(latestHealths).filter((h) => h.status === 'offline').length;
+  const onlineCount = 16 - offlineNodesCount;
 
   return (
     <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 flex items-center justify-between sticky top-0 z-30">
@@ -41,18 +46,36 @@ export function TopHeader() {
       {/* Center: Live Operational Telemetry Pulse */}
       <div className="hidden lg:flex items-center gap-4 text-xs">
         <div className="flex items-center gap-2 px-3 py-1 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-          <Radio className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />
+          <Radio className={`h-3.5 w-3.5 ${offlineNodesCount > 0 ? 'text-amber-500' : 'text-emerald-500'} animate-pulse`} />
           <span className="text-slate-600 dark:text-slate-300 font-medium">Edge Telemetry:</span>
-          <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">16/16 Nodes Online</span>
+          <span className={`font-mono font-semibold ${offlineNodesCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+            {onlineCount}/16 Nodes Online
+          </span>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1 rounded border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20">
+        <div className={`flex items-center gap-2 px-3 py-1 rounded border ${
+          currentRiskState === 'Critical'
+            ? 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-400'
+            : currentRiskState === 'Warning'
+            ? 'border-orange-500/40 bg-orange-500/10 text-orange-700 dark:text-orange-400'
+            : currentRiskState === 'Watch'
+            ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400'
+            : currentRiskState === 'Advisory'
+            ? 'border-blue-500/40 bg-blue-500/10 text-blue-700 dark:text-blue-400'
+            : 'border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400'
+        }`}>
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+              currentRiskState === 'Critical' || currentRiskState === 'Warning' ? 'bg-rose-400' : 'bg-emerald-400'
+            }`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${
+              currentRiskState === 'Critical' || currentRiskState === 'Warning' ? 'bg-rose-500' : 'bg-emerald-500'
+            }`} />
           </span>
           <span className="text-slate-600 dark:text-slate-300 font-medium">Mine Risk State:</span>
-          <span className="font-semibold text-emerald-700 dark:text-emerald-400">NORMAL</span>
+          <span className="font-semibold uppercase tracking-wider font-mono">
+            {currentRiskState}
+          </span>
         </div>
       </div>
 
