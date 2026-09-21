@@ -245,7 +245,7 @@ export default function SimulatorPage() {
             </p>
           </div>
 
-          <div className="divide-y divide-[#D7DEDC] overflow-y-auto max-h-[540px]">
+          <div className="divide-y divide-[#D7DEDC] overflow-y-auto max-h-135">
             {Object.values(SCENARIO_DEFINITIONS).map((def) => {
               const isSelected = def.id === state.scenarioId;
               return (
