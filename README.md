@@ -72,30 +72,35 @@ In accordance with safety-critical engineering standards:
 | **Phase 6** | Alert Center, Web Audio Siren & Regulatory Audit | **COMPLETED & VERIFIED** |
 | **Phase 7** | Full System Integration & Responsive Verification | **COMPLETED & VERIFIED** |
 | **Phase 8** | Adversarial QA & Production Release Candidate | **COMPLETED & VERIFIED** |
+| **Phase 10** | Professional UI/UX Reconstruction | **COMPLETED & VERIFIED** |
+| **Phase 11** | Production & Vercel Hardening | **COMPLETED & VERIFIED** |
 
 ---
 
-## 4. Information Architecture (11 Core Routes)
+## 4. Information Architecture (All Core Routes)
 
 The navigation follows operational mining command hierarchy:
 
 ```
 MONITOR
-  ├── /dashboard       Operations Overview (colliery status, live node health, current risk state)
+  ├── /dashboard       Operations Overview (triage header, live GIS canvas, risk evidence dossier)
   ├── /mine            Colliery Strata Profile (Panels P-101 to P-104, extraction methods, depth)
-  └── /gis             Underground Spatial Surveillance (georeferenced panel polygons & sensor locations)
+  ├── /gis             Underground Spatial Surveillance (georeferenced panel polygons & sensor locations)
+  └── /telemetry       Real-Time Transducer Ingestion Stream (normalized samples, 5s DB buffer)
 INTELLIGENCE
-  ├── /sensors         Sensor Node Fleet (16 ESP32 nodes, battery levels, LoRa RSSI, calibration)
-  ├── /events          Subsidence Events Log (timeline of anomalous deformation events)
-  └── /analytics       AI Risk Analytics (multi-sensor correlation, rate-of-change, z-score persistence)
+  ├── /nodes           Sensor Node Fleet (16 ESP32 nodes, battery levels, LoRa RSSI, maintenance)
+  ├── /sensors         Transducer Metrology & Calibration Matrix (80 channels, zero tare)
+  ├── /events          Subsidence Events Log (chronology of anomalous deformation events)
+  ├── /analytics       AI Risk Analytics (multi-sensor correlation, rate-of-change, z-score persistence)
+  └── /simulator       Mulberry32 Deterministic Test Station (seed controls, 9 failure scenarios)
 RESPONSE
-  ├── /alerts          Emergency Early Warning & Evacuation Escalation Center
+  ├── /alerts          Emergency Early Warning & Evacuation Escalation Center (CMR 2017 Reg 112)
   └── /infrastructure  Surface Structures, Railway Lines & Underground Roadway Protection
 TRACEABILITY
-  ├── /audit           Immutable Compliance Audit Log (append-only operator actions)
+  ├── /audit           Immutable Regulatory Audit Log (cryptographic append-only operator actions)
   └── /reports         DGMS Form-IV Regulatory Reports & Shift Handover Logs
 SYSTEM
-  └── /settings        Geotechnical Safety Thresholds & Alarm Calibration
+  └── /settings        Geotechnical Safety Thresholds & Alarm Calibration Matrix
 ```
 
 ---
@@ -103,21 +108,20 @@ SYSTEM
 ## 5. Local Setup & Verification
 
 ### Prerequisites
-- Node.js ≥ 22.0.0 (Tested on Node v26.5.0)
+- Node.js ≥ 20.0.0 (Tested on Node v24.x / v26.5.0)
 - npm ≥ 10.0.0
 
-### Installation
+### Installation & Verification
 ```bash
 # 1. Clone repository
 git clone <repo-url>
 cd sih26025
 
-# 2. Install dependencies (clean lock file)
+# 2. Install dependencies
 npm install
 
 # 3. Environment configuration
 cp .env.example .env.local
-# (Local development operates in offline/demo mode out of the box with zero required external integrations)
 
 # 4. Run automated test suite
 npm test
@@ -129,8 +133,8 @@ npx tsc --noEmit
 # 6. Build production bundle
 npm run build
 
-# 7. Start local development server
-npm run dev
+# 7. Start production server locally
+npm start
 ```
 Open [http://localhost:3000](http://localhost:3000) to access the operations dashboard.
 
@@ -143,3 +147,11 @@ During SIH hackathon evaluation, judges can test the role-based operational perm
 2. **Mine Manager**: Colliery extraction schedules, panel progress, production clearance.
 3. **Geotechnical Engineer**: Sensor calibration, raw time-series feeds, InSAR baseline correlation.
 4. **Administrator**: System health, firmware lifecycle, and compliance audit trail inspection.
+
+---
+
+## 7. Production Vercel Deployment & Postman Suite
+
+- **Vercel Deploy:** Push to repository main/master branch connected to Vercel, or run `vercel --prod`. Pre-configured with `vercel.json` and Node.js 24.x runtime.
+- **Postman API Test Collection:** Located in `docs/postman/SIH26025_Telemetry_API.postman_collection.json`. Covers 10 edge cases validating authentication, rate limiting, JSON schema enforcement, and duplicate rejection.
+- **Audit Documentation:** Detailed reports available in `docs/production-hardening-report.md` and `docs/PROJECT_STATUS.md`.
