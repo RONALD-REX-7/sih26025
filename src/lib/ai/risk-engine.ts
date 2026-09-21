@@ -17,7 +17,7 @@ import { RiskState } from '@/lib/domain/risk-states';
 import { NormalizedTelemetrySample } from '@/lib/domain/telemetry-contract';
 import { NodeHealthSample } from '@/lib/telemetry/types';
 import { TelemetryEngine } from '@/lib/telemetry/telemetry-engine';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Json } from '@/lib/supabase/database.types';
 import {
   AnomalyRecord,
@@ -703,6 +703,10 @@ export class RiskEngine {
    */
   private async flushPersistenceBuffer(): Promise<void> {
     if (this.pendingAnomaliesToPersist.length === 0) return;
+    if (!isSupabaseConfigured()) {
+      this.pendingAnomaliesToPersist = [];
+      return;
+    }
 
     const toPersist = [...this.pendingAnomaliesToPersist];
     this.pendingAnomaliesToPersist = [];

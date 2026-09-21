@@ -18,7 +18,7 @@ import {
   IngestionStats,
 } from './types';
 import { validateTelemetrySample } from '@/lib/domain/telemetry-contract';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 export class TelemetryEngine {
   private static instance: TelemetryEngine | null = null;
@@ -150,6 +150,10 @@ export class TelemetryEngine {
    */
   private async flushPersistenceBuffer(): Promise<void> {
     if (this.isPersisting || this.pendingPersistenceBuffer.length === 0) {
+      return;
+    }
+
+    if (!isSupabaseConfigured()) {
       return;
     }
 

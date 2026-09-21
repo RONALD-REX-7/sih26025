@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { AuditEntry } from '@/lib/domain/types';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,10 @@ export default function AuditPage() {
   }, [initAlertEngine]);
 
   const fetchSupabaseAudit = async () => {
+    if (!isSupabaseConfigured()) {
+      setIsLiveSupabase(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -48,6 +52,11 @@ export default function AuditPage() {
   useEffect(() => {
     let isMounted = true;
     async function loadInitial() {
+      if (!isSupabaseConfigured()) {
+        if (!isMounted) return;
+        setIsLiveSupabase(false);
+        return;
+      }
       try {
         const { data, error: queryError } = await createClient()
           .from('audit_entries')

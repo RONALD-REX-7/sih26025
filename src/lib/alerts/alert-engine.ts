@@ -12,7 +12,7 @@ import { RiskEngine } from '@/lib/ai/risk-engine';
 import { RiskAssessmentEvent } from '@/lib/ai/types';
 import { NotificationManager } from '@/lib/notifications/notification-manager';
 import { AudibleAlarm } from '@/lib/notifications/audible-alarm';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import {
   AcknowledgementPayload,
   EscalationPayload,
@@ -396,7 +396,7 @@ export class AlertEngine {
 
   // --- Supabase Persistence Handlers ---
   private async syncAlertToSupabase(alert: Alert): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isSupabaseConfigured()) return;
     try {
       const supabase = createClient();
       // Map demo panel ids to valid Supabase panel UUID if needed
@@ -419,7 +419,7 @@ export class AlertEngine {
   }
 
   private async syncAcknowledgementToSupabase(alert: Alert): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isSupabaseConfigured()) return;
     try {
       const supabase = createClient();
       // Record audit and update alert status in Supabase
@@ -431,7 +431,7 @@ export class AlertEngine {
   }
 
   private async syncAuditToSupabase(entry: AuditEntry): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isSupabaseConfigured()) return;
     try {
       const supabase = createClient();
       await supabase.from('audit_entries').insert({

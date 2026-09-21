@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { SensorNode, NodeStatus } from '@/lib/domain/types';
 import { DEMO_NODES } from '@/lib/data/mock-data';
 import { useAlertStore } from '@/lib/alerts/alert-store';
@@ -29,6 +29,11 @@ export default function NodesPage() {
   }, [initAlertEngine]);
 
   const fetchNodes = async () => {
+    if (!isSupabaseConfigured()) {
+      setNodes(DEMO_NODES);
+      setIsLiveSupabase(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const supabase = createClient();
@@ -55,6 +60,12 @@ export default function NodesPage() {
   useEffect(() => {
     let isMounted = true;
     async function loadInitial() {
+      if (!isSupabaseConfigured()) {
+        if (!isMounted) return;
+        setNodes(DEMO_NODES);
+        setIsLiveSupabase(false);
+        return;
+      }
       try {
         const { data, error: queryError } = await createClient()
           .from('sensor_nodes')
