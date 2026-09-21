@@ -22,17 +22,16 @@ import {
 } from '@/components/ui/sheet';
 import { SidebarNav } from './sidebar-nav';
 import {
-  LogOut,
   Volume2,
   VolumeX,
   Menu,
   User,
   ChevronDown,
-  AlertTriangle,
+  Play,
 } from 'lucide-react';
 
 export function TopHeader() {
-  const { profile, role, setDemoRole, signOut } = useAuth();
+  const { role, setDemoRole } = useAuth();
   const { currentRiskState, latestHealths, state: simState } = useSimulatorStore();
   const { activeCount, criticalCount, isAlarmMuted, toggleMuteAlarm, initAlertEngine } = useAlertStore();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -45,146 +44,152 @@ export function TopHeader() {
   const onlineCount = Math.max(16 - offlineNodesCount, 0);
   const isSimActive = simState.status === 'running';
 
-  const getRiskColor = (state: string) => {
+  const getRiskStyle = (state: string) => {
     switch (state) {
       case 'Critical':
-        return 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-800';
+        return 'bg-[#FBEBE9] text-[#91180E] border-[#B42318]';
       case 'Warning':
-        return 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-800';
+        return 'bg-[#FDF0ED] text-[#B42318] border-[#A85A00]';
       case 'Watch':
-        return 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800';
+        return 'bg-[#FCF2E9] text-[#A85A00] border-[#A85A00]';
       case 'Advisory':
-        return 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-300 dark:border-sky-800';
+        return 'bg-[#FBF6E9] text-[#9A6A00] border-[#9A6A00]';
       default:
-        return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800';
+        return 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]';
     }
   };
 
   return (
-    <header className="h-12 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30 select-none">
+    <header className="h-12 border-b border-[#D7DEDC] bg-[#FFFFFF] px-4 flex items-center justify-between sticky top-0 z-30 select-none">
       {/* 1. Mine Identity & Context */}
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
           <SheetTrigger
-            className="lg:hidden h-7 w-7 inline-flex items-center justify-center rounded-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0"
+            className="lg:hidden h-8 w-8 inline-flex items-center justify-center rounded-sm text-[#1D2933] hover:bg-[#EDF1F0] cursor-pointer shrink-0"
             aria-label="Open Navigation Menu"
           >
             <Menu className="h-4 w-4" />
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64 max-w-xs border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+          <SheetContent side="left" className="p-0 w-60 max-w-xs border-r border-[#D7DEDC] bg-[#FFFFFF]">
             <SidebarNav onItemClick={() => setIsMobileOpen(false)} className="w-full h-full border-r-0" />
           </SheetContent>
         </Sheet>
 
-        <div className="flex items-baseline gap-2 min-w-0">
-          <span className="font-semibold text-xs sm:text-sm text-slate-950 dark:text-slate-50 tracking-tight shrink-0">
+        <div className="flex items-baseline gap-2.5 min-w-0">
+          <span className="font-semibold text-sm text-[#1D2933] tracking-tight shrink-0">
             Bhowra-West Colliery
           </span>
-          <span className="text-[11px] text-slate-500 font-mono hidden md:inline truncate">
-            Jharia Coalfield &bull; Seam VII/VIII
+          <span className="text-xs text-[#52606D] hidden md:inline truncate">
+            Jharia Coalfield &bull; Seam VII/VIII (185m–265m)
           </span>
         </div>
       </div>
 
-      {/* 2. Operational State (Mode, System Status, Global Risk) */}
-      <div className="hidden sm:flex items-center gap-2 text-xs">
+      {/* 2. Operational Vitals */}
+      <div className="hidden sm:flex items-center gap-3 text-xs">
         {/* Mode Tag */}
-        <span
-          className={`font-mono text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded-sm border ${
-            isSimActive
-              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
-          }`}
-        >
+        <span className="font-mono-tech text-xs uppercase px-2 py-0.5 rounded-sm border border-[#D7DEDC] bg-[#EDF1F0] text-[#52606D] font-medium">
           {isSimActive ? `SIM: ${simState.speed}x` : 'DEMO MODE'}
         </span>
 
-        {/* Telemetry Node Status */}
-        <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded-sm border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-          <span className="text-slate-400 font-sans mr-1">Fleet:</span>
-          <strong className={offlineNodesCount > 0 ? 'text-amber-600' : 'text-slate-900 dark:text-slate-100'}>
-            {onlineCount}/16
-          </strong> Online
-        </span>
+        <span className="text-[#D7DEDC]">|</span>
 
-        {/* Global Risk State */}
-        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-sm border text-[11px] font-mono font-medium ${getRiskColor(currentRiskState)}`}>
-          <span className="text-[10px] font-sans font-normal opacity-75">Risk:</span>
-          <span className="font-semibold uppercase tracking-wider">{currentRiskState}</span>
+        {/* Global Condition */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-[#52606D]">Condition:</span>
+          <span className={`px-2 py-0.5 rounded-sm text-xs font-semibold border ${getRiskStyle(currentRiskState)}`}>
+            {currentRiskState.toUpperCase()}
+          </span>
         </div>
-      </div>
 
-      {/* 3. Alert State & Evaluator User */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        {/* Active Alert Priority Callout */}
-        {activeCount > 0 ? (
-          <Link href="/alerts">
-            <button
-              type="button"
-              className={`h-7 px-2 rounded-sm inline-flex items-center gap-1.5 text-xs font-mono font-semibold transition-colors cursor-pointer text-white ${
+        <span className="text-[#D7DEDC]">|</span>
+
+        {/* Telemetry Health */}
+        <div className="flex items-center gap-1.5 text-xs text-[#52606D]">
+          <span className="h-2 w-2 rounded-full bg-[#2F6B4F]" />
+          <span>Fleet:</span>
+          <span className="font-mono-tech text-xs font-semibold text-[#1D2933]">{onlineCount}/16</span>
+        </div>
+
+        {activeCount > 0 && (
+          <>
+            <span className="text-[#D7DEDC]">|</span>
+            <Link
+              href="/alerts"
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-xs font-semibold ${
                 criticalCount > 0
-                  ? 'bg-rose-600 hover:bg-rose-700 animate-pulse'
-                  : 'bg-amber-600 hover:bg-amber-700'
+                  ? 'bg-[#FBEBE9] text-[#B42318]'
+                  : 'bg-[#FBF6E9] text-[#9A6A00]'
               }`}
             >
-              <AlertTriangle className="h-3.5 w-3.5" />
-              <span>{criticalCount > 0 ? `${criticalCount} CRITICAL` : `${activeCount} ALERT`}</span>
-            </button>
-          </Link>
-        ) : (
-          <Link href="/alerts" className="hidden md:inline-flex">
-            <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 px-2 py-1 rounded-sm">
-              0 Active Alerts
-            </span>
-          </Link>
+              <span>{activeCount} {activeCount === 1 ? 'Alert' : 'Alerts'}</span>
+            </Link>
+          </>
         )}
+      </div>
 
-        {/* Audio Siren Mute Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
+      {/* 3. Operational Controls */}
+      <div className="flex items-center gap-2">
+        {/* Audible Siren Toggle */}
+        <button
           onClick={toggleMuteAlarm}
-          className="h-7 w-7 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-          title={isAlarmMuted ? 'Unmute Industrial Siren' : 'Mute Industrial Siren'}
+          className={`h-7 px-2 text-xs font-medium rounded-sm border flex items-center gap-1.5 transition-colors cursor-pointer ${
+            isAlarmMuted
+              ? 'border-[#D7DEDC] bg-[#EDF1F0] text-[#74808A] hover:bg-[#D7DEDC]'
+              : 'border-[#173B57] bg-[#FFFFFF] text-[#173B57] hover:bg-[#EDF1F0]'
+          }`}
+          title={isAlarmMuted ? 'Unmute Emergency Siren' : 'Mute Emergency Siren'}
         >
           {isAlarmMuted ? (
-            <VolumeX className="h-3.5 w-3.5 text-amber-600" />
+            <>
+              <VolumeX className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">Siren Muted</span>
+            </>
           ) : (
-            <Volume2 className="h-3.5 w-3.5" />
+            <>
+              <Volume2 className="h-3.5 w-3.5 text-[#173B57]" />
+              <span className="hidden md:inline">Siren Ready</span>
+            </>
           )}
-        </Button>
+        </button>
 
-        {/* Persona Switcher Dropdown */}
+        {/* Persona Switcher */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="h-7 px-2 inline-flex items-center justify-center rounded-sm text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 gap-1.5 font-normal border border-slate-200 dark:border-slate-800 cursor-pointer">
-            <User className="h-3 w-3 text-slate-500" />
-            <span className="font-medium hidden sm:inline max-w-[110px] truncate">{role}</span>
-            <ChevronDown className="h-3 w-3 opacity-50" />
+          <DropdownMenuTrigger className="h-7 px-2 text-xs font-medium rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-[#1D2933] hover:bg-[#EDF1F0] flex items-center gap-1.5 cursor-pointer">
+            <User className="h-3.5 w-3.5 text-[#173B57]" />
+            <span className="hidden sm:inline">{role}</span>
+            <ChevronDown className="h-3 w-3 text-[#74808A]" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-md">
-            <DropdownMenuLabel className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">
-              Evaluator Persona ({profile?.full_name ?? 'Operator'})
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+          <DropdownMenuContent align="end" className="w-56 text-xs bg-[#FFFFFF] border-[#D7DEDC] text-[#1D2933]">
+            <DropdownMenuLabel className="text-xs text-[#74808A]">Operational Persona</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-[#D7DEDC]" />
             {USER_ROLES.map((r) => (
               <DropdownMenuItem
                 key={r}
                 onClick={() => setDemoRole(r)}
-                className={`cursor-pointer text-xs py-1.5 ${role === r ? 'bg-slate-100 dark:bg-slate-800 font-semibold text-sky-700 dark:text-sky-400' : ''}`}
+                className={`cursor-pointer text-xs ${
+                  role === r ? 'bg-[#EDF1F0] font-semibold text-[#173B57]' : 'hover:bg-[#EDF1F0]'
+                }`}
               >
-                {r === 'SafetyOfficer' && '🛡️ Safety Officer'}
-                {r === 'MineManager' && '👷 Mine Manager'}
-                {r === 'Engineer' && '🔬 Geotechnical Engineer'}
-                {r === 'Administrator' && '⚙️ System Administrator'}
+                {r === 'SafetyOfficer' && 'Safety Officer (CMR 112)'}
+                {r === 'MineManager' && 'Mine Manager (Operations)'}
+                {r === 'Engineer' && 'Geotech Engineer (Sensors)'}
+                {r === 'Administrator' && 'Administrator (Audit)'}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut} className="cursor-pointer text-xs text-rose-600 py-1.5">
-              <LogOut className="h-3.5 w-3.5 mr-1.5" />
-              Reset Persona Session
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Simulator Link */}
+        <Link href="/simulator">
+          <Button
+            size="sm"
+            className="h-7 px-2.5 text-xs bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] font-medium rounded-sm"
+          >
+            <Play className="h-3 w-3 mr-1 fill-current" />
+            <span className="hidden sm:inline">Simulator</span>
+          </Button>
+        </Link>
       </div>
     </header>
   );

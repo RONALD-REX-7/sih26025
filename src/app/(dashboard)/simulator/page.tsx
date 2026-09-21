@@ -6,6 +6,7 @@ import { SCENARIO_DEFINITIONS, SimulationScenarioId } from '@/lib/simulator/scen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RiskBadge } from '@/components/industrial/risk-badge';
+import { StatusDot } from '@/components/industrial/status-dot';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { DEMO_NODES } from '@/lib/data/mock-data';
 import {
@@ -14,6 +15,9 @@ import {
   RotateCcw,
   Copy,
   Check,
+  Cpu,
+  Sliders,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function SimulatorPage() {
@@ -96,193 +100,198 @@ export default function SimulatorPage() {
   );
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto select-none">
+    <div className="space-y-4 max-w-7xl mx-auto">
       {/* Workbench Header */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
-              Engineering Test Station &bull; Geotechnical Simulation
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#52606D] flex items-center gap-1.5">
+              <Cpu className="h-4 w-4 text-[#173B57]" />
+              Engineering test console &bull; Geotechnical test bench
             </span>
             <ProvenanceBadge provenance="SIMULATED" size="sm" />
           </div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-lg font-bold tracking-tight text-[#1D2933]">
             Mulberry32 Deterministic Telemetry Test Bench
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#52606D] mt-0.5">
             Seed-reproducible multi-station synthetic generator for calibrating DGMS CMR 2017 Reg. 112 early warning algorithms.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
-          <div className="text-right font-mono text-xs">
-            <div className="text-[10px] text-slate-400 uppercase">Elapsed / Duration</div>
-            <div className="font-bold text-slate-800 dark:text-slate-200">
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="text-right font-mono-tech text-xs">
+            <div className="text-xs text-[#74808A] uppercase">Elapsed / Duration</div>
+            <div className="font-bold text-[#1D2933]">
               {formatTime(state.elapsedSec)} / {formatTime(activeDef.durationSeconds)}
             </div>
           </div>
-          <RiskBadge state={currentRiskState} size="md" />
+          <RiskBadge state={currentRiskState} size="sm" />
         </div>
       </div>
 
-      {/* Main Bench Grid: Scenario & Controls (Left) + Telemetry & Progression (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left Column (5 Cols): Scenario Selector & Execution Controls */}
-        <div className="lg:col-span-5 space-y-4">
-          {/* Controls Console */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3.5 space-y-3">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono flex items-center justify-between">
-              <span>Workbench Controls</span>
-              <span className={`px-1.5 py-0.2 rounded-xs text-[10px] ${
-                state.status === 'running'
-                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                  : state.status === 'paused'
-                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                  : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-              }`}>
-                {state.status.toUpperCase()}
-              </span>
-            </div>
+      {/* Sticky Playback Controller Header Bar */}
+      <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {state.status === 'running' ? (
+            <Button
+              size="sm"
+              onClick={pause}
+              className="text-xs h-8 bg-[#9A6A00] hover:bg-[#A85A00] text-[#FFFFFF] font-mono-tech cursor-pointer"
+            >
+              <Pause className="h-3.5 w-3.5 mr-1" /> Pause
+            </Button>
+          ) : state.status === 'paused' ? (
+            <Button
+              size="sm"
+              onClick={resume}
+              className="text-xs h-8 bg-[#2F6B4F] hover:bg-[#1E4D38] text-[#FFFFFF] font-mono-tech cursor-pointer"
+            >
+              <Play className="h-3.5 w-3.5 mr-1" /> Resume
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={start}
+              className="text-xs h-8 bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] font-mono-tech cursor-pointer"
+            >
+              <Play className="h-3.5 w-3.5 mr-1" /> Start simulation
+            </Button>
+          )}
 
-            {/* Playback Action Buttons */}
-            <div className="flex items-center gap-2">
-              {state.status === 'running' ? (
-                <Button
-                  size="sm"
-                  onClick={pause}
-                  className="flex-1 text-xs h-8 bg-amber-600 hover:bg-amber-700 text-white font-mono cursor-pointer"
-                >
-                  <Pause className="h-3.5 w-3.5 mr-1" /> Pause
-                </Button>
-              ) : state.status === 'paused' ? (
-                <Button
-                  size="sm"
-                  onClick={resume}
-                  className="flex-1 text-xs h-8 bg-emerald-600 hover:bg-emerald-700 text-white font-mono cursor-pointer"
-                >
-                  <Play className="h-3.5 w-3.5 mr-1" /> Resume
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={start}
-                  className="flex-1 text-xs h-8 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 text-white font-mono cursor-pointer"
-                >
-                  <Play className="h-3.5 w-3.5 mr-1" /> Start Simulation
-                </Button>
-              )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={reset}
+            className="text-xs h-8 font-mono-tech border-[#D7DEDC] hover:bg-[#EDF1F0] text-[#52606D]"
+            title="Reset simulation to tick 0"
+          >
+            <RotateCcw className="h-3.5 w-3.5 mr-1" /> Reset
+          </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={reset}
-                className="text-xs h-8 font-mono border-slate-300 dark:border-slate-700"
-                title="Reset simulation to tick 0"
+          <span className="text-xs font-mono-tech text-[#52606D] ml-2 flex items-center gap-1.5">
+            <StatusDot
+              status={state.status === 'running' ? 'active' : state.status === 'paused' ? 'degraded' : 'inactive'}
+              size="sm"
+            />
+            Status: <strong className="text-[#1D2933]">{state.status.toUpperCase()}</strong>
+          </span>
+        </div>
+
+        {/* Clock Speed & Seed Controls */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-1">
+            <span className="text-xs font-medium text-[#52606D] mr-1">Speed:</span>
+            {([1, 2, 5, 10] as const).map((spd) => (
+              <button
+                key={spd}
+                type="button"
+                onClick={() => setSpeed(spd)}
+                className={`px-2 py-1 text-xs font-mono-tech rounded-sm border cursor-pointer ${
+                  state.speed === spd
+                    ? 'bg-[#173B57] text-[#FFFFFF] font-bold border-transparent'
+                    : 'border-[#D7DEDC] hover:bg-[#EDF1F0] text-[#52606D]'
+                }`}
               >
-                <RotateCcw className="h-3.5 w-3.5 mr-1" /> Reset
-              </Button>
-            </div>
-
-            {/* Speed Multiplier */}
-            <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-              <div className="text-[10px] font-mono text-slate-500 uppercase">Clock Speed</div>
-              <div className="grid grid-cols-4 gap-1.5">
-                {([1, 2, 5, 10] as const).map((spd) => (
-                  <button
-                    key={spd}
-                    type="button"
-                    onClick={() => setSpeed(spd)}
-                    className={`py-1 text-xs font-mono rounded-xs border cursor-pointer ${
-                      state.speed === spd
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-bold border-transparent'
-                        : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    {spd}x
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Seed Configuration */}
-            <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 uppercase">
-                <span>Mulberry32 PRNG Seed</span>
-                <span>Active: {state.seed}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Input
-                  value={seedInput}
-                  onChange={(e) => setSeedInput(e.target.value)}
-                  className="h-7 text-xs font-mono"
-                  placeholder="Integer seed"
-                />
-                <Button size="sm" variant="outline" onClick={handleApplySeed} className="h-7 text-xs px-2 font-mono">
-                  Apply
-                </Button>
-                <Button size="sm" variant="ghost" onClick={handleRandomizeSeed} className="h-7 text-xs px-2 font-mono" title="Randomize seed">
-                  Rand
-                </Button>
-                <Button size="sm" variant="ghost" onClick={handleCopySeed} className="h-7 px-2 font-mono text-xs">
-                  {copiedSeed ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                </Button>
-              </div>
-            </div>
+                {spd}x
+              </button>
+            ))}
           </div>
 
-          {/* Scenario Selector */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3.5 space-y-2.5">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
-              Geotechnical Failure Scenarios (9 Pre-Calibrated)
-            </div>
+          <div className="flex items-center gap-1.5 text-xs font-mono-tech">
+            <span className="text-[#52606D]">Seed:</span>
+            <Input
+              value={seedInput}
+              onChange={(e) => setSeedInput(e.target.value)}
+              className="h-7 w-20 text-xs font-mono-tech bg-[#F4F6F5] border-[#D7DEDC]"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleApplySeed}
+              className="h-7 text-xs px-2 font-mono-tech border-[#D7DEDC] hover:bg-[#EDF1F0]"
+            >
+              Set
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleRandomizeSeed}
+              className="h-7 text-xs px-2 font-mono-tech text-[#52606D]"
+              title="Randomize seed"
+            >
+              Rand
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleCopySeed}
+              className="h-7 px-2 font-mono-tech text-xs text-[#52606D]"
+            >
+              {copiedSeed ? <Check className="h-3.5 w-3.5 text-[#2F6B4F]" /> : <Copy className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+        </div>
+      </div>
 
-            <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
-              {Object.values(SCENARIO_DEFINITIONS).map((def) => {
-                const isSelected = def.id === state.scenarioId;
-                return (
-                  <div
-                    key={def.id}
-                    onClick={() => setScenario(def.id as SimulationScenarioId)}
-                    className={`p-2.5 rounded-sm border cursor-pointer transition-colors text-xs ${
-                      isSelected
-                        ? 'border-sky-500 bg-sky-50/50 dark:bg-sky-950/20 text-slate-900 dark:text-slate-100'
-                        : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between font-mono">
-                      <span className="font-semibold text-slate-900 dark:text-slate-100">{def.name}</span>
-                      <span className="text-[10px] text-slate-400">{def.durationSeconds}s</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
-                      {def.description}
-                    </p>
+      {/* Main Bench Grid: 40% Scenarios List / 60% Active Progression & Telemetry */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left Column (40%): Geotechnical Failure Scenarios List */}
+        <div className="lg:col-span-5 bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden flex flex-col">
+          <div className="p-3.5 border-b border-[#D7DEDC] bg-[#F8FAF9]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#1D2933]">
+              Geotechnical Failure Scenarios (9 Pre-Calibrated)
+            </h2>
+            <p className="text-xs text-[#52606D] mt-0.5">
+              Select scenario to immediately re-prime deterministic Mulberry32 sequence
+            </p>
+          </div>
+
+          <div className="divide-y divide-[#D7DEDC] overflow-y-auto max-h-[540px]">
+            {Object.values(SCENARIO_DEFINITIONS).map((def) => {
+              const isSelected = def.id === state.scenarioId;
+              return (
+                <div
+                  key={def.id}
+                  onClick={() => setScenario(def.id as SimulationScenarioId)}
+                  className={`p-3 cursor-pointer transition-colors text-xs ${
+                    isSelected
+                      ? 'bg-[#F4F6F5] border-l-4 border-l-[#173B57]'
+                      : 'hover:bg-[#F8FAF9]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-mono-tech">
+                    <span className="font-semibold text-[#1D2933]">{def.name}</span>
+                    <span className="text-xs text-[#74808A]">{def.durationSeconds}s duration</span>
                   </div>
-                );
-              })}
-            </div>
+                  <p className="text-xs text-[#52606D] mt-1 leading-relaxed">
+                    {def.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Right Column (7 Cols): Telemetry, Progression, & Real-time Evidence */}
+        {/* Right Column (60%): Scenario Progression & Telemetry Output */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Scenario Overview & Phase Timeline */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3.5 space-y-3">
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="font-bold text-slate-900 dark:text-slate-100">
-                ACTIVE SCENARIO: {activeDef.name}
+          {/* Progression Bar & Phase Info */}
+          <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-3">
+            <div className="flex items-center justify-between text-xs font-mono-tech">
+              <span className="font-bold text-[#1D2933]">
+                Scenario progression: {activeDef.name}
               </span>
-              <span className="text-slate-500">Progress: {progressPct}%</span>
+              <span className="text-[#52606D] font-semibold">{progressPct}% complete</span>
             </div>
 
-            {/* Progression Bar */}
             <div className="space-y-1">
-              <div className="h-1.5 w-full rounded-xs bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-sm bg-[#EDF1F0] overflow-hidden">
                 <div
-                  className="h-full bg-slate-900 dark:bg-slate-100 transition-all duration-300"
+                  className="h-full bg-[#173B57] transition-all duration-300"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-slate-400">
+              <div className="flex justify-between text-xs font-mono-tech text-[#74808A]">
                 <span>Phase I: Initiation</span>
                 <span>Phase II: Acceleration</span>
                 <span>Phase III: Consolidation</span>
@@ -290,23 +299,26 @@ export default function SimulatorPage() {
             </div>
 
             {/* Affected Injection Nodes */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">
-                <span>Active Target Nodes ({state.affectedNodeCodes.length} active):</span>
-                <div className="flex gap-1">
+            <div className="pt-3 border-t border-[#D7DEDC] space-y-2">
+              <div className="flex items-center justify-between text-xs text-[#52606D]">
+                <span className="font-medium">
+                  Injection target stations ({state.affectedNodeCodes.length} active):
+                </span>
+                <div className="flex gap-1 font-mono-tech">
                   {['P-101', 'P-102', 'P-103', 'P-104'].map((p) => (
                     <button
                       key={p}
                       type="button"
                       onClick={() => selectPanelNodes(p)}
-                      className="px-1 py-0.2 rounded-xs border border-slate-200 dark:border-slate-700 text-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      className="px-1.5 py-0.5 rounded-sm border border-[#D7DEDC] text-xs hover:bg-[#EDF1F0] cursor-pointer"
                     >
                       {p}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1">
+
+              <div className="flex flex-wrap gap-1.5 font-mono-tech">
                 {DEMO_NODES.map((n) => {
                   const isAffected = state.affectedNodeCodes.includes(n.node_code);
                   return (
@@ -314,10 +326,10 @@ export default function SimulatorPage() {
                       key={n.node_code}
                       type="button"
                       onClick={() => toggleNodeAffected(n.node_code)}
-                      className={`px-1.5 py-0.5 rounded-xs text-[10px] font-mono border cursor-pointer ${
+                      className={`px-2 py-0.5 rounded-sm text-xs border cursor-pointer transition-colors ${
                         isAffected
-                          ? 'bg-amber-600 text-white border-transparent font-bold'
-                          : 'border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          ? 'bg-[#173B57] text-[#FFFFFF] border-transparent font-bold'
+                          : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
                       }`}
                     >
                       {n.node_code}
@@ -328,74 +340,98 @@ export default function SimulatorPage() {
             </div>
           </div>
 
-          {/* Telemetry Readout Table (No bloated cards) */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden">
-            <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-xs font-mono">
-              <span className="font-bold text-slate-900 dark:text-slate-100 uppercase">
-                Transducer Channel Deltas (Station SN-102 Epicenter)
+          {/* Telemetry Channel Deltas Table */}
+          <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden">
+            <div className="p-3 border-b border-[#D7DEDC] bg-[#F8FAF9] flex items-center justify-between text-xs font-mono-tech">
+              <span className="font-bold text-[#1D2933] uppercase">
+                Transducer channel deltas (Station SN-102 Epicenter)
               </span>
-              <span className="text-[10px] text-slate-400">Live Mathematical Physics</span>
+              <span className="text-xs text-[#52606D]">Live sensor fusion</span>
             </div>
 
-            <table className="w-full text-xs font-mono">
-              <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-[10px] text-slate-400 uppercase">
+            <table className="w-full text-xs font-mono-tech">
+              <thead className="border-b border-[#D7DEDC] bg-[#F8FAF9] text-xs text-[#52606D] uppercase">
                 <tr>
-                  <th className="py-2 px-3 text-left">Channel</th>
-                  <th className="py-2 px-3 text-left">Transducer Modality</th>
-                  <th className="py-2 px-3 text-right">Value</th>
-                  <th className="py-2 px-3 text-right">Nominal Range</th>
-                  <th className="py-2 px-3 text-center">Status</th>
+                  <th className="py-2.5 px-3 text-left">Channel</th>
+                  <th className="py-2.5 px-3 text-left">Transducer modality</th>
+                  <th className="py-2.5 px-3 text-right">Value</th>
+                  <th className="py-2.5 px-3 text-right">Nominal range</th>
+                  <th className="py-2.5 px-3 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-[11px]">
+              <tbody className="divide-y divide-[#D7DEDC]">
                 <tr>
-                  <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-100">TILT_X</td>
-                  <td className="py-2 px-3 text-slate-500 font-sans">Biaxial Tilt X</td>
-                  <td className="py-2 px-3 text-right font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                  <td className="py-2.5 px-3 font-bold text-[#1D2933]">TILT_X</td>
+                  <td className="py-2.5 px-3 text-[#52606D] font-sans">Biaxial Tilt X</td>
+                  <td className="py-2.5 px-3 text-right font-bold text-[#1D2933] tabular-nums">
                     {tiltVal.toFixed(2)} arcsec
                   </td>
-                  <td className="py-2 px-3 text-right text-slate-400">&plusmn;150 arcsec</td>
-                  <td className="py-2 px-3 text-center">
-                    <span className={`px-1.5 py-0.2 rounded-xs text-[10px] ${Math.abs(tiltVal) > 120 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  <td className="py-2.5 px-3 text-right text-[#74808A]">&plusmn;150 arcsec</td>
+                  <td className="py-2.5 px-3 text-center">
+                    <span
+                      className={`px-2 py-0.5 rounded-sm text-xs font-semibold ${
+                        Math.abs(tiltVal) > 120
+                          ? 'bg-[#FBEBE9] text-[#B42318]'
+                          : 'bg-[#EAF2ED] text-[#2F6B4F]'
+                      }`}
+                    >
                       {Math.abs(tiltVal) > 120 ? 'ALERT' : 'NOMINAL'}
                     </span>
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-100">DISP_Z</td>
-                  <td className="py-2 px-3 text-slate-500 font-sans">Borehole Extensometer</td>
-                  <td className="py-2 px-3 text-right font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                  <td className="py-2.5 px-3 font-bold text-[#1D2933]">DISP_Z</td>
+                  <td className="py-2.5 px-3 text-[#52606D] font-sans">Borehole Extensometer</td>
+                  <td className="py-2.5 px-3 text-right font-bold text-[#1D2933] tabular-nums">
                     {dispVal.toFixed(2)} mm
                   </td>
-                  <td className="py-2 px-3 text-right text-slate-400">0.0 &ndash; 30.0 mm</td>
-                  <td className="py-2 px-3 text-center">
-                    <span className={`px-1.5 py-0.2 rounded-xs text-[10px] ${dispVal > 30.0 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  <td className="py-2.5 px-3 text-right text-[#74808A]">0.0 &ndash; 30.0 mm</td>
+                  <td className="py-2.5 px-3 text-center">
+                    <span
+                      className={`px-2 py-0.5 rounded-sm text-xs font-semibold ${
+                        dispVal > 30.0
+                          ? 'bg-[#FBEBE9] text-[#B42318]'
+                          : 'bg-[#EAF2ED] text-[#2F6B4F]'
+                      }`}
+                    >
                       {dispVal > 30.0 ? 'EXCEEDED' : 'NOMINAL'}
                     </span>
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-100">VIB_RMS</td>
-                  <td className="py-2 px-3 text-slate-500 font-sans">Triaxial Seismograph PPV</td>
-                  <td className="py-2 px-3 text-right font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                  <td className="py-2.5 px-3 font-bold text-[#1D2933]">VIB_RMS</td>
+                  <td className="py-2.5 px-3 text-[#52606D] font-sans">Triaxial Seismograph PPV</td>
+                  <td className="py-2.5 px-3 text-right font-bold text-[#1D2933] tabular-nums">
                     {vibVal.toFixed(2)} mm/s
                   </td>
-                  <td className="py-2 px-3 text-right text-slate-400">&lt; 5.0 mm/s</td>
-                  <td className="py-2 px-3 text-center">
-                    <span className={`px-1.5 py-0.2 rounded-xs text-[10px] ${vibVal > 5.0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  <td className="py-2.5 px-3 text-right text-[#74808A]">&lt; 5.0 mm/s</td>
+                  <td className="py-2.5 px-3 text-center">
+                    <span
+                      className={`px-2 py-0.5 rounded-sm text-xs font-semibold ${
+                        vibVal > 5.0
+                          ? 'bg-[#FBF6E9] text-[#9A6A00]'
+                          : 'bg-[#EAF2ED] text-[#2F6B4F]'
+                      }`}
+                    >
                       {vibVal > 5.0 ? 'ELEVATED' : 'NOMINAL'}
                     </span>
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-100">STRAIN</td>
-                  <td className="py-2 px-3 text-slate-500 font-sans">Rockbolt / Pillar Strain</td>
-                  <td className="py-2 px-3 text-right font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                  <td className="py-2.5 px-3 font-bold text-[#1D2933]">STRAIN</td>
+                  <td className="py-2.5 px-3 text-[#52606D] font-sans">Rockbolt / Pillar Strain</td>
+                  <td className="py-2.5 px-3 text-right font-bold text-[#1D2933] tabular-nums">
                     {strainVal.toFixed(1)} &mu;&epsilon;
                   </td>
-                  <td className="py-2 px-3 text-right text-slate-400">&plusmn;800 &mu;&epsilon;</td>
-                  <td className="py-2 px-3 text-center">
-                    <span className={`px-1.5 py-0.2 rounded-xs text-[10px] ${strainVal > 800 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  <td className="py-2.5 px-3 text-right text-[#74808A]">&plusmn;800 &mu;&epsilon;</td>
+                  <td className="py-2.5 px-3 text-center">
+                    <span
+                      className={`px-2 py-0.5 rounded-sm text-xs font-semibold ${
+                        strainVal > 800
+                          ? 'bg-[#FBEBE9] text-[#B42318]'
+                          : 'bg-[#EAF2ED] text-[#2F6B4F]'
+                      }`}
+                    >
                       {strainVal > 800 ? 'HIGH' : 'NOMINAL'}
                     </span>
                   </td>
@@ -404,21 +440,21 @@ export default function SimulatorPage() {
             </table>
           </div>
 
-          {/* Risk Engine Response & Evidence */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3.5 space-y-2 text-xs">
-            <div className="flex items-center justify-between text-slate-500 font-mono">
-              <span className="font-bold text-slate-900 dark:text-slate-100 uppercase">
-                Risk Engine Response Output
+          {/* Risk Engine Response Rationale */}
+          <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-2 text-xs">
+            <div className="flex items-center justify-between border-b border-[#D7DEDC] pb-2">
+              <span className="font-bold text-[#1D2933] uppercase font-mono-tech">
+                Risk assessment evidence output
               </span>
               <RiskBadge state={currentRiskState} size="sm" />
             </div>
-            <div className="p-2.5 rounded-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-[11px] leading-relaxed">
-              <div className="text-slate-700 dark:text-slate-300">
-                <strong className="text-slate-900 dark:text-slate-100">Evaluated Rationale:</strong>{' '}
+            <div className="p-3 rounded-sm bg-[#F4F6F5] border border-[#D7DEDC] font-mono-tech leading-relaxed">
+              <div className="text-[#1D2933]">
+                <strong className="text-[#173B57]">Evaluated rationale:</strong>{' '}
                 {currentEvidence?.whyRiskChanged ?? 'Strata deformation rates and multi-station correlation within baseline.'}
               </div>
-              <div className="mt-1 text-slate-500 text-[10px]">
-                Active Anomaly Clustered Nodes: {currentEvidence?.where.affectedNodes.join(', ') || 'None'}
+              <div className="mt-1 text-[#52606D] text-xs">
+                Active anomaly clustered nodes: {currentEvidence?.where.affectedNodes.join(', ') || 'None'}
               </div>
             </div>
           </div>

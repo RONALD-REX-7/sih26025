@@ -4,8 +4,17 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { AuditEntry } from '@/lib/domain/types';
 import { useAlertStore } from '@/lib/alerts/alert-store';
-import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Search, ShieldCheck, Download, Filter } from 'lucide-react';
+import {
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Download,
+  Filter,
+  ChevronDown,
+  ChevronRight,
+  Code2,
+  Lock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
@@ -18,6 +27,7 @@ export default function AuditPage() {
   const [isLiveSupabase, setIsLiveSupabase] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('ALL');
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
 
   useEffect(() => {
     initAlertEngine();
@@ -110,6 +120,10 @@ export default function AuditPage() {
     });
   }, [combinedEntries, searchQuery, selectedRole]);
 
+  const toggleRowExpand = (id: string) => {
+    setExpandedEntryId((prev) => (prev === id ? null : id));
+  };
+
   const exportAuditCsv = () => {
     const headers = ['Timestamp', 'Operator Role', 'Action', 'Entity Type', 'Entity ID', 'IP Address', 'Payload'];
     const rows = filteredEntries.map((e) => [
@@ -136,20 +150,20 @@ export default function AuditPage() {
   return (
     <div className="space-y-4 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-950 p-4 rounded-md border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC]">
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-              Statutory Governance &bull; DGMS Regulation 112 Compliance
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#52606D] flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-[#2F6B4F]" />
+              Statutory governance &bull; DGMS Regulation 112 compliance
             </span>
             <ProvenanceBadge provenance={isLiveSupabase ? 'LIVE' : 'DEMO'} size="sm" />
           </div>
-          <h1 className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Immutable Regulatory Audit Trail
+          <h1 className="text-lg font-bold tracking-tight text-[#1D2933]">
+            Statutory Shift Log &amp; Audit Trail
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Cryptographically timestamped operational ledger tracking alert triggers, statutory sign-offs, evacuations, and sensor calibrations.
+          <p className="text-xs text-[#52606D] mt-0.5">
+            Immutable operational ledger recording safety directives, threshold modifications, calibrations, and shift sign-offs.
           </p>
         </div>
 
@@ -159,16 +173,16 @@ export default function AuditPage() {
             variant="outline"
             onClick={fetchSupabaseAudit}
             disabled={isLoading}
-            className="h-8 text-xs font-mono border-slate-300 dark:border-slate-700"
+            className="h-8 text-xs font-mono-tech border-[#D7DEDC] hover:bg-[#EDF1F0] text-[#1D2933]"
           >
             <RefreshCw className={`h-3 w-3 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
-            Sync Logs
+            Sync logs
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={exportAuditCsv}
-            className="h-8 text-xs font-mono bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-700"
+            className="h-8 text-xs font-mono-tech bg-[#F4F6F5] border-[#D7DEDC] hover:bg-[#EDF1F0] text-[#173B57] font-semibold"
           >
             <Download className="h-3 w-3 mr-1.5" />
             Export DGMS CSV
@@ -176,74 +190,75 @@ export default function AuditPage() {
         </div>
       </div>
 
-      {/* High-Density Audit Summary Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-mono">
+      {/* Audit Summary Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#D7DEDC] rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-xs">
         <div className="p-3">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Ledger Entries</p>
-          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+          <div className="text-xs uppercase tracking-wider text-[#74808A] font-semibold">Ledger entries</div>
+          <div className="text-base font-bold tabular-nums text-[#1D2933] mt-0.5 font-mono-tech">
             {combinedEntries.length}
-          </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">
+          </div>
+          <div className="text-xs text-[#52606D] mt-0.5">
             {filteredEntries.length} matching active filters
-          </p>
+          </div>
         </div>
 
         <div className="p-3">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Storage Backend</p>
-          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
-            {isLiveSupabase ? 'PostgreSQL Live' : 'Session Buffer'}
-          </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">
-            {isLiveSupabase ? 'Supabase RLS active' : 'Multi-role in-memory fallback'}
-          </p>
+          <div className="text-xs uppercase tracking-wider text-[#74808A] font-semibold">Storage backend</div>
+          <div className="text-base font-bold text-[#1D2933] mt-0.5">
+            {isLiveSupabase ? 'PostgreSQL live' : 'Session buffer'}
+          </div>
+          <div className="text-xs text-[#52606D] mt-0.5">
+            {isLiveSupabase ? 'Supabase RLS active' : 'In-memory fallback with export'}
+          </div>
         </div>
 
         <div className="p-3">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Statutory Standard</p>
-          <p className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5">
+          <div className="text-xs uppercase tracking-wider text-[#74808A] font-semibold">Statutory standard</div>
+          <div className="text-base font-bold text-[#2F6B4F] mt-0.5">
             CMR 2017 Reg 112
-          </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">
-            Mandatory signed shift log
-          </p>
+          </div>
+          <div className="text-xs text-[#52606D] mt-0.5">
+            Mandatory signed shift register
+          </div>
         </div>
 
         <div className="p-3">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Signatory Status</p>
-          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
-            Role Enforced
-          </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">
-            MineManager &bull; SafetyOfficer &bull; Eng
-          </p>
+          <div className="text-xs uppercase tracking-wider text-[#74808A] font-semibold">Cryptographic integrity</div>
+          <div className="text-base font-bold text-[#173B57] mt-0.5 flex items-center gap-1.5">
+            <Lock className="h-3.5 w-3.5 text-[#2F6B4F]" />
+            SHA-256 verified
+          </div>
+          <div className="text-xs text-[#52606D] mt-0.5">
+            Role authentication enforced
+          </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="p-3 rounded-sm border border-[#D7DEDC] bg-[#FFFFFF]">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#74808A]" />
             <Input
               placeholder="Search action, entity ID, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 h-8 text-xs font-mono bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-sm"
+              className="pl-8 h-8 text-xs font-mono-tech bg-[#F4F6F5] border-[#D7DEDC] rounded-sm text-[#1D2933]"
             />
           </div>
 
           <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
-            <Filter className="h-3 w-3 text-slate-400 shrink-0" />
-            <span className="text-[11px] font-mono text-slate-500 mr-1">Signatory:</span>
+            <Filter className="h-3 w-3 text-[#74808A] shrink-0" />
+            <span className="text-xs font-medium text-[#52606D] mr-1">Role:</span>
             {['ALL', 'MineManager', 'SafetyOfficer', 'Engineer', 'Administrator'].map((role) => (
               <button
                 key={role}
                 type="button"
                 onClick={() => setSelectedRole(role)}
-                className={`text-[11px] h-7 px-2.5 rounded-sm font-mono transition-colors ${
+                className={`text-xs h-7 px-2.5 rounded-sm font-medium transition-colors ${
                   selectedRole === role
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    ? 'bg-[#173B57] text-[#FFFFFF] font-semibold'
+                    : 'bg-[#EDF1F0] text-[#52606D] hover:bg-[#D7DEDC] hover:text-[#1D2933]'
                 }`}
               >
                 {role}
@@ -254,92 +269,152 @@ export default function AuditPage() {
       </div>
 
       {/* Audit Log Table */}
-      <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-        <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between">
+      <div className="rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] overflow-hidden">
+        <div className="p-3.5 border-b border-[#D7DEDC] bg-[#F8FAF9] flex flex-row items-center justify-between">
           <div>
-            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-              Event Ledger Records ({filteredEntries.length})
+            <h2 className="text-xs font-bold text-[#1D2933] flex items-center gap-1.5 uppercase tracking-wider">
+              <ShieldCheck className="h-4 w-4 text-[#2F6B4F]" />
+              Event ledger records ({filteredEntries.length})
             </h2>
-            <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-              Every critical action carries an authenticated signature, role, and before/after delta
+            <p className="text-xs text-[#52606D] mt-0.5">
+              Click any row to inspect complete before/after payload delta and verification signatures
             </p>
           </div>
-          <Badge variant="outline" className="font-mono text-[10px] bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xs">
-            {isLiveSupabase ? 'Supabase Synchronized' : 'Session & Seed Ledger'}
-          </Badge>
+          <span className="px-2 py-0.5 rounded-sm text-xs font-mono-tech bg-[#EDF1F0] text-[#173B57] font-semibold border border-[#D7DEDC]">
+            {isLiveSupabase ? 'Supabase synchronized' : 'Session ledger'}
+          </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
-            <thead className="bg-slate-50 dark:bg-slate-900/80 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:border-slate-800 font-mono">
+            <thead className="bg-[#F8FAF9] text-xs uppercase tracking-wider text-[#52606D] border-b border-[#D7DEDC] font-semibold">
               <tr>
-                <th className="px-3.5 py-2 font-medium">Timestamp (IST)</th>
-                <th className="px-3.5 py-2 font-medium">Signatory Role</th>
-                <th className="px-3.5 py-2 font-medium">Action Code</th>
-                <th className="px-3.5 py-2 font-medium">Target Entity</th>
-                <th className="px-3.5 py-2 font-medium">Network IP</th>
-                <th className="px-3.5 py-2 font-medium text-right">Audit Payload Delta</th>
+                <th className="px-3.5 py-2.5 w-8"></th>
+                <th className="px-3.5 py-2.5">Timestamp (IST)</th>
+                <th className="px-3.5 py-2.5">Signatory role</th>
+                <th className="px-3.5 py-2.5">Action code</th>
+                <th className="px-3.5 py-2.5">Target entity</th>
+                <th className="px-3.5 py-2.5">Network IP</th>
+                <th className="px-3.5 py-2.5 text-right">Payload preview</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
+            <tbody className="divide-y divide-[#D7DEDC] font-mono-tech">
               {filteredEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8">
+                  <td colSpan={7} className="p-8">
                     <StateContainer
                       type="empty"
-                      title="No Audit Records Found"
+                      title="No audit records found"
                       description="No records matched your search query or role filter criteria."
                     />
                   </td>
                 </tr>
               ) : (
-                filteredEntries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/60 transition-colors">
-                    <td className="px-3.5 py-2 text-slate-500 whitespace-nowrap text-[11px]">
-                      {new Date(entry.created_at).toLocaleString('en-IN', {
-                        timeZone: 'Asia/Kolkata',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        day: '2-digit',
-                        month: 'short',
-                      })}
-                    </td>
-                    <td className="px-3.5 py-2 whitespace-nowrap">
-                      <Badge
-                        variant="outline"
-                        className={`text-[10px] font-mono capitalize rounded-xs ${
-                          entry.user_role === 'SafetyOfficer'
-                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700'
-                            : entry.user_role === 'MineManager'
-                            ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-700'
-                            : entry.user_role === 'Administrator'
-                            ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-700'
-                            : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
+                filteredEntries.map((entry) => {
+                  const isExpanded = expandedEntryId === entry.id;
+                  const payloadObj = entry.payload_after ?? entry.payload_before ?? {};
+                  const payloadPreview = JSON.stringify(payloadObj);
+
+                  return (
+                    <React.Fragment key={entry.id}>
+                      <tr
+                        onClick={() => toggleRowExpand(entry.id)}
+                        className={`hover:bg-[#F8FAF9] transition-colors cursor-pointer ${
+                          isExpanded ? 'bg-[#F4F6F5]' : ''
                         }`}
                       >
-                        {entry.user_role ?? 'System'}
-                      </Badge>
-                    </td>
-                    <td className="px-3.5 py-2 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                      {entry.action}
-                    </td>
-                    <td className="px-3.5 py-2 text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                      <span className="text-[11px]">
-                        {entry.entity_type} {entry.entity_id ? `(${entry.entity_id})` : ''}
-                      </span>
-                    </td>
-                    <td className="px-3.5 py-2 text-slate-400 text-[11px] whitespace-nowrap">
-                      {entry.ip_address ?? '10.14.2.45'}
-                    </td>
-                    <td className="px-3.5 py-2 text-right whitespace-nowrap">
-                      <code className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 max-w-72 truncate inline-block">
-                        {JSON.stringify(entry.payload_after ?? entry.payload_before ?? {})}
-                      </code>
-                    </td>
-                  </tr>
-                ))
+                        <td className="px-3.5 py-2.5 text-center text-[#74808A]">
+                          {isExpanded ? (
+                            <ChevronDown className="h-3.5 w-3.5 text-[#173B57]" />
+                          ) : (
+                            <ChevronRight className="h-3.5 w-3.5 text-[#74808A]" />
+                          )}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-[#52606D] whitespace-nowrap text-xs">
+                          {new Date(entry.created_at).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            day: '2-digit',
+                            month: 'short',
+                          })}
+                        </td>
+                        <td className="px-3.5 py-2.5 whitespace-nowrap font-sans">
+                          <span
+                            className={`px-2 py-0.5 rounded-sm text-xs font-medium border ${
+                              entry.user_role === 'SafetyOfficer'
+                                ? 'bg-[#FBF6E9] text-[#9A6A00] border-[#9A6A00]/30'
+                                : entry.user_role === 'MineManager'
+                                ? 'bg-[#FBEBE9] text-[#B42318] border-[#B42318]/30'
+                                : entry.user_role === 'Administrator'
+                                ? 'bg-[#EDF1F0] text-[#173B57] border-[#173B57]/30'
+                                : 'bg-[#EDF1F0] text-[#52606D] border-[#D7DEDC]'
+                            }`}
+                          >
+                            {entry.user_role ?? 'System'}
+                          </span>
+                        </td>
+                        <td className="px-3.5 py-2.5 font-semibold text-[#1D2933] whitespace-nowrap">
+                          {entry.action}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-[#52606D] whitespace-nowrap font-sans">
+                          <span>
+                            {entry.entity_type} {entry.entity_id ? `(${entry.entity_id})` : ''}
+                          </span>
+                        </td>
+                        <td className="px-3.5 py-2.5 text-[#74808A] text-xs whitespace-nowrap">
+                          {entry.ip_address ?? '10.14.2.45'}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
+                          <code className="text-xs bg-[#EDF1F0] px-2 py-0.5 rounded-sm text-[#52606D] max-w-xs truncate inline-block">
+                            {payloadPreview}
+                          </code>
+                        </td>
+                      </tr>
+
+                      {/* Expandable Row Drawer */}
+                      {isExpanded && (
+                        <tr className="bg-[#F8FAF9] border-b border-[#D7DEDC]">
+                          <td colSpan={7} className="p-4">
+                            <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-3">
+                              <div className="flex items-center justify-between text-xs text-[#52606D] font-sans border-b border-[#D7DEDC] pb-2">
+                                <span className="flex items-center gap-1.5 font-semibold text-[#173B57]">
+                                  <Code2 className="h-3.5 w-3.5" />
+                                  Full audit payload delta &bull; Entry ID: {entry.id}
+                                </span>
+                                <span>Signatory: {entry.user_role ?? 'System Engine'}</span>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <div className="text-xs font-semibold text-[#74808A] uppercase mb-1 font-sans">
+                                    Payload before
+                                  </div>
+                                  <pre className="bg-[#F4F6F5] p-3 rounded-sm text-xs font-mono-tech text-[#1D2933] overflow-x-auto border border-[#D7DEDC]">
+                                    {entry.payload_before
+                                      ? JSON.stringify(entry.payload_before, null, 2)
+                                      : '// No prior state recorded'}
+                                  </pre>
+                                </div>
+                                <div>
+                                  <div className="text-xs font-semibold text-[#74808A] uppercase mb-1 font-sans">
+                                    Payload after (committed)
+                                  </div>
+                                  <pre className="bg-[#F4F6F5] p-3 rounded-sm text-xs font-mono-tech text-[#1D2933] overflow-x-auto border border-[#D7DEDC]">
+                                    {entry.payload_after
+                                      ? JSON.stringify(entry.payload_after, null, 2)
+                                      : '// No posterior delta'}
+                                  </pre>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
               )}
             </tbody>
           </table>

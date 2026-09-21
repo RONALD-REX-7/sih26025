@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-ibm-plex-sans);
   --font-mono: var(--font-ibm-plex-mono);
-  --font-heading: var(--font-inter);
+  --font-heading: var(--font-ibm-plex-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -18,11 +18,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -39,92 +34,106 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: calc(var(--radius) * 0.75);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.375rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* SIH26025 Industrial Design System Tokens */
+  --background: #F4F6F5;
+  --foreground: #1D2933;
+  --card: #FFFFFF;
+  --card-foreground: #1D2933;
+  --popover: #FFFFFF;
+  --popover-foreground: #1D2933;
+  --primary: #173B57;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EDF1F0;
+  --secondary-foreground: #1D2933;
+  --muted: #EDF1F0;
+  --muted-foreground: #52606D;
+  --accent: #EDF1F0;
+  --accent-foreground: #173B57;
+  --destructive: #B42318;
+  --border: #D7DEDC;
+  --input: #D7DEDC;
+  --ring: #173B57;
+  --radius: 0.25rem;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Industrial Custom Tokens */
+  --canvas: #F4F6F5;
+  --surface: #FFFFFF;
+  --surface-subtle: #EDF1F0;
+  --text-primary: #1D2933;
+  --text-secondary: #52606D;
+  --text-muted: #74808A;
+  --border-subtle: #D7DEDC;
+  --navy: #173B57;
+  --navy-dark: #102C42;
+  --info-blue: #35677D;
+
+  /* Statutory Safety Risk States */
+  --risk-normal: #2F6B4F;
+  --risk-normal-bg: #EAF2ED;
+  --risk-advisory: #9A6A00;
+  --risk-advisory-bg: #FBF6E9;
+  --risk-watch: #A85A00;
+  --risk-watch-bg: #FCF2E9;
+  --risk-warning: #B42318;
+  --risk-warning-bg: #FDF0ED;
+  --risk-critical: #91180E;
+  --risk-critical-bg: #FBEBE9;
+
+  /* Sidebar Tokens */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1D2933;
+  --sidebar-primary: #173B57;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EDF1F0;
+  --sidebar-accent-foreground: #173B57;
+  --sidebar-border: #D7DEDC;
+  --sidebar-ring: #173B57;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-ibm-plex-sans), system-ui, -apple-system, sans-serif;
   }
   html {
-    @apply font-sans;
+    font-family: var(--font-ibm-plex-sans), system-ui, -apple-system, sans-serif;
   }
+}
+
+/* Operational Utilities */
+.font-mono-tech {
+  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace;
+}
+
+.table-industrial th {
+  background-color: #EDF1F0;
+  color: #52606D;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 12px;
+  border-bottom: 1px solid #D7DEDC;
+  text-align: left;
+}
+
+.table-industrial td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #D7DEDC;
+  font-size: 13px;
+  color: #1D2933;
+}
+
+.table-industrial tr:hover td {
+  background-color: #F8FAF9;
 }

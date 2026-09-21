@@ -4,7 +4,6 @@ import React, { useState, useMemo } from 'react';
 import { DEMO_MINE, DEMO_NODES } from '@/lib/data/mock-data';
 import { GIS_LAYERS_CONFIG, GIS_SUBSIDENCE_EVENTS } from '@/lib/data/gis-data';
 import { GisLayerId } from '@/lib/domain/gis-types';
-import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { GisMapCanvas } from '@/components/gis/gis-map-canvas';
 import { NodeInvestigator } from '@/components/gis/node-investigator';
 import { EventInvestigator } from '@/components/gis/event-investigator';
@@ -17,6 +16,7 @@ import {
   EyeOff,
   RotateCcw,
   CheckCircle2,
+  MapPin,
 } from 'lucide-react';
 
 export default function GisPage() {
@@ -45,37 +45,31 @@ export default function GisPage() {
     }));
   };
 
-  // Node selection handler
   const handleSelectNode = (nodeCode: string) => {
     setSelectedNodeCode(nodeCode);
     setSelectedEventId(null);
   };
 
-  // Event selection handler
   const handleSelectEvent = (eventId: string) => {
     setSelectedEventId(eventId);
     setSelectedNodeCode(null);
   };
 
-  // Resolve currently selected node object
   const selectedNode = useMemo(() => {
     if (!selectedNodeCode) return null;
     return DEMO_NODES.find((n) => n.node_code === selectedNodeCode) || null;
   }, [selectedNodeCode]);
 
-  // Resolve currently selected event object
   const selectedEvent = useMemo(() => {
     if (!selectedEventId) return null;
     return GIS_SUBSIDENCE_EVENTS.find((e) => e.id === selectedEventId) || null;
   }, [selectedEventId]);
 
-  // Map active anomalies by node code
   const anomaliesForSelectedNode = useMemo(() => {
     if (!selectedNodeCode) return [];
     return activeAnomalies.filter((a) => a.nodeCode === selectedNodeCode);
   }, [selectedNodeCode, activeAnomalies]);
 
-  // Events involving selected node
   const eventsForSelectedNode = useMemo(() => {
     if (!selectedNodeCode) return [];
     return GIS_SUBSIDENCE_EVENTS.filter((e) => e.affectedNodeCodes.includes(selectedNodeCode));
@@ -99,37 +93,37 @@ export default function GisPage() {
   return (
     <div className="space-y-4 max-w-7xl mx-auto select-none">
       {/* Top Header */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-[#173B57]" />
               Spatial Geospatial Surveillance Workstation
             </span>
-            <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#1D2933]">
             Underground Strata GIS &amp; Spatial Surveillance Canvas
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#52606D] mt-0.5">
             {DEMO_MINE.name} &bull; Jharia Coalfield ({DEMO_MINE.latitude.toFixed(4)}&deg;N, {DEMO_MINE.longitude.toFixed(4)}&deg;E) &bull; Seam VII/VIII Working
           </p>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="px-2 py-0.5 rounded-xs border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+        <div className="flex items-center gap-2 font-mono-tech text-xs">
+          <span className="px-2.5 py-1 rounded-sm border border-[#D7DEDC] bg-[#EDF1F0] text-[#52606D]">
             Scale: 1:5,000 WGS84
           </span>
-          <span className="px-2 py-0.5 rounded-xs border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
+          <span className="px-2.5 py-1 rounded-sm border border-[#2F6B4F]/30 bg-[#EAF2ED] text-[#2F6B4F] font-semibold">
             16 / 16 Stations Active
           </span>
         </div>
       </div>
 
       {/* Layer Control Bar */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3 flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-600 dark:text-slate-400">
-          <Layers className="h-4 w-4 text-slate-500" />
-          <span className="font-semibold uppercase tracking-wider text-[10px]">Surveillance Overlays:</span>
+      <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 flex flex-wrap items-center justify-between gap-2.5 shadow-xs">
+        <div className="flex items-center gap-2 text-xs font-mono-tech text-[#52606D]">
+          <Layers className="h-4 w-4 text-[#173B57]" />
+          <span className="font-semibold uppercase tracking-wider text-xs">Surveillance Layers:</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -141,14 +135,15 @@ export default function GisPage() {
                 key={layer.id}
                 type="button"
                 onClick={() => toggleLayer(layer.id)}
-                className={`text-[11px] h-7 px-2 font-mono rounded-xs border cursor-pointer transition-colors inline-flex items-center gap-1 ${
+                className={`text-xs h-7 px-2.5 font-mono-tech rounded-sm border cursor-pointer transition-colors inline-flex items-center gap-1.5 ${
                   isVisible
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold border-transparent'
-                    : 'text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
+                    : 'text-[#52606D] border-[#D7DEDC] bg-[#FFFFFF] hover:bg-[#EDF1F0]'
                 }`}
               >
-                {isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3 opacity-60" />}
-                <span>{layer.name}</span> {layer.count ? <span className="opacity-70 text-[9px]">({layer.count})</span> : null}
+                {isVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5 opacity-60" />}
+                <span>{layer.name}</span>
+                {layer.count ? <span className="opacity-75 text-xs">({layer.count})</span> : null}
               </button>
             );
           })}
@@ -156,9 +151,9 @@ export default function GisPage() {
       </div>
 
       {/* Main Investigation Split: Interactive Canvas (2 cols) & Investigation Sidebar (1 col) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-        {/* Spatial Surveillance Canvas */}
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        {/* Left: Spatial Surveillance Canvas (8 cols / ~67%) */}
+        <div className="lg:col-span-8 space-y-4">
           <GisMapCanvas
             activeLayers={activeLayers}
             selectedNodeCode={selectedNodeCode}
@@ -176,21 +171,21 @@ export default function GisPage() {
           )}
 
           {/* Scientific Integrity Standards Notice */}
-          <div className="border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 rounded-sm p-3 text-xs text-slate-500 font-mono space-y-1">
-            <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+          <div className="border border-[#D7DEDC] bg-[#FFFFFF] rounded-sm p-3.5 text-xs text-[#52606D] space-y-1.5 shadow-xs">
+            <div className="flex items-center gap-2 font-semibold text-[#173B57] text-xs">
+              <CheckCircle2 className="h-4 w-4 text-[#2F6B4F]" />
               <span>Scientific &amp; Regulatory Integrity Standards:</span>
             </div>
-            <p className="text-[10px] leading-relaxed">
-              &bull; <strong>Cadastral Infrastructure:</strong> Jharia Coalfield leasehold bounds, Railway siding 45m statutory non-subsidence corridor, ventilation shaft.<br />
+            <p className="text-xs leading-relaxed">
+              &bull; <strong>Cadastral Infrastructure:</strong> Jharia Coalfield leasehold bounds, Railway siding 45m statutory non-subsidence reserve, ventilation shaft.<br />
               &bull; <strong>InSAR Satellite Grid:</strong> Illustrative Sentinel-1 synthetic LOS observation layer (DEMO); does not claim live orbital telemetry.<br />
               &bull; <strong>Geomechanical Reference:</strong> Standard CMPDI empirical hyperbolic tangent subsidence limit trough formulations.
             </p>
           </div>
         </div>
 
-        {/* Operational Investigation Sidebar */}
-        <div className="lg:col-span-1 space-y-4">
+        {/* Right: Operational Investigation Sidebar (4 cols / ~33%) */}
+        <div className="lg:col-span-4 space-y-4">
           {selectedEvent ? (
             <EventInvestigator
               event={selectedEvent}
@@ -207,8 +202,8 @@ export default function GisPage() {
               riskState={liveRiskByNode[selectedNode.node_code] ?? 'Normal'}
             />
           ) : (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-6 text-center text-xs text-slate-500 font-mono space-y-2">
-              <RotateCcw className="h-5 w-5 mx-auto text-slate-400" />
+            <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-6 text-center text-xs text-[#52606D] font-mono-tech space-y-2 shadow-xs">
+              <RotateCcw className="h-5 w-5 mx-auto text-[#74808A]" />
               <p>Select any monitoring station node or subsidence event polygon on the map canvas to open deep telemetry metrology.</p>
             </div>
           )}

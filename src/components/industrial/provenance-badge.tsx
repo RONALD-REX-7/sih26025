@@ -17,8 +17,8 @@ export function ProvenanceBadge({
   const config = getProvenanceConfig(provenance);
 
   const sizeClasses = {
-    sm: 'text-[9px] py-0 px-1 font-mono tracking-wider',
-    md: 'text-[10px] py-0.5 px-1.5 font-mono tracking-wider font-semibold',
+    sm: 'text-xs py-0.5 px-1.5 font-mono-tech tracking-wider',
+    md: 'text-xs py-0.5 px-2 font-mono-tech tracking-wider font-semibold',
   };
 
   return (

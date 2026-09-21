@@ -31,22 +31,22 @@ export function RiskBadge({
   const Icon = RISK_ICONS[state];
 
   const sizeClasses = {
-    sm: 'text-[10px] py-0 px-1.5 gap-1',
-    md: 'text-xs py-0.5 px-2 gap-1.5',
-    lg: 'text-sm py-1 px-2.5 gap-2 font-bold',
+    sm: 'text-xs py-0.5 px-2 gap-1',
+    md: 'text-xs py-1 px-2.5 gap-1.5 font-medium',
+    lg: 'text-sm py-1.5 px-3 gap-2 font-semibold',
   };
 
   const iconSizes = {
-    sm: 'h-3 w-3',
-    md: 'h-3.5 w-3.5',
-    lg: 'h-4 w-4',
+    sm: 'h-3.5 w-3.5',
+    md: 'h-4 w-4',
+    lg: 'h-4.5 w-4.5',
   };
 
   return (
     <Badge
       variant="outline"
       className={cn(
-        'font-mono uppercase tracking-wide inline-flex items-center font-semibold border',
+        'font-mono-tech uppercase tracking-wide inline-flex items-center font-semibold rounded-sm border',
         config.badgeClass,
         sizeClasses[size],
         className
@@ -55,7 +55,7 @@ export function RiskBadge({
       {showIcon && <Icon className={cn(iconSizes[size], 'shrink-0')} />}
       <span>{config.label}</span>
       {showLevel && (
-        <span className="opacity-70 text-[10px] font-normal">
+        <span className="opacity-75 text-xs font-mono-tech font-normal ml-1">
           [L{config.severityLevel}]
         </span>
       )}

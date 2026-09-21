@@ -36,42 +36,37 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    groupName: 'MONITOR',
+    groupName: 'SURVEILLANCE',
     items: [
-      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Command Surface', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Mine & Panels', href: '/mine', icon: Layers },
       { name: 'Underground GIS', href: '/gis', icon: MapPin },
-      { name: 'Live Telemetry', href: '/telemetry', icon: Radio },
+      { name: 'Station Telemetry', href: '/telemetry', icon: Radio },
     ],
   },
   {
     groupName: 'INTELLIGENCE',
     items: [
       { name: 'Node Fleet', href: '/nodes', icon: Server },
-      { name: 'Sensor Analytics', href: '/sensors', icon: Cpu },
-      { name: 'Subsidence Events', href: '/events', icon: Activity },
-      { name: 'AI Risk Analytics', href: '/analytics', icon: TrendingUp },
-      { name: 'Mine Simulator', href: '/simulator', icon: Play },
+      { name: 'Sensor Matrix', href: '/sensors', icon: Cpu },
+      { name: 'Event Ledger', href: '/events', icon: Activity },
+      { name: 'AI Risk Engine', href: '/analytics', icon: TrendingUp },
+      { name: 'Strata Simulator', href: '/simulator', icon: Play },
     ],
   },
   {
-    groupName: 'RESPONSE',
+    groupName: 'OPERATIONS',
     items: [
-      { name: 'Alerts & Evacuation', href: '/alerts', icon: AlertOctagon, isAlert: true },
+      { name: 'Incident Center', href: '/alerts', icon: AlertOctagon, isAlert: true },
       { name: 'Infrastructure', href: '/infrastructure', icon: Building2 },
     ],
   },
   {
-    groupName: 'TRACEABILITY',
+    groupName: 'COMPLIANCE',
     items: [
-      { name: 'Audit Trail', href: '/audit', icon: ClipboardList },
-      { name: 'DGMS Reports', href: '/reports', icon: FileSpreadsheet },
-    ],
-  },
-  {
-    groupName: 'SYSTEM',
-    items: [
-      { name: 'Safety Settings', href: '/settings', icon: Settings },
+      { name: 'Statutory Audit', href: '/audit', icon: ClipboardList },
+      { name: 'Form IV Reports', href: '/reports', icon: FileSpreadsheet },
+      { name: 'Safety Thresholds', href: '/settings', icon: Settings },
     ],
   },
 ];
@@ -86,29 +81,29 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
   const { activeCount, criticalCount } = useAlertStore();
 
   return (
-    <aside className={cn('w-56 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none', className)}>
+    <aside className={cn('w-60 border-r border-[#D7DEDC] bg-[#FFFFFF] flex flex-col shrink-0 select-none', className)}>
       {/* Brand Header */}
-      <div className="p-3 border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-sm bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center font-mono font-bold text-xs shrink-0">
+      <div className="p-3.5 border-b border-[#D7DEDC] bg-[#F8FAF9]">
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-sm bg-[#173B57] text-[#FFFFFF] flex items-center justify-center font-mono-tech font-bold text-xs shrink-0">
             25
           </div>
-          <div>
-            <div className="font-bold text-xs tracking-tight text-slate-900 dark:text-slate-100">
-              SIH26025 &bull; CMR 2017
+          <div className="min-w-0">
+            <div className="font-semibold text-sm tracking-tight text-[#173B57]">
+              SIH26025 &bull; CMR 112
             </div>
-            <p className="text-[10px] text-slate-500 font-mono leading-tight">
-              Subsidence Surveillance
+            <p className="text-xs text-[#52606D] truncate">
+              Strata Early Warning
             </p>
           </div>
         </div>
       </div>
 
       {/* Grouped Navigation */}
-      <nav className="flex-1 p-2 space-y-3 overflow-y-auto">
+      <nav className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto">
         {NAV_GROUPS.map((group) => (
-          <div key={group.groupName} className="space-y-0.5">
-            <div className="px-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 font-mono mb-1">
+          <div key={group.groupName} className="space-y-1">
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[#74808A]">
               {group.groupName}
             </div>
             <div className="space-y-0.5">
@@ -124,22 +119,22 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
                     href={item.href}
                     onClick={onItemClick}
                     className={cn(
-                      'flex items-center justify-between px-2 py-1.5 rounded-sm text-xs font-medium transition-colors',
+                      'flex items-center justify-between px-2.5 py-2 rounded-sm text-[13px] font-medium transition-colors',
                       isActive
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100'
+                        ? 'bg-[#173B57] text-[#FFFFFF]'
+                        : 'text-[#52606D] hover:bg-[#EDF1F0] hover:text-[#1D2933]'
                     )}
                   >
-                    <div className="flex items-center gap-2">
-                      <Icon className={cn('h-3.5 w-3.5 shrink-0', isActive ? 'text-white dark:text-slate-900' : 'text-slate-500')} />
-                      <span>{item.name}</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-[#FFFFFF]' : 'text-[#74808A]')} />
+                      <span className="truncate">{item.name}</span>
                     </div>
 
                     {hasAlertBadge && (
                       <span
                         className={cn(
-                          'px-1.5 py-0.2 rounded-xs text-[10px] font-mono font-bold text-white',
-                          criticalCount > 0 ? 'bg-rose-600 animate-pulse' : 'bg-amber-600'
+                          'px-1.5 py-0.5 rounded-sm text-xs font-mono-tech font-bold',
+                          criticalCount > 0 ? 'bg-[#FBEBE9] text-[#B42318]' : 'bg-[#FBF6E9] text-[#9A6A00]'
                         )}
                       >
                         {activeCount}
@@ -154,9 +149,9 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
       </nav>
 
       {/* Footer Info */}
-      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 font-mono flex items-center justify-between">
+      <div className="p-3 border-t border-[#D7DEDC] bg-[#F8FAF9] text-xs text-[#74808A] flex items-center justify-between font-mono-tech">
         <span>Bhowra-West</span>
-        <span>v1.0-RC</span>
+        <span>DGMS v1.0</span>
       </div>
     </aside>
   );

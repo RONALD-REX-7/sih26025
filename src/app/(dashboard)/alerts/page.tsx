@@ -4,24 +4,18 @@ import React, { useEffect, useState } from 'react';
 import { Alert } from '@/lib/domain/types';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { RiskBadge } from '@/components/industrial/risk-badge';
-import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { StateContainer } from '@/components/industrial/state-container';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
 import { EscalateModal } from '@/components/industrial/escalate-modal';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import {
   CheckCircle2,
-  ShieldAlert,
   Bell,
   Volume2,
   VolumeX,
   Radio,
-  Flame,
-  FileText,
   Send,
+  AlertTriangle,
 } from 'lucide-react';
 import { AcknowledgementPayload, EscalationPayload } from '@/lib/alerts/alert-types';
 
@@ -42,11 +36,9 @@ export default function AlertsPage() {
 
   const [selectedRisk, setSelectedRisk] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
-  const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'queue' | 'dispatches'>('queue');
   const [ackNotice, setAckNotice] = useState<string | null>(null);
 
-  // Modal dialog states
   const [targetAckAlert, setTargetAckAlert] = useState<Alert | null>(null);
   const [targetEscalateAlert, setTargetEscalateAlert] = useState<Alert | null>(null);
 
@@ -60,9 +52,6 @@ export default function AlertsPage() {
     return matchesRisk && matchesStatus;
   });
 
-  const activeAlert =
-    (selectedAlertId && alerts.find((a) => a.id === selectedAlertId)) || filteredAlerts[0] || alerts[0];
-
   const handleOpenAcknowledge = (alert: Alert) => {
     setTargetAckAlert(alert);
   };
@@ -74,7 +63,7 @@ export default function AlertsPage() {
   const handleConfirmAcknowledge = async (payload: AcknowledgementPayload) => {
     if (!targetAckAlert) return;
     await acknowledgeAlert(targetAckAlert.id, payload);
-    setAckNotice(`Alert ${targetAckAlert.id} successfully acknowledged. Audit entry recorded.`);
+    setAckNotice(`Alert ${targetAckAlert.id} successfully acknowledged. Statutory audit entry committed.`);
     setTimeout(() => setAckNotice(null), 4000);
   };
 
@@ -86,489 +75,274 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Top Header & Alarm Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-4 max-w-7xl mx-auto select-none">
+      {/* Top Header */}
+      <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Radio className="h-3.5 w-3.5 text-amber-500" />
-              Emergency Response &bull; DGMS CMR 2017 Reg 112
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+              <Radio className="h-4 w-4 text-[#173B57]" />
+              Emergency Response Coordination &bull; DGMS CMR 2017 Reg 112
             </span>
-            <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Early Warning &amp; Subsidence Alert Center
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#1D2933]">
+            Early Warning &amp; Incident Action Center
           </h1>
-          <p className="text-xs text-slate-500">
-            Multi-tier geotechnical alert dispatch, regulatory sign-off, audible siren, and escalation tracking.
+          <p className="text-xs text-[#52606D] mt-0.5">
+            Real-time incident dispatch, regulatory CMR 112 shift sign-off, audible siren readiness, and escalation workflows.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Audible Siren Controller */}
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-md border border-slate-200 dark:border-slate-800">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={toggleMuteAlarm}
-              className={`h-7 px-2 text-xs font-mono cursor-pointer ${
-                isAlarmMuted ? 'text-slate-400' : 'text-amber-600 dark:text-amber-400'
-              }`}
-            >
-              {isAlarmMuted ? <VolumeX className="h-3.5 w-3.5 mr-1" /> : <Volume2 className="h-3.5 w-3.5 mr-1" />}
-              {isAlarmMuted ? 'Alarm Muted' : isAlarmPlaying ? 'Siren Active' : 'Sound Ready'}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={playTestAlarm}
-              className="h-7 px-2 text-[10px] font-mono text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-            >
-              Test Beep
-            </Button>
-          </div>
-
-          <Badge
-            variant="outline"
-            className={`font-mono text-xs ${
-              criticalCount > 0
-                ? 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse'
-                : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+        <div className="flex items-center gap-3">
+          {/* Audible Siren Toggle */}
+          <button
+            onClick={toggleMuteAlarm}
+            className={`h-8 px-3 text-xs font-mono-tech font-medium rounded-sm border flex items-center gap-1.5 cursor-pointer transition-colors ${
+              isAlarmMuted
+                ? 'border-[#D7DEDC] bg-[#EDF1F0] text-[#74808A]'
+                : 'border-[#173B57] bg-[#FFFFFF] text-[#173B57]'
             }`}
           >
-            {criticalCount > 0 ? `${criticalCount} High Risk Alert(s)` : 'Geotechnical Status: Controlled'}
-          </Badge>
+            {isAlarmMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            <span>{isAlarmMuted ? 'Alarm Muted' : isAlarmPlaying ? 'Siren Active' : 'Siren Ready'}</span>
+          </button>
+
+          <button
+            onClick={playTestAlarm}
+            className="h-8 px-2.5 text-xs font-mono-tech border border-[#D7DEDC] bg-[#FFFFFF] text-[#52606D] hover:bg-[#EDF1F0] rounded-sm cursor-pointer"
+          >
+            Test Beep
+          </button>
         </div>
       </div>
 
       {ackNotice && (
-        <div className="p-3 text-xs bg-emerald-50 text-emerald-800 border border-emerald-300 rounded flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+        <div className="p-3 text-xs bg-[#EAF2ED] text-[#2F6B4F] border border-[#2F6B4F]/30 rounded-sm flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-[#2F6B4F] shrink-0" />
           <span>{ackNotice}</span>
         </div>
       )}
 
       {/* Incident Metric Summary Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] text-slate-400 uppercase">Active Incidents</div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-            {activeCount} <span className="text-[10px] font-normal text-slate-500">requiring action</span>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono-tech text-xs">
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
+          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Active Directives</div>
+          <div className="text-lg font-bold text-[#B42318] mt-0.5">
+            {activeCount} <span className="text-xs font-normal text-[#52606D]">requiring action</span>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] text-slate-400 uppercase">Acknowledged</div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-            {alerts.filter((a) => a.status === 'acknowledged').length} <span className="text-[10px] font-normal text-slate-500">signed off</span>
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
+          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Acknowledged</div>
+          <div className="text-lg font-bold text-[#2F6B4F] mt-0.5">
+            {alerts.filter((a) => a.status === 'acknowledged').length} <span className="text-xs font-normal text-[#52606D]">signed off</span>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] text-slate-400 uppercase">Escalated</div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-            {alerts.filter((a) => a.status === 'escalated').length} <span className="text-[10px] font-normal text-slate-500">dispatched</span>
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
+          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Escalated</div>
+          <div className="text-lg font-bold text-[#A85A00] mt-0.5">
+            {alerts.filter((a) => a.status === 'escalated').length} <span className="text-xs font-normal text-[#52606D]">dispatched</span>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] text-slate-400 uppercase">Dispatch Logs</div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-            {notificationHistory.length} <span className="text-[10px] font-normal text-slate-500">transmissions</span>
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
+          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Dispatch Log Entries</div>
+          <div className="text-lg font-bold text-[#1D2933] mt-0.5">
+            {notificationHistory.length} <span className="text-xs font-normal text-[#52606D]">events</span>
           </div>
         </div>
       </div>
 
-      {/* Mode Tabs: Active Queue vs Notification History */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+      {/* Tabs: Incident Queue vs Multi-Channel Dispatch Log */}
+      <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 flex flex-wrap items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant={activeTab === 'queue' ? 'default' : 'ghost'}
+          <button
             onClick={() => setActiveTab('queue')}
-            className={`text-xs font-mono h-8 cursor-pointer ${
-              activeTab === 'queue' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-600'
+            className={`px-3 py-1.5 text-xs font-mono-tech rounded-sm border cursor-pointer transition-colors ${
+              activeTab === 'queue'
+                ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
+                : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
             }`}
           >
-            <Bell className="h-3.5 w-3.5 mr-1.5" />
+            <Bell className="h-3.5 w-3.5 inline mr-1.5" />
             Incident Queue ({filteredAlerts.length})
-          </Button>
-          <Button
-            size="sm"
-            variant={activeTab === 'dispatches' ? 'default' : 'ghost'}
+          </button>
+          <button
             onClick={() => setActiveTab('dispatches')}
-            className={`text-xs font-mono h-8 cursor-pointer ${
-              activeTab === 'dispatches' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-600'
+            className={`px-3 py-1.5 text-xs font-mono-tech rounded-sm border cursor-pointer transition-colors ${
+              activeTab === 'dispatches'
+                ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
+                : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
             }`}
           >
-            <Send className="h-3.5 w-3.5 mr-1.5" />
-            Multi-Channel Dispatch Log ({notificationHistory.length})
-          </Button>
+            <Send className="h-3.5 w-3.5 inline mr-1.5" />
+            Dispatch Transmissions ({notificationHistory.length})
+          </button>
         </div>
 
         {activeTab === 'queue' && (
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Risk:</span>
-              {['ALL', 'Critical', 'Warning', 'Watch', 'Advisory'].map((r) => (
-                <Button
-                  key={r}
-                  variant={selectedRisk === r ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedRisk(r)}
-                  className={`text-[10px] h-6 px-1.5 font-mono ${
-                    selectedRisk === r
-                      ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 font-bold'
-                      : 'text-slate-500'
-                  }`}
-                >
-                  {r}
-                </Button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Status:</span>
-              {['ALL', 'active', 'acknowledged', 'escalated'].map((s) => (
-                <Button
-                  key={s}
-                  variant={selectedStatus === s ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedStatus(s)}
-                  className={`text-[10px] h-6 px-1.5 font-mono capitalize ${
-                    selectedStatus === s
-                      ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 font-bold'
-                      : 'text-slate-500'
-                  }`}
-                >
-                  {s}
-                </Button>
-              ))}
-            </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono-tech">
+            <span className="text-[#52606D]">Severity:</span>
+            {['ALL', 'Critical', 'Warning', 'Watch', 'Advisory'].map((r) => (
+              <button
+                key={r}
+                onClick={() => setSelectedRisk(r)}
+                className={`px-2 py-0.5 text-xs font-mono-tech rounded-sm border cursor-pointer transition-colors ${
+                  selectedRisk === r
+                    ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
+                    : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
+                }`}
+              >
+                {r}
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      {/* TAB 1: INCIDENT QUEUE & EVIDENCE INSPECTOR */}
-      {activeTab === 'queue' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Alerts Table (2 cols) */}
-          <div className="lg:col-span-2">
-            <Card className="border-slate-200 dark:border-slate-800">
-              <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-slate-700 dark:text-slate-300" />
-                    Emergency Geotechnical Incident Log
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Select an alert to view convergence evidence, audit metadata, and sign-off directives
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="text-[11px] font-mono bg-slate-50/50 dark:bg-slate-900/50">
-                      <TableHead>Time (IST)</TableHead>
-                      <TableHead>Risk State</TableHead>
-                      <TableHead>Incident Title</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAlerts.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="p-8">
-                          <StateContainer
-                            type="empty"
-                            title="No Alerts In Selected Category"
-                            description="All geotechnical channels report baseline convergence tolerances."
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredAlerts.map((a) => (
-                        <TableRow
-                          key={a.id}
-                          onClick={() => setSelectedAlertId(a.id)}
-                          className={`text-xs cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-900/80 ${
-                            activeAlert.id === a.id ? 'bg-slate-100/70 dark:bg-slate-800/70' : ''
-                          }`}
-                        >
-                          <TableCell className="font-mono text-[11px] text-slate-500 whitespace-nowrap">
-                            {new Date(a.triggered_at).toLocaleTimeString('en-IN', {
-                              timeZone: 'Asia/Kolkata',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </TableCell>
-                          <TableCell>
-                            <RiskBadge state={a.risk_state} size="sm" />
-                          </TableCell>
-                          <TableCell className="font-semibold text-slate-900 dark:text-slate-100 max-w-50 truncate">
-                            {a.title}
-                          </TableCell>
-                          <TableCell className="font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                            {a.panel?.code || a.panel_id || 'General'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] font-mono capitalize ${
-                                a.status === 'active'
-                                  ? 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse'
-                                  : a.status === 'escalated'
-                                  ? 'bg-rose-50 text-rose-700 border-rose-300 font-bold'
-                                  : a.status === 'acknowledged'
-                                  ? 'bg-blue-50 text-blue-700 border-blue-300'
-                                  : 'bg-slate-50 text-slate-600 border-slate-300'
-                              }`}
-                            >
-                              {a.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              {a.status === 'active' && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleOpenAcknowledge(a)}
-                                  className="text-[11px] h-6 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300 cursor-pointer"
-                                >
-                                  Sign Off
-                                </Button>
-                              )}
-                              {a.status !== 'resolved' && a.status !== 'escalated' && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleOpenEscalate(a)}
-                                  className="text-[10px] h-6 px-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
-                                  title="Escalate incident to DGMS"
-                                >
-                                  <Flame className="h-3 w-3 mr-0.5" />
-                                  Escalate
-                                </Button>
-                              )}
-                              {a.status === 'acknowledged' && (
-                                <span className="text-[10px] font-mono text-slate-400">Signed Off</span>
-                              )}
-                              {a.status === 'escalated' && (
-                                <span className="text-[10px] font-mono text-rose-600 font-semibold">Escalated</span>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Alert Evidence Inspector (1 col) */}
-          <div className="lg:col-span-1">
-            {activeAlert ? (
-              <Card className="border-slate-200 dark:border-slate-800 h-full flex flex-col">
-                <CardHeader className="p-4 pb-3 border-b border-slate-100 dark:border-slate-900">
-                  <div className="flex items-center justify-between mb-1">
-                    <RiskBadge state={activeAlert.risk_state} size="md" />
-                    <Badge variant="outline" className="font-mono text-[10px] uppercase">
-                      {activeAlert.status}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-sm font-semibold">{activeAlert.title}</CardTitle>
-                  <CardDescription className="text-xs font-mono text-slate-500">
-                    ID: {activeAlert.id} &bull; Panel: {activeAlert.panel?.code || activeAlert.panel_id || 'Mine Wide'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 space-y-4 flex-1 text-xs">
-                  <div>
-                    <h4 className="font-semibold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider mb-1">
-                      Geotechnical Evidence &amp; Observation
-                    </h4>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-900 p-2.5 rounded border border-slate-200 dark:border-slate-800 font-mono text-[11px]">
-                      {activeAlert.message}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider">
-                      Regulatory Mandate &amp; Directive
-                    </h4>
-                    <div className="p-2.5 rounded bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-900/60 text-slate-700 dark:text-slate-300 text-[11px] space-y-1">
-                      <p className="font-semibold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5 text-blue-600" />
-                        DGMS Circular (Coal) No. 04 of 2017
-                      </p>
-                      <p className="text-slate-600 dark:text-slate-400 text-[10.5px] leading-relaxed">
-                        Mandates continuous convergence recording, barrier pillar integrity checks, and immediate barricading if tensile strain exceeds 3.0 mm/m.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-900 space-y-1.5">
-                    <div className="flex justify-between text-[11px]">
-                      <span className="text-slate-500">Triggered At:</span>
-                      <span className="font-mono text-slate-700 dark:text-slate-300">
-                        {new Date(activeAlert.triggered_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
-                      </span>
-                    </div>
-                    {activeAlert.acknowledged_by && (
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Acknowledged By:</span>
-                        <span className="font-mono text-emerald-700 dark:text-emerald-400 font-medium">
-                          {activeAlert.acknowledged_by}
-                        </span>
-                      </div>
-                    )}
-                    {activeAlert.acknowledged_at && (
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Ack Timestamp:</span>
-                        <span className="font-mono text-slate-700 dark:text-slate-300">
-                          {new Date(activeAlert.acknowledged_at).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {activeAlert.status === 'active' && (
-                    <div className="pt-3 space-y-2">
-                      <Button
-                        onClick={() => handleOpenAcknowledge(activeAlert)}
-                        className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer"
-                      >
-                        <ShieldAlert className="h-4 w-4 mr-1.5" />
-                        Statutory Sign-Off &amp; Acknowledge
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleOpenEscalate(activeAlert)}
-                        className="w-full text-xs font-mono text-rose-600 border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
-                      >
-                        <Flame className="h-3.5 w-3.5 mr-1.5" />
-                        Escalate to DGMS Hierarchy
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
+      {/* Main Content Area */}
+      {activeTab === 'queue' ? (
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden shadow-xs">
+          {filteredAlerts.length === 0 ? (
+            <div className="p-8">
               <StateContainer
                 type="empty"
-                title="No Incident Selected"
-                description="Select an alert from the queue to view geotechnical evidence."
+                title="No Incidents in Queue"
+                description="All strata monitoring stations are operating within statutory tolerances."
               />
-            )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left table-industrial">
+                <thead>
+                  <tr>
+                    <th>Alert ID</th>
+                    <th>Risk State</th>
+                    <th>Panel</th>
+                    <th>Directive Title &amp; Observed Evidence</th>
+                    <th>Triggered At</th>
+                    <th>Status</th>
+                    <th className="text-right">Statutory Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAlerts.map((alert) => (
+                    <tr key={alert.id} className="transition-colors">
+                      <td className="font-mono-tech font-bold text-[#173B57]">
+                        {alert.id}
+                      </td>
+                      <td>
+                        <RiskBadge state={alert.risk_state} size="sm" showIcon={false} />
+                      </td>
+                      <td className="font-mono-tech text-xs text-[#52606D]">
+                        {alert.panel?.code || alert.panel_id || 'P-101'}
+                      </td>
+                      <td className="max-w-md">
+                        <div className="font-semibold text-xs text-[#1D2933]">
+                          {alert.title}
+                        </div>
+                        <div className="text-xs text-[#52606D] truncate mt-0.5">
+                          {alert.message}
+                        </div>
+                      </td>
+                      <td className="font-mono-tech text-xs text-[#52606D]">
+                        {new Date(alert.triggered_at).toLocaleTimeString()}
+                      </td>
+                      <td>
+                        <span className={`px-2 py-0.5 rounded-sm text-xs font-mono-tech font-semibold ${
+                          alert.status === 'active'
+                            ? 'bg-[#FBEBE9] text-[#91180E]'
+                            : alert.status === 'escalated'
+                            ? 'bg-[#FBF6E9] text-[#9A6A00]'
+                            : 'bg-[#EAF2ED] text-[#2F6B4F]'
+                        }`}>
+                          {alert.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="text-right space-x-1.5">
+                        {alert.status !== 'acknowledged' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAcknowledge(alert)}
+                              className="px-2.5 py-1 rounded-sm bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] text-xs font-mono-tech font-medium cursor-pointer"
+                            >
+                              Sign Off
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEscalate(alert)}
+                              className="px-2 py-1 rounded-sm border border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0] text-xs font-mono-tech cursor-pointer"
+                            >
+                              Escalate
+                            </button>
+                          </>
+                        )}
+                        {alert.status === 'acknowledged' && (
+                          <span className="text-xs text-[#2F6B4F] font-mono-tech font-semibold">
+                            Signed Off
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Dispatch Log View */
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left table-industrial">
+              <thead>
+                <tr>
+                  <th>Dispatch Time</th>
+                  <th>Channel</th>
+                  <th>Recipient / Station</th>
+                  <th>Message Content</th>
+                  <th>Protocol Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {notificationHistory.map((item) => (
+                  <tr key={item.id} className="transition-colors">
+                    <td className="font-mono-tech text-xs text-[#52606D]">
+                      {new Date(item.dispatchedAt).toLocaleTimeString()}
+                    </td>
+                    <td className="font-mono-tech font-semibold text-[#173B57]">
+                      {(item.payload.channel || item.providerName).toUpperCase()}
+                    </td>
+                    <td className="font-mono-tech text-xs text-[#1D2933]">
+                      {item.payload.recipient || item.providerName}
+                    </td>
+                    <td className="text-xs text-[#52606D] max-w-lg truncate">
+                      {item.payload.subject || item.payload.body}
+                    </td>
+                    <td>
+                      <span className="px-2 py-0.5 rounded-sm text-xs font-mono-tech font-semibold bg-[#EAF2ED] text-[#2F6B4F]">
+                        {item.status.toUpperCase()}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* TAB 2: MULTI-CHANNEL NOTIFICATION DISPATCH LOG */}
-      {activeTab === 'dispatches' && (
-        <Card className="border-slate-200 dark:border-slate-800">
-          <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Send className="h-4 w-4 text-slate-700 dark:text-slate-300" />
-                Multi-Channel Emergency Notification Dispatch Log
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Real-time audit trail of all automated SMS, Email, Webhook, and In-App dispatches
-              </CardDescription>
-            </div>
-            <ProvenanceBadge provenance="DEMO" size="sm" />
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="text-[11px] font-mono bg-slate-50/50 dark:bg-slate-900/50">
-                  <TableHead>Timestamp (IST)</TableHead>
-                  <TableHead>Channel</TableHead>
-                  <TableHead>Recipient</TableHead>
-                  <TableHead>Provider</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Latency</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {notificationHistory.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="p-8">
-                      <StateContainer
-                        type="empty"
-                        title="No Notifications Dispatched Yet"
-                        description="Notification dispatches will appear here automatically when risk state transitions occur."
-                      />
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  notificationHistory.map((n) => (
-                    <TableRow key={n.id} className="text-xs font-mono">
-                      <TableCell className="text-slate-500 whitespace-nowrap">
-                        {new Date(n.dispatchedAt).toLocaleTimeString('en-IN', {
-                          timeZone: 'Asia/Kolkata',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-[10px] uppercase font-bold">
-                          {n.payload.channel}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-48 truncate text-slate-700 dark:text-slate-300">
-                        {n.payload.recipient}
-                      </TableCell>
-                      <TableCell className="text-slate-500 text-[11px]">
-                        {n.providerName}
-                      </TableCell>
-                      <TableCell className="max-w-64 truncate text-slate-800 dark:text-slate-200">
-                        {n.payload.subject}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`text-[9px] font-mono ${
-                            n.status === 'SIMULATED_DEMO'
-                              ? 'bg-amber-50 text-amber-700 border-amber-300'
-                              : n.status === 'DELIVERED'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                              : 'bg-rose-50 text-rose-700 border-rose-300'
-                          }`}
-                        >
-                          {n.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right text-slate-500">
-                        {n.latencyMs} ms
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Acknowledge Modal Dialog */}
+      {/* Acknowledge Modal */}
       <AcknowledgeModal
         alert={targetAckAlert}
-        isOpen={!!targetAckAlert}
+        isOpen={Boolean(targetAckAlert)}
         onClose={() => setTargetAckAlert(null)}
         onConfirm={handleConfirmAcknowledge}
       />
 
-      {/* Escalate Modal Dialog */}
+      {/* Escalate Modal */}
       <EscalateModal
         alert={targetEscalateAlert}
-        isOpen={!!targetEscalateAlert}
+        isOpen={Boolean(targetEscalateAlert)}
         onClose={() => setTargetEscalateAlert(null)}
         onConfirm={handleConfirmEscalate}
       />

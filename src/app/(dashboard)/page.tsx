@@ -7,11 +7,11 @@ import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { Alert } from '@/lib/domain/types';
 import { AcknowledgementPayload } from '@/lib/alerts/alert-types';
-import { DEMO_NODES } from '@/lib/data/mock-data';
+import { DEMO_NODES, DEMO_PANELS } from '@/lib/data/mock-data';
 import { GisLayerId } from '@/lib/domain/gis-types';
 import { RiskState } from '@/lib/domain/risk-states';
 import { RiskBadge } from '@/components/industrial/risk-badge';
-import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
+import { StatusDot } from '@/components/industrial/status-dot';
 import { RiskEvidencePanel } from '@/components/industrial/risk-evidence-panel';
 import { GisMapCanvas } from '@/components/gis/gis-map-canvas';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
@@ -22,6 +22,10 @@ import {
   CheckCircle2,
   ChevronRight,
   ExternalLink,
+  Radio,
+  FileCheck,
+  Shield,
+  Layers,
 } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
@@ -69,27 +73,16 @@ export default function DashboardOverviewPage() {
 
   const isSimActive = simState.status === 'running';
 
-  // Primary active alert requiring operator attention
+  // Active alert requiring operator attention
   const activeAlert = useMemo(() => {
     return alerts.find((a) => a.status === 'active' || a.status === 'escalated') || null;
   }, [alerts]);
-
-  // Transducer sensor values for primary station
-  const tiltVal = latestReadings['SN-102-TILT_X']?.value ?? 12.4;
-  const dispVal = latestReadings['SN-102-DISP_Z']?.value ?? 18.5;
-  const vibVal = latestReadings['SN-101-VIB_RMS']?.value ?? 3.2;
 
   // Fleet Health Aggregations
   const healthValues = Object.values(latestHealths);
   const offlineNodes = healthValues.filter((h) => h.status === 'offline').length;
   const degradedNodes = healthValues.filter((h) => h.status === 'degraded').length;
   const onlineNodes = Math.max(16 - offlineNodes - degradedNodes, 0);
-  const avgBattery = healthValues.length > 0
-    ? (healthValues.reduce((acc, h) => acc + h.batteryPct, 0) / healthValues.length).toFixed(1)
-    : '94.2';
-  const avgRssi = healthValues.length > 0
-    ? Math.round(healthValues.reduce((acc, h) => acc + h.signalRssiDbm, 0) / healthValues.length)
-    : -84;
 
   // Derive live risk state per node
   const liveRiskByNode = useMemo(() => {
@@ -119,78 +112,74 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="space-y-4 max-w-7xl mx-auto select-none">
-      {/* Simulation Active Notification Strip */}
-      {isSimActive && (
-        <div className="px-3 py-2 bg-amber-500/10 border border-amber-500/30 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
+      {/* 1. High-Priority Operational Status Bar (48px) */}
+      <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping shrink-0" />
-            <span className="font-semibold font-mono">DETERMINISTIC SIMULATION ACTIVE:</span>
-            <span>Scenario: {simState.scenarioId} &bull; Seed: {simState.seed} &bull; Speed: {simState.speed}x</span>
-          </div>
-          <Link href="/simulator" className="font-semibold underline text-amber-800 dark:text-amber-300 shrink-0 font-mono">
-            Workbench Controls &rarr;
-          </Link>
-        </div>
-      )}
-
-      {/* Top Operations Command Header */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
-              Colliery Operations Command Surface
-            </span>
-            <ProvenanceBadge provenance={isSimActive ? 'SIMULATED' : 'DEMO'} size="sm" />
-            <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-1.5 py-0.5 rounded-xs font-mono">
-              DGMS CMR 2017 REG. 112 ACTIVE
+            <Shield className="h-5 w-5 text-[#173B57] shrink-0" />
+            <span className="font-semibold text-sm text-[#1D2933] tracking-tight truncate">
+              Bhowra-West Colliery Command
             </span>
           </div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-slate-50">
-            Bhowra-West Colliery &bull; Underground Subsidence Surveillance
-          </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-            Jharia Coalfield &bull; Seam VII/VIII (185m–265m depth) &bull; Bord &amp; Pillar Depillaring with Hydraulic Stowing
-          </p>
+
+          <span className="text-[#D7DEDC] hidden md:inline">|</span>
+
+          <div className="hidden md:flex items-center gap-2 text-xs text-[#52606D]">
+            <span>DGMS Status:</span>
+            <span className="font-mono-tech font-semibold text-[#1D2933]">CMR 2017 Reg 112</span>
+          </div>
+
+          <span className="text-[#D7DEDC] hidden md:inline">|</span>
+
+          <div className="flex items-center gap-2 text-xs text-[#52606D]">
+            <span>Fleet:</span>
+            <span className="font-mono-tech font-semibold text-[#1D2933]">{onlineNodes}/16 Online</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 self-start md:self-center">
-          <div className="text-right hidden sm:block">
-            <div className="text-[10px] text-slate-400 font-mono uppercase">On-Duty Persona</div>
-            <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">{role} ({profile?.full_name?.split(' ')[0] ?? 'Operator'})</div>
+        <div className="flex items-center gap-3 shrink-0">
+          {isSimActive && (
+            <span className="text-xs font-mono-tech bg-[#FBF6E9] border border-[#9A6A00]/40 text-[#9A6A00] px-2 py-0.5 rounded-sm font-semibold">
+              SIMULATING ({simState.speed}x)
+            </span>
+          )}
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#52606D] hidden sm:inline">Strata Condition:</span>
+            <RiskBadge state={currentRiskState} size="md" />
           </div>
-          <RiskBadge state={currentRiskState} size="lg" />
         </div>
       </div>
 
-      {/* Immediate Incident Warning Callout OR Statutory Compliance Nominal State */}
-      {activeAlert ? (
+      {/* 2. Active Alert Evacuation Directive (if active) */}
+      {activeAlert && (
         <div
           className={`p-3.5 rounded-sm border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
             activeAlert.severity === 'critical'
-              ? 'border-rose-400 bg-rose-50/90 dark:bg-rose-950/30 text-rose-950 dark:text-rose-100'
+              ? 'border-[#91180E] bg-[#FBEBE9] text-[#91180E]'
               : activeAlert.severity === 'high'
-              ? 'border-orange-400 bg-orange-50/90 dark:bg-orange-950/30 text-orange-950 dark:text-orange-100'
-              : 'border-amber-400 bg-amber-50/90 dark:bg-amber-950/30 text-amber-950 dark:text-amber-100'
+              ? 'border-[#B42318] bg-[#FDF0ED] text-[#B42318]'
+              : 'border-[#9A6A00] bg-[#FBF6E9] text-[#9A6A00]'
           }`}
         >
           <div className="flex items-start gap-3">
-            <div className={`p-1.5 rounded-xs mt-0.5 text-white shrink-0 ${
-              activeAlert.severity === 'critical' ? 'bg-rose-600 animate-pulse' : 'bg-orange-600'
+            <div className={`p-1.5 rounded-sm text-[#FFFFFF] shrink-0 mt-0.5 ${
+              activeAlert.severity === 'critical' ? 'bg-[#91180E] animate-pulse' : 'bg-[#B42318]'
             }`}>
               <AlertTriangle className="h-4 w-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                <span className="font-mono font-bold text-[10px] uppercase tracking-wider px-1.5 py-0.2 bg-black/10 rounded-xs">
-                  ACTIVE {activeAlert.severity.toUpperCase()} ALERT
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="font-mono-tech font-bold text-xs uppercase tracking-wider px-1.5 py-0.5 bg-black/10 rounded-sm">
+                  {activeAlert.severity.toUpperCase()} DIRECTIVE
                 </span>
                 <RiskBadge state={activeAlert.risk_state} size="sm" />
-                <span className="text-xs font-mono opacity-80">
+                <span className="text-xs font-mono-tech opacity-90">
                   Panel: <strong>{activeAlert.panel_id}</strong> &bull; Triggered: {new Date(activeAlert.triggered_at).toLocaleTimeString()}
                 </span>
               </div>
-              <div className="text-xs font-bold">{activeAlert.title}</div>
-              <p className="text-xs opacity-90 mt-0.5 line-clamp-2 max-w-4xl">
+              <div className="text-sm font-bold tracking-tight">{activeAlert.title}</div>
+              <p className="text-xs opacity-90 mt-0.5 line-clamp-2 max-w-4xl font-sans">
                 {activeAlert.message}
               </p>
             </div>
@@ -203,53 +192,38 @@ export default function DashboardOverviewPage() {
                 setSelectedAlertForAck(activeAlert);
                 setIsAckModalOpen(true);
               }}
-              className={`font-semibold text-xs h-7 text-white shadow-none ${
-                activeAlert.severity === 'critical'
-                  ? 'bg-rose-600 hover:bg-rose-700'
-                  : 'bg-orange-600 hover:bg-orange-700'
-              }`}
+              className="font-semibold text-xs h-8 px-3 bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] rounded-sm"
             >
               Sign Off (CMR 112)
             </Button>
             <Link href="/alerts">
-              <Button size="sm" variant="outline" className="text-xs h-7">
-                Alert Center &rarr;
+              <Button size="sm" variant="outline" className="text-xs h-8 px-3 border-[#D7DEDC] bg-[#FFFFFF] text-[#1D2933] hover:bg-[#EDF1F0]">
+                Incident Log &rarr;
               </Button>
             </Link>
           </div>
         </div>
-      ) : (
-        <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 rounded-sm flex items-center justify-between text-xs text-emerald-900 dark:text-emerald-300">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-            <span className="font-semibold font-mono">STATUTORY MONITORING NOMINAL:</span>
-            <span>All 16 strata monitoring stations reporting within baseline tolerances. 0 active DGMS evacuation directives.</span>
-          </div>
-          <Link href="/alerts" className="font-semibold underline text-emerald-700 dark:text-emerald-400 font-mono">
-            Incident Queue &rarr;
-          </Link>
-        </div>
       )}
 
-      {/* Central Viewport Workspace: Underground GIS (Left) + Explainable Evidence Dossier (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left (7 Cols): Interactive Spatial Surveillance Map */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden flex flex-col">
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between gap-2">
+      {/* 3. Central Operational Split View: GIS Surveillance (65%) + Evidence Dossier (35%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        {/* Left: GIS Underground Surveillance Canvas (7 Cols / ~60%) */}
+        <div className="lg:col-span-7 bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden flex flex-col shadow-xs">
+          <div className="px-4 py-3 border-b border-[#D7DEDC] bg-[#F8FAF9] flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-emerald-600" />
-              <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-mono uppercase tracking-wide">
+              <MapPin className="h-4 w-4 text-[#173B57]" />
+              <span className="text-xs font-semibold text-[#173B57] font-mono-tech uppercase tracking-wide">
                 Underground GIS &bull; Panel Layout
               </span>
             </div>
 
-            {/* Quick Layer Controls HUD */}
-            <div className="flex items-center gap-1.5 text-[11px] font-mono">
+            {/* Layer Toggles */}
+            <div className="flex items-center gap-1.5 text-xs font-mono-tech">
               <button
                 type="button"
                 onClick={() => toggleLayer('panels')}
-                className={`px-1.5 py-0.5 rounded-xs border cursor-pointer ${
-                  activeLayers.panels ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-transparent' : 'border-slate-300 text-slate-500'
+                className={`px-2 py-0.5 rounded-sm border cursor-pointer transition-colors ${
+                  activeLayers.panels ? 'bg-[#173B57] text-[#FFFFFF] border-[#173B57]' : 'border-[#D7DEDC] bg-[#FFFFFF] text-[#52606D]'
                 }`}
               >
                 Panels
@@ -257,29 +231,29 @@ export default function DashboardOverviewPage() {
               <button
                 type="button"
                 onClick={() => toggleLayer('nodes')}
-                className={`px-1.5 py-0.5 rounded-xs border cursor-pointer ${
-                  activeLayers.nodes ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-transparent' : 'border-slate-300 text-slate-500'
+                className={`px-2 py-0.5 rounded-sm border cursor-pointer transition-colors ${
+                  activeLayers.nodes ? 'bg-[#173B57] text-[#FFFFFF] border-[#173B57]' : 'border-[#D7DEDC] bg-[#FFFFFF] text-[#52606D]'
                 }`}
               >
-                Nodes
+                Stations
               </button>
               <button
                 type="button"
                 onClick={() => toggleLayer('infrastructure')}
-                className={`px-1.5 py-0.5 rounded-xs border cursor-pointer ${
-                  activeLayers.infrastructure ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-transparent' : 'border-slate-300 text-slate-500'
+                className={`px-2 py-0.5 rounded-sm border cursor-pointer transition-colors ${
+                  activeLayers.infrastructure ? 'bg-[#173B57] text-[#FFFFFF] border-[#173B57]' : 'border-[#D7DEDC] bg-[#FFFFFF] text-[#52606D]'
                 }`}
               >
                 Railway
               </button>
-              <Link href="/gis" className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 ml-1">
-                <ExternalLink className="h-3.5 w-3.5" />
+              <Link href="/gis" className="text-[#74808A] hover:text-[#173B57] ml-1" title="Open Full Screen GIS">
+                <ExternalLink className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
           {/* Map Surface */}
-          <div className="p-2 flex-1 flex flex-col justify-center min-h-[380px]">
+          <div className="p-2 flex-1 flex flex-col justify-center min-h-[400px]">
             <GisMapCanvas
               activeLayers={activeLayers}
               selectedNodeCode={selectedNodeCode}
@@ -287,123 +261,147 @@ export default function DashboardOverviewPage() {
               onSelectNode={(code) => setSelectedNodeCode(code)}
               onSelectEvent={(id) => setSelectedEventId(id)}
               liveRiskByNode={liveRiskByNode}
-              className="w-full h-full min-h-[360px]"
+              className="w-full h-full min-h-[380px]"
             />
           </div>
 
-          <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>Selected Station: <strong className="text-slate-800 dark:text-slate-200">{selectedNodeCode ?? 'None'}</strong></span>
+          <div className="px-4 py-2 border-t border-[#D7DEDC] bg-[#F8FAF9] flex items-center justify-between text-xs font-mono-tech text-[#52606D]">
+            <span>Selected Station: <strong className="text-[#1D2933]">{selectedNodeCode ?? 'None'}</strong></span>
             <span>Projection: WGS84 &bull; Scale: 1:5000</span>
           </div>
         </div>
 
-        {/* Right (5 Cols): "Why This Risk Changed" Evidence Dossier */}
-        <div className="lg:col-span-5 flex flex-col space-y-3">
+        {/* Right: Explainable Risk Assessment & Evidence Dossier (5 Cols / ~40%) */}
+        <div className="lg:col-span-5 space-y-4">
           <RiskEvidencePanel
             riskState={currentRiskState}
             evidence={currentEvidence}
             activeAnomalies={activeAnomalies}
-            className="flex-1 shadow-none"
+            className="shadow-xs"
           />
 
-          {/* Action Directive Callout */}
-          <div className="p-3 rounded-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs space-y-1.5">
-            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              Statutory Inspection Directive
+          {/* Statutory Inspection Directive */}
+          <div className="p-3.5 rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-xs space-y-2 shadow-xs">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+              <FileCheck className="h-3.5 w-3.5 text-[#173B57]" />
+              Statutory Shift Directive
             </div>
-            <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+            <p className="text-xs text-[#1D2933] leading-relaxed">
               {currentRiskState === 'Critical' || currentRiskState === 'Warning'
-                ? 'Immediate withdrawal of depillaring crew from affected extraction panel. Verify hydraulic sand stowing line pressure and inspect railway surface siding buffer.'
+                ? 'Immediate withdrawal of extraction crew from Panel P-101. Verify hydraulic sand stowing pressure line and inspect railway siding 45m reserve perimeter.'
                 : currentRiskState === 'Watch'
-                ? 'Heighten acoustic microseismic surveillance. Verify zero offset drift on borehole extensometers across Panel P-101.'
-                : 'Maintain routine 30-second telemetry polling interval. All subsidence velocity rates nominal.'}
+                ? 'Heighten borehole extensometer surveillance. Verify sensor calibration baseline across adjacent stations.'
+                : 'Maintain standard 30-second polling. Strata deformation gradient nominal across all panels.'}
             </p>
-            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500">
-              <span>Directive Code: DGMS-SOP-{currentRiskState.toUpperCase()}</span>
-              <Link href="/analytics" className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-0.5">
-                Full Analytics <ChevronRight className="h-3 w-3" />
+            <div className="flex items-center justify-between pt-2 border-t border-[#D7DEDC] text-xs font-mono-tech text-[#52606D]">
+              <span>DGMS-SOP-{currentRiskState.toUpperCase()}</span>
+              <Link href="/analytics" className="text-[#173B57] font-semibold hover:underline flex items-center gap-0.5">
+                Full Analytics <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Operational Telemetry & Fleet Status Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
-            <span>BIAXIAL TILT (X)</span>
-            <span className="text-[10px]">TILT_X</span>
+      {/* 4. Station Fleet Telemetry & Transducer Status Table (Full Width) */}
+      <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden shadow-xs">
+        <div className="px-4 py-3 border-b border-[#D7DEDC] bg-[#F8FAF9] flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold text-[#173B57] tracking-tight">
+              Station Fleet Telemetry & Transducer Status
+            </h2>
+            <p className="text-xs text-[#52606D]">
+              Real-time multi-channel sensor readings across Bhowra-West monitoring network (16 Stations, 80 Transducers)
+            </p>
           </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
-              {tiltVal.toFixed(2)} <span className="text-xs font-normal text-slate-500">arcsec</span>
-            </div>
-            <span className="text-[10px] font-mono text-slate-400">Nominal: &plusmn;150</span>
-          </div>
-          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
-            <span>Rate:</span>
-            <span className="text-slate-700 dark:text-slate-300">
-              {isSimActive ? '+0.80 arcsec/min' : '0.05 arcsec/min'}
-            </span>
+
+          <div className="flex items-center gap-2">
+            <Link href="/sensors">
+              <Button size="sm" variant="outline" className="h-7 text-xs border-[#D7DEDC] bg-[#FFFFFF] text-[#1D2933] hover:bg-[#EDF1F0]">
+                All Transducers Matrix &rarr;
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
-            <span>SURFACE DISPLACEMENT</span>
-            <span className="text-[10px]">DISP_Z</span>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
-              {dispVal.toFixed(2)} <span className="text-xs font-normal text-slate-500">mm</span>
-            </div>
-            <span className="text-[10px] font-mono text-slate-400">Limit: 30 mm</span>
-          </div>
-          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
-            <span>Rate:</span>
-            <span className={dispVal > 30 ? 'text-rose-600 font-semibold' : 'text-slate-700 dark:text-slate-300'}>
-              {isSimActive ? '+0.35 mm/min' : '0.02 mm/min'}
-            </span>
-          </div>
-        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left table-industrial">
+            <thead>
+              <tr>
+                <th>Station ID</th>
+                <th>Panel</th>
+                <th>Displacement (Z)</th>
+                <th>Biaxial Tilt (X)</th>
+                <th>Biaxial Tilt (Y)</th>
+                <th>Vibration RMS</th>
+                <th>Battery</th>
+                <th>Condition</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {DEMO_NODES.map((node) => {
+                const disp = latestReadings[`${node.node_code}-DISP_Z`]?.value ?? 18.5;
+                const tiltX = latestReadings[`${node.node_code}-TILT_X`]?.value ?? 12.4;
+                const tiltY = latestReadings[`${node.node_code}-TILT_Y`]?.value ?? -8.1;
+                const vib = latestReadings[`${node.node_code}-VIB_RMS`]?.value ?? 3.2;
+                const health = latestHealths[node.node_code];
+                const nodeRisk = liveRiskByNode[node.node_code] ?? 'Normal';
+                const isSelected = selectedNodeCode === node.node_code;
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
-            <span>VIBRATION VELOCITY</span>
-            <span className="text-[10px]">VIB_RMS</span>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
-              {vibVal.toFixed(2)} <span className="text-xs font-normal text-slate-500">mm/s</span>
-            </div>
-            <span className="text-[10px] font-mono text-slate-400">PPV Limit: 5.0</span>
-          </div>
-          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
-            <span>Rate:</span>
-            <span className="text-slate-700 dark:text-slate-300">
-              {isSimActive ? '-0.40 mm/s/min' : '0.01 mm/s/min'}
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
-            <span>FLEET LINK BUDGET</span>
-            <span className="text-[10px]">ESP32 LoRa</span>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
-              {onlineNodes}/16 <span className="text-xs font-normal text-slate-500">Online</span>
-            </div>
-            <span className="text-[10px] font-mono text-slate-400">Mean: {avgRssi} dBm</span>
-          </div>
-          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
-            <span>Mean Battery:</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              {avgBattery}%
-            </span>
-          </div>
+                return (
+                  <tr
+                    key={node.id}
+                    onClick={() => setSelectedNodeCode(node.node_code)}
+                    className={`cursor-pointer transition-colors ${
+                      isSelected ? 'bg-[#EDF1F0]/80 font-medium' : ''
+                    }`}
+                  >
+                    <td className="font-mono-tech font-bold text-[#173B57]">
+                      {node.node_code}
+                    </td>
+                    <td className="text-xs text-[#52606D] font-mono-tech">
+                      {node.panel?.code || node.panel_id}
+                    </td>
+                    <td className="font-mono-tech">
+                      <span className={disp > 30.0 ? 'text-[#B42318] font-bold' : 'text-[#1D2933]'}>
+                        {disp.toFixed(2)} mm
+                      </span>
+                    </td>
+                    <td className="font-mono-tech text-[#1D2933]">
+                      {tiltX.toFixed(2)} arcsec
+                    </td>
+                    <td className="font-mono-tech text-[#1D2933]">
+                      {tiltY.toFixed(2)} arcsec
+                    </td>
+                    <td className="font-mono-tech text-[#1D2933]">
+                      {vib.toFixed(2)} mm/s
+                    </td>
+                    <td className="font-mono-tech text-xs">
+                      <span className={health?.batteryPct && health.batteryPct < 25 ? 'text-[#B42318] font-bold' : 'text-[#52606D]'}>
+                        {health?.batteryPct ? `${health.batteryPct}%` : '95%'}
+                      </span>
+                    </td>
+                    <td>
+                      <RiskBadge state={nodeRisk} size="sm" showIcon={false} />
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedNodeCode(node.node_code);
+                        }}
+                        className="text-xs text-[#173B57] font-semibold hover:underline"
+                      >
+                        Inspect
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 

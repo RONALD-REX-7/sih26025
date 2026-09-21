@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/auth-context';
 import { UserRole } from '@/lib/domain/constants';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Shield, HardHat, Activity, UserCheck, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Shield, HardHat, Activity, UserCheck, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,50 +48,48 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F4F6F5] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-amber-400 text-xs font-mono font-medium tracking-wide">
-            <Activity className="h-3.5 w-3.5" />
-            SIH26025 &bull; DGMS COMPLIANT
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-[#173B57] text-[#FFFFFF] text-xs font-mono-tech font-semibold uppercase tracking-wider">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#2F6B4F]" />
+            SIH26025 &bull; DGMS CMR 2017 Reg 112
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#1D2933]">
             Mine Subsidence Early Warning System
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Real-Time AI-Enabled Telemetry & Subsidence Risk Platform &bull; Jharia Coalfield Prototype
+          <p className="text-xs text-[#52606D]">
+            Real-Time AI-Enabled Telemetry &amp; Subsidence Risk Platform &bull; Jharia Coalfield Prototype
           </p>
         </div>
 
         {/* Quick Demo Access (Judges & Evaluators) */}
-        <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/10 shadow-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-amber-950 dark:text-amber-200">
-                <UserCheck className="h-4 w-4 text-amber-600" />
-                SIH Hackathon Evaluation Persona
-              </CardTitle>
-              <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-amber-300 text-[10px]">
-                DEMO MODE
-              </Badge>
-            </div>
-            <CardDescription className="text-xs text-slate-600 dark:text-slate-400">
-              Select an operational role to immediately inspect dashboard permissions and workflow:
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2 pt-0">
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#D7DEDC] pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#173B57] flex items-center gap-1.5">
+              <UserCheck className="h-4 w-4 text-[#173B57]" />
+              Evaluation personas (instant demo mode)
+            </span>
+            <span className="px-1.5 py-0.5 rounded-sm bg-[#EDF1F0] text-[#173B57] text-xs font-mono-tech font-semibold">
+              DEMO
+            </span>
+          </div>
+          <p className="text-xs text-[#52606D]">
+            Select an operational colliery role to evaluate permissions, alerting, and statutory workflows:
+          </p>
+          <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => handleSelectDemoPersona('SafetyOfficer')}
-              className="justify-start text-xs h-auto py-2 px-2.5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-500"
+              className="justify-start text-xs h-auto py-2.5 px-3 bg-[#FFFFFF] border-[#D7DEDC] hover:bg-[#EDF1F0] hover:border-[#173B57]"
             >
-              <Shield className="h-3.5 w-3.5 mr-2 text-emerald-600 shrink-0" />
+              <Shield className="h-4 w-4 mr-2 text-[#2F6B4F] shrink-0" />
               <div className="text-left">
-                <div className="font-medium">Safety Officer</div>
-                <div className="text-[10px] text-muted-foreground">Alerts & Evac</div>
+                <div className="font-semibold text-[#1D2933]">Safety Officer</div>
+                <div className="text-xs text-[#52606D]">Alerts &amp; Evacuation</div>
               </div>
             </Button>
 
@@ -102,12 +98,12 @@ export default function LoginPage() {
               variant="outline"
               size="sm"
               onClick={() => handleSelectDemoPersona('MineManager')}
-              className="justify-start text-xs h-auto py-2 px-2.5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-500"
+              className="justify-start text-xs h-auto py-2.5 px-3 bg-[#FFFFFF] border-[#D7DEDC] hover:bg-[#EDF1F0] hover:border-[#173B57]"
             >
-              <HardHat className="h-3.5 w-3.5 mr-2 text-blue-600 shrink-0" />
+              <HardHat className="h-4 w-4 mr-2 text-[#173B57] shrink-0" />
               <div className="text-left">
-                <div className="font-medium">Mine Manager</div>
-                <div className="text-[10px] text-muted-foreground">Panels & Ops</div>
+                <div className="font-semibold text-[#1D2933]">Mine Manager</div>
+                <div className="text-xs text-[#52606D]">Panels &amp; Operations</div>
               </div>
             </Button>
 
@@ -116,12 +112,12 @@ export default function LoginPage() {
               variant="outline"
               size="sm"
               onClick={() => handleSelectDemoPersona('Engineer')}
-              className="justify-start text-xs h-auto py-2 px-2.5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-500"
+              className="justify-start text-xs h-auto py-2.5 px-3 bg-[#FFFFFF] border-[#D7DEDC] hover:bg-[#EDF1F0] hover:border-[#173B57]"
             >
-              <Activity className="h-3.5 w-3.5 mr-2 text-purple-600 shrink-0" />
+              <Activity className="h-4 w-4 mr-2 text-[#9A6A00] shrink-0" />
               <div className="text-left">
-                <div className="font-medium">Geotech Eng.</div>
-                <div className="text-[10px] text-muted-foreground">Telemetry & InSAR</div>
+                <div className="font-semibold text-[#1D2933]">Geotech Engineer</div>
+                <div className="text-xs text-[#52606D]">Sensors &amp; Calibration</div>
               </div>
             </Button>
 
@@ -130,76 +126,79 @@ export default function LoginPage() {
               variant="outline"
               size="sm"
               onClick={() => handleSelectDemoPersona('Administrator')}
-              className="justify-start text-xs h-auto py-2 px-2.5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-500"
+              className="justify-start text-xs h-auto py-2.5 px-3 bg-[#FFFFFF] border-[#D7DEDC] hover:bg-[#EDF1F0] hover:border-[#173B57]"
             >
-              <Shield className="h-3.5 w-3.5 mr-2 text-red-600 shrink-0" />
+              <ShieldCheck className="h-4 w-4 mr-2 text-[#173B57] shrink-0" />
               <div className="text-left">
-                <div className="font-medium">Administrator</div>
-                <div className="text-[10px] text-muted-foreground">Audit & Systems</div>
+                <div className="font-semibold text-[#1D2933]">Administrator</div>
+                <div className="text-xs text-[#52606D]">Audit &amp; System</div>
               </div>
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Credentials Form (Production Supabase) */}
-        <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Authorized Credential Sign-In</CardTitle>
-            <CardDescription className="text-xs">
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-3">
+          <div className="border-b border-[#D7DEDC] pb-2">
+            <h2 className="text-sm font-bold text-[#1D2933]">Authorized Credential Sign-In</h2>
+            <p className="text-xs text-[#52606D]">
               For colliery personnel with authenticated Supabase credentials
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleCredentialsLogin}>
-            <CardContent className="space-y-3">
-              {errorMsg && (
-                <div className="flex items-center gap-2 p-2.5 rounded text-xs bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900">
-                  <AlertTriangle className="h-4 w-4 shrink-0" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-              <div className="space-y-1">
-                <Label htmlFor="email" className="text-xs">Official Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="officer@coalfield.in"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-9 text-xs"
-                  required
-                />
+            </p>
+          </div>
+
+          <form onSubmit={handleCredentialsLogin} className="space-y-3">
+            {errorMsg && (
+              <div className="flex items-center gap-2 p-2.5 rounded-sm text-xs bg-[#FBEBE9] text-[#B42318] border border-[#B42318]/30">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{errorMsg}</span>
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="password" className="text-xs">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-9 text-xs"
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2 pt-2">
-              <Button type="submit" className="w-full h-9 text-xs font-medium" disabled={isSubmitting}>
-                {isSubmitting ? 'Authenticating...' : 'Sign In with Supabase'}
+            )}
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-xs text-[#52606D]">Official email address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="officer@coalfield.in"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-9 text-xs font-mono-tech bg-[#F4F6F5] border-[#D7DEDC]"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-xs text-[#52606D]">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-9 text-xs font-mono-tech bg-[#F4F6F5] border-[#D7DEDC]"
+                required
+              />
+            </div>
+            <div className="pt-2 space-y-2">
+              <Button
+                type="submit"
+                className="w-full h-9 text-xs font-semibold bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF]"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Authenticating...' : 'Sign in with Supabase'}
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/')}
-                className="w-full text-xs text-muted-foreground"
+                className="w-full text-xs text-[#52606D] hover:text-[#1D2933] hover:bg-[#EDF1F0]"
               >
-                Continue to Dashboard in Demo Mode <ArrowRight className="h-3 w-3 ml-1" />
+                Continue to dashboard in demo mode <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
-            </CardFooter>
+            </div>
           </form>
-        </Card>
+        </div>
 
         {/* Footer DGMS Notice */}
-        <div className="text-center text-[11px] text-slate-400 dark:text-slate-500">
+        <div className="text-center text-xs text-[#74808A] font-mono-tech">
           DGMS Technical Circular (Coal) No. 04 of 2017 &bull; Smart India Hackathon 2026
         </div>
       </div>

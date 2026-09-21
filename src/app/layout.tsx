@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import { Inter, IBM_Plex_Mono } from 'next/font/google';
+import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth/auth-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-const inter = Inter({
-  variable: '--font-inter',
+const ibmPlexSans = IBM_Plex_Sans({
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-ibm-plex-sans',
   subsets: ['latin'],
   display: 'swap',
   fallback: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
@@ -33,9 +34,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${ibmPlexMono.variable} h-full antialiased font-sans`}
+      className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased font-sans`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
+      <body className="min-h-full flex flex-col bg-[#F4F6F5] text-[#1D2933] font-sans">
         <AuthProvider>
           <TooltipProvider>
             {children}

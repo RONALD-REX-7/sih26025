@@ -3,136 +3,106 @@
 import React from 'react';
 import Link from 'next/link';
 import { DEMO_MINE, DEMO_PANELS } from '@/lib/data/mock-data';
-import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { RiskBadge } from '@/components/industrial/risk-badge';
 import { Button } from '@/components/ui/button';
-import { Layers, MapPin, ExternalLink } from 'lucide-react';
+import { Layers, MapPin, ExternalLink, ShieldCheck } from 'lucide-react';
 
 export default function MinePage() {
   return (
     <div className="space-y-4 max-w-7xl mx-auto select-none">
       {/* Top Header */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+              <Layers className="h-4 w-4 text-[#173B57]" />
               Colliery Site &amp; Panel Stratigraphy
             </span>
-            <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            {DEMO_MINE.name} &bull; Strata Profile
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#1D2933]">
+            {DEMO_MINE.name} &bull; Stratigraphic Profile
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[#52606D] mt-0.5">
             {DEMO_MINE.location_name} &bull; DGMS Dhanbad Central Circle &bull; Seam VII/VIII Combined Working
           </p>
         </div>
 
         <Link href="/gis">
-          <Button size="sm" variant="outline" className="text-xs h-8 font-mono">
-            <MapPin className="h-3.5 w-3.5 mr-1 text-emerald-600" />
+          <Button size="sm" variant="outline" className="text-xs h-8 font-mono-tech border-[#D7DEDC]">
+            <MapPin className="h-3.5 w-3.5 mr-1.5 text-[#173B57]" />
             Inspect on Underground GIS
           </Button>
         </Link>
       </div>
 
-      {/* Geological & Mining Parameters Grid (No card bloat) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Extraction Method</div>
-          <div className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-            Bord &amp; Pillar Depillaring
+      {/* Geomechanical Stratigraphy & Stowing Specification */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-2 shadow-xs">
+          <div className="text-xs font-mono-tech font-semibold uppercase text-[#173B57] flex items-center gap-1.5">
+            <ShieldCheck className="h-4 w-4 text-[#173B57]" />
+            Barakar Geological Formation &amp; Overburden
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            With hydraulic sand stowing in central extraction section.
+          <p className="text-xs text-[#52606D] leading-relaxed">
+            The working coal seam (VII/VIII combined, thickness 4.2m) occurs at depths ranging from 185m to 265m below ground surface. The overburden comprises interbedded medium-to-coarse Barakar sandstones (62%), sandy shales (24%), and carbonaceous shales (14%) with empirical draw angle θ = 32°.
           </p>
+          <div className="pt-2 border-t border-[#D7DEDC] grid grid-cols-2 gap-2 text-xs font-mono-tech text-[#52606D]">
+            <div>Angle of Draw: <strong className="text-[#1D2933]">32°</strong></div>
+            <div>Rock Mass Rating: <strong className="text-[#1D2933]">58 (Fair)</strong></div>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Working Seam Depth</div>
-          <div className="text-sm font-bold font-mono text-slate-900 dark:text-slate-100 mt-0.5">
-            150m &ndash; 265m Depth
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-2 shadow-xs">
+          <div className="text-xs font-mono-tech font-semibold uppercase text-[#173B57] flex items-center gap-1.5">
+            <Layers className="h-4 w-4 text-[#173B57]" />
+            Extraction Method &amp; Hydraulic Stowing
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Barakar formation sandstone, shale, and coal seams.
+          <p className="text-xs text-[#52606D] leading-relaxed">
+            Bord and pillar method with continuous depillaring under hydraulic sand stowing. River sand is pumped underground through 150mm borehole ranges at 1:2.5 solid-to-water ratio to minimize surface trough subsidence beneath the Indian Railways Chandrapura-Adra siding.
           </p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Regulatory Classification</div>
-          <div className="text-sm font-bold text-amber-700 dark:text-amber-400 mt-0.5">
-            Category-IV Severe
+          <div className="pt-2 border-t border-[#D7DEDC] grid grid-cols-2 gap-2 text-xs font-mono-tech text-[#52606D]">
+            <div>Stowing Void Fill: <strong className="text-[#2F6B4F]">92.4%</strong></div>
+            <div>Safety Buffer: <strong className="text-[#A85A00]">45m Railway</strong></div>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Mandatory real-time surface &amp; stratum telemetry under Reg. 112.
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Surface Sensitivity</div>
-          <div className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-            Railway Siding Buffer
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            45m statutory non-subsidence corridor crossing Panel P-101.
-          </p>
         </div>
       </div>
 
-      {/* Panels Register */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden">
-        <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-xs font-mono">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-slate-700 dark:text-slate-300" />
-            <span className="font-bold text-slate-900 dark:text-slate-100 uppercase">
-              Underground Extraction Panels Register
-            </span>
-          </div>
-          <span className="text-[10px] text-slate-400">{DEMO_PANELS.length} Active Working Districts</span>
+      {/* Panels Register Table */}
+      <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm overflow-hidden shadow-xs">
+        <div className="px-4 py-3 border-b border-[#D7DEDC] bg-[#F8FAF9] flex items-center justify-between">
+          <span className="font-semibold text-sm text-[#173B57]">
+            Underground Extraction Panels Register ({DEMO_PANELS.length} Active Working Districts)
+          </span>
+          <span className="text-xs font-mono-tech text-[#74808A]">DGMS Form IV Registry</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-[10px] font-mono text-slate-400 uppercase">
+          <table className="w-full text-left table-industrial">
+            <thead>
               <tr>
-                <th className="py-2.5 px-3 text-left">Code</th>
-                <th className="py-2.5 px-3 text-left">Working District</th>
-                <th className="py-2.5 px-3 text-right">Seam Depth</th>
-                <th className="py-2.5 px-3 text-left">Method</th>
-                <th className="py-2.5 px-3 text-left">Status</th>
-                <th className="py-2.5 px-3 text-left">Telemetry Cluster</th>
-                <th className="py-2.5 px-3 text-center">Risk</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
+                <th>Panel Code</th>
+                <th>Working District</th>
+                <th className="text-right">Seam Depth</th>
+                <th>Extraction Technique</th>
+                <th>Telemetry Stations</th>
+                <th>Condition</th>
+                <th className="text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-[11px]">
-              {DEMO_PANELS.map((panel, idx) => (
-                <tr key={panel.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100">
-                    {panel.code}
+            <tbody>
+              {DEMO_PANELS.map((p) => (
+                <tr key={p.id} className="transition-colors">
+                  <td className="font-mono-tech font-bold text-[#173B57]">{p.code}</td>
+                  <td className="font-semibold text-xs text-[#1D2933]">{p.name}</td>
+                  <td className="font-mono-tech text-right text-xs text-[#1D2933]">{p.depth_m}m</td>
+                  <td className="text-xs text-[#52606D]">{p.extraction_method}</td>
+                  <td className="font-mono-tech text-xs text-[#173B57]">
+                    {p.code === 'P-101' ? 'SN-101 to SN-104 (4 Nodes)' : p.code === 'P-102' ? 'SN-105 to SN-108 (4 Nodes)' : p.code === 'P-103' ? 'SN-109 to SN-112 (4 Nodes)' : 'SN-113 to SN-116 (4 Nodes)'}
                   </td>
-                  <td className="py-2.5 px-3 font-sans font-medium text-slate-800 dark:text-slate-200">
-                    {panel.name}
+                  <td>
+                    <RiskBadge state={p.code === 'P-101' ? 'Advisory' : 'Normal'} size="sm" showIcon={false} />
                   </td>
-                  <td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400 tabular-nums">
-                    {panel.depth_m.toFixed(1)} m
-                  </td>
-                  <td className="py-2.5 px-3 font-sans text-slate-600 dark:text-slate-400">
-                    {panel.extraction_method}
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <span className="px-1.5 py-0.2 rounded-xs border border-slate-200 dark:border-slate-700 text-[10px] capitalize">
-                      {panel.extraction_status}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-slate-500 text-[10px]">
-                    SN-10{idx * 4 + 1} &ndash; SN-10{idx * 4 + 4} (4 nodes)
-                  </td>
-                  <td className="py-2.5 px-3 text-center">
-                    <RiskBadge state={idx === 0 ? 'Normal' : idx === 2 ? 'Watch' : 'Normal'} size="sm" showLevel={false} />
-                  </td>
-                  <td className="py-2.5 px-3 text-right font-sans">
-                    <Link href={`/gis?panel=${panel.code}`} className="text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-0.5 text-xs">
+                  <td className="text-right">
+                    <Link href="/gis" className="text-xs font-mono-tech text-[#173B57] hover:underline inline-flex items-center gap-1">
                       GIS <ExternalLink className="h-3 w-3" />
                     </Link>
                   </td>
