@@ -4,9 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { AuditEntry } from '@/lib/domain/types';
 import { useAlertStore } from '@/lib/alerts/alert-store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { RefreshCw, Search, ShieldCheck, Download, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,19 +85,21 @@ export default function AuditPage() {
     );
   }, [storeAudits, supabaseEntries]);
 
-  const filteredEntries = combinedEntries.filter((entry) => {
-    const matchesSearch =
-      entry.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.entity_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (entry.entity_id && entry.entity_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (entry.user_role && entry.user_role.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredEntries = useMemo(() => {
+    return combinedEntries.filter((entry) => {
+      const matchesSearch =
+        entry.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.entity_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (entry.entity_id && entry.entity_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (entry.user_role && entry.user_role.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesRole =
-      selectedRole === 'ALL' ||
-      (entry.user_role && entry.user_role.toLowerCase() === selectedRole.toLowerCase());
+      const matchesRole =
+        selectedRole === 'ALL' ||
+        (entry.user_role && entry.user_role.toLowerCase() === selectedRole.toLowerCase());
 
-    return matchesSearch && matchesRole;
-  });
+      return matchesSearch && matchesRole;
+    });
+  }, [combinedEntries, searchQuery, selectedRole]);
 
   const exportAuditCsv = () => {
     const headers = ['Timestamp', 'Operator Role', 'Action', 'Entity Type', 'Entity ID', 'IP Address', 'Payload'];
@@ -125,22 +125,22 @@ export default function AuditPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-4 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-950 p-4 rounded-md border border-slate-200 dark:border-slate-800">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               Statutory Governance &bull; DGMS Regulation 112 Compliance
             </span>
             <ProvenanceBadge provenance={isLiveSupabase ? 'LIVE' : 'DEMO'} size="sm" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Immutable Regulatory Audit Trail
           </h1>
-          <p className="text-xs text-slate-500">
-            Cryptographically timestamped operational log tracking alert triggers, acknowledgements, evacuations, and sensor calibrations.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Cryptographically timestamped operational ledger tracking alert triggers, statutory sign-offs, evacuations, and sensor calibrations.
           </p>
         </div>
 
@@ -150,101 +150,144 @@ export default function AuditPage() {
             variant="outline"
             onClick={fetchSupabaseAudit}
             disabled={isLoading}
-            className="text-xs font-mono"
+            className="h-8 text-xs font-mono border-slate-300 dark:border-slate-700"
           >
-            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
             Sync Logs
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={exportAuditCsv}
-            className="text-xs font-mono bg-slate-50 dark:bg-slate-900"
+            className="h-8 text-xs font-mono bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-700"
           >
-            <Download className="h-3.5 w-3.5 mr-1.5" />
+            <Download className="h-3 w-3 mr-1.5" />
             Export DGMS CSV
           </Button>
         </div>
       </div>
 
+      {/* High-Density Audit Summary Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-mono">
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Ledger Entries</p>
+          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+            {combinedEntries.length}
+          </p>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {filteredEntries.length} matching active filters
+          </p>
+        </div>
+
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Storage Backend</p>
+          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+            {isLiveSupabase ? 'PostgreSQL Live' : 'Session Buffer'}
+          </p>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {isLiveSupabase ? 'Supabase RLS active' : 'Multi-role in-memory fallback'}
+          </p>
+        </div>
+
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Statutory Standard</p>
+          <p className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5">
+            CMR 2017 Reg 112
+          </p>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            Mandatory signed shift log
+          </p>
+        </div>
+
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Signatory Status</p>
+          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+            Role Enforced
+          </p>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            MineManager &bull; SafetyOfficer &bull; Eng
+          </p>
+        </div>
+      </div>
+
       {/* Filter and Search Bar */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-        <CardContent className="p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
             <Input
               placeholder="Search action, entity ID, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 h-8 text-xs font-mono bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="pl-8 h-8 text-xs font-mono bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-sm"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-            <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <span className="text-[11px] font-mono text-slate-500">Signatory Role:</span>
+          <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+            <Filter className="h-3 w-3 text-slate-400 shrink-0" />
+            <span className="text-[11px] font-mono text-slate-500 mr-1">Signatory:</span>
             {['ALL', 'MineManager', 'SafetyOfficer', 'Engineer', 'Administrator'].map((role) => (
-              <Button
+              <button
                 key={role}
-                variant={selectedRole === role ? 'default' : 'ghost'}
-                size="sm"
+                type="button"
                 onClick={() => setSelectedRole(role)}
-                className={`text-[11px] h-7 px-2 font-mono ${
+                className={`text-[11px] h-7 px-2.5 rounded-sm font-mono transition-colors ${
                   selectedRole === role
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'text-slate-600 dark:text-slate-400'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
                 {role}
-              </Button>
+              </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Audit Log Table */}
-      <Card className="border-slate-200 dark:border-slate-800">
-        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+      <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+        <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               Event Ledger Records ({filteredEntries.length})
-            </CardTitle>
-            <CardDescription className="text-xs">
+            </h2>
+            <p className="text-[10px] text-slate-500 font-mono mt-0.5">
               Every critical action carries an authenticated signature, role, and before/after delta
-            </CardDescription>
+            </p>
           </div>
-          <Badge variant="outline" className="font-mono text-[10px]">
+          <Badge variant="outline" className="font-mono text-[10px] bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xs">
             {isLiveSupabase ? 'Supabase Synchronized' : 'Session & Seed Ledger'}
           </Badge>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="text-[11px] font-mono bg-slate-50/50 dark:bg-slate-900/50">
-                <TableHead>Timestamp (IST)</TableHead>
-                <TableHead>Signatory Role</TableHead>
-                <TableHead>Action Code</TableHead>
-                <TableHead>Target Entity</TableHead>
-                <TableHead>Network IP</TableHead>
-                <TableHead className="text-right">Audit Payload Delta</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-slate-50 dark:bg-slate-900/80 text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:border-slate-800 font-mono">
+              <tr>
+                <th className="px-3.5 py-2 font-medium">Timestamp (IST)</th>
+                <th className="px-3.5 py-2 font-medium">Signatory Role</th>
+                <th className="px-3.5 py-2 font-medium">Action Code</th>
+                <th className="px-3.5 py-2 font-medium">Target Entity</th>
+                <th className="px-3.5 py-2 font-medium">Network IP</th>
+                <th className="px-3.5 py-2 font-medium text-right">Audit Payload Delta</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
               {filteredEntries.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="p-8">
+                <tr>
+                  <td colSpan={6} className="p-8">
                     <StateContainer
                       type="empty"
                       title="No Audit Records Found"
                       description="No records matched your search query or role filter criteria."
                     />
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ) : (
                 filteredEntries.map((entry) => (
-                  <TableRow key={entry.id} className="text-xs font-mono hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
-                    <TableCell className="text-slate-500 whitespace-nowrap">
+                  <tr key={entry.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-900/60 transition-colors">
+                    <td className="px-3.5 py-2 text-slate-500 whitespace-nowrap text-[11px]">
                       {new Date(entry.created_at).toLocaleString('en-IN', {
                         timeZone: 'Asia/Kolkata',
                         hour: '2-digit',
@@ -253,46 +296,46 @@ export default function AuditPage() {
                         day: '2-digit',
                         month: 'short',
                       })}
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="px-3.5 py-2 whitespace-nowrap">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] font-mono capitalize ${
+                        className={`text-[10px] font-mono capitalize rounded-xs ${
                           entry.user_role === 'SafetyOfficer'
-                            ? 'bg-amber-50 text-amber-700 border-amber-300'
+                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700'
                             : entry.user_role === 'MineManager'
-                            ? 'bg-rose-50 text-rose-700 border-rose-300'
+                            ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-700'
                             : entry.user_role === 'Administrator'
-                            ? 'bg-indigo-50 text-indigo-700 border-indigo-300'
-                            : 'bg-slate-50 text-slate-600 border-slate-300'
+                            ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-700'
+                            : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
                         }`}
                       >
                         {entry.user_role ?? 'System'}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="font-semibold text-slate-800 dark:text-slate-200">
+                    </td>
+                    <td className="px-3.5 py-2 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                       {entry.action}
-                    </TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-400">
-                      <span className="text-[11px] font-mono">
+                    </td>
+                    <td className="px-3.5 py-2 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                      <span className="text-[11px]">
                         {entry.entity_type} {entry.entity_id ? `(${entry.entity_id})` : ''}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-slate-400 text-[11px]">
+                    </td>
+                    <td className="px-3.5 py-2 text-slate-400 text-[11px] whitespace-nowrap">
                       {entry.ip_address ?? '10.14.2.45'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <code className="text-[10px] bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 max-w-72 truncate inline-block">
+                    </td>
+                    <td className="px-3.5 py-2 text-right whitespace-nowrap">
+                      <code className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 max-w-72 truncate inline-block">
                         {JSON.stringify(entry.payload_after ?? entry.payload_before ?? {})}
                       </code>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

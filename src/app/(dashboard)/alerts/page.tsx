@@ -5,7 +5,6 @@ import { Alert } from '@/lib/domain/types';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { RiskBadge } from '@/components/industrial/risk-badge';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
-import { MetricBlock } from '@/components/industrial/metric-block';
 import { StateContainer } from '@/components/industrial/state-container';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
 import { EscalateModal } from '@/components/industrial/escalate-modal';
@@ -150,44 +149,32 @@ export default function AlertsPage() {
         </div>
       )}
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricBlock
-          label="Active Incidents"
-          channelCode="SYS-ALT-ACT"
-          value={activeCount}
-          unit="events"
-          nominalRange={[0, 2]}
-          riskState={activeCount > 0 ? 'Advisory' : 'Normal'}
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Acknowledged"
-          channelCode="SYS-ALT-ACK"
-          value={alerts.filter((a) => a.status === 'acknowledged').length}
-          unit="logged"
-          nominalRange={[0, 10]}
-          riskState="Normal"
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Escalated Incidents"
-          channelCode="DGMS-ESC"
-          value={alerts.filter((a) => a.status === 'escalated').length}
-          unit="dispatched"
-          nominalRange={[0, 0]}
-          riskState={alerts.some((a) => a.status === 'escalated') ? 'Warning' : 'Normal'}
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Notification Dispatches"
-          channelCode="NOTIF-DISP"
-          value={notificationHistory.length}
-          unit="channels"
-          nominalRange={[0, 50]}
-          riskState="Normal"
-          provenance="DEMO"
-        />
+      {/* Incident Metric Summary Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Active Incidents</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {activeCount} <span className="text-[10px] font-normal text-slate-500">requiring action</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Acknowledged</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {alerts.filter((a) => a.status === 'acknowledged').length} <span className="text-[10px] font-normal text-slate-500">signed off</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Escalated</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {alerts.filter((a) => a.status === 'escalated').length} <span className="text-[10px] font-normal text-slate-500">dispatched</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Dispatch Logs</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {notificationHistory.length} <span className="text-[10px] font-normal text-slate-500">transmissions</span>
+          </div>
+        </div>
       </div>
 
       {/* Mode Tabs: Active Queue vs Notification History */}

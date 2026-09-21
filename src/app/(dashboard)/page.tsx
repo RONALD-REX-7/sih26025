@@ -7,24 +7,21 @@ import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { Alert } from '@/lib/domain/types';
 import { AcknowledgementPayload } from '@/lib/alerts/alert-types';
-import { TelemetryEngine } from '@/lib/telemetry/telemetry-engine';
-import { IngestionStats } from '@/lib/telemetry/types';
-import { GIS_SUBSIDENCE_EVENTS } from '@/lib/data/gis-data';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { DEMO_NODES } from '@/lib/data/mock-data';
+import { GisLayerId } from '@/lib/domain/gis-types';
+import { RiskState } from '@/lib/domain/risk-states';
 import { RiskBadge } from '@/components/industrial/risk-badge';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
-import { MetricBlock } from '@/components/industrial/metric-block';
 import { RiskEvidencePanel } from '@/components/industrial/risk-evidence-panel';
+import { GisMapCanvas } from '@/components/gis/gis-map-canvas';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
+import { Button } from '@/components/ui/button';
 import {
   MapPin,
-  Activity,
-  ShieldAlert,
+  AlertTriangle,
   CheckCircle2,
-  Server,
-  Zap,
+  ChevronRight,
+  ExternalLink,
 } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
@@ -45,28 +42,29 @@ export default function DashboardOverviewPage() {
     initAlertEngine,
   } = useAlertStore();
 
+  const [selectedNodeCode, setSelectedNodeCode] = useState<string | null>('SN-102');
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedAlertForAck, setSelectedAlertForAck] = useState<Alert | null>(null);
   const [isAckModalOpen, setIsAckModalOpen] = useState(false);
 
-  const [ingestionStats, setIngestionStats] = useState<IngestionStats>({
-    totalSamplesIngested: 0,
-    totalBatchesIngested: 0,
-    lastReceivedAt: null,
-    activeSourceType: 'SIMULATED',
-    droppedSamplesCount: 0,
-    persistenceErrorsCount: 0,
+  // GIS Active Layers on Dashboard
+  const [activeLayers, setActiveLayers] = useState<Record<GisLayerId, boolean>>({
+    panels: true,
+    nodes: true,
+    infrastructure: true,
+    goaf: true,
+    insar: false,
+    geomechanical: false,
+    events: true,
   });
+
+  const toggleLayer = (layerId: GisLayerId) => {
+    setActiveLayers((prev) => ({ ...prev, [layerId]: !prev[layerId] }));
+  };
 
   useEffect(() => {
     initEngine(1025, 'NORMAL_BASELINE');
     initAlertEngine();
-
-    const telemetryEngine = TelemetryEngine.getInstance();
-    const interval = setInterval(() => {
-      setIngestionStats(telemetryEngine.getStats());
-    }, 1000);
-
-    return () => clearInterval(interval);
   }, [initEngine, initAlertEngine]);
 
   const isSimActive = simState.status === 'running';
@@ -80,7 +78,6 @@ export default function DashboardOverviewPage() {
   const tiltVal = latestReadings['SN-102-TILT_X']?.value ?? 12.4;
   const dispVal = latestReadings['SN-102-DISP_Z']?.value ?? 18.5;
   const vibVal = latestReadings['SN-101-VIB_RMS']?.value ?? 3.2;
-  const strainVal = latestReadings['SN-102-STRAIN']?.value ?? 420.0;
 
   // Fleet Health Aggregations
   const healthValues = Object.values(latestHealths);
@@ -94,6 +91,24 @@ export default function DashboardOverviewPage() {
     ? Math.round(healthValues.reduce((acc, h) => acc + h.signalRssiDbm, 0) / healthValues.length)
     : -84;
 
+  // Derive live risk state per node
+  const liveRiskByNode = useMemo(() => {
+    const map: Record<string, RiskState> = {};
+    for (const node of DEMO_NODES) {
+      const nodeDisp = latestReadings[`${node.node_code}-DISP_Z`]?.value ?? 18.5;
+      let r: RiskState = 'Normal';
+      if (nodeDisp > 48.0) r = 'Critical';
+      else if (nodeDisp > 32.0) r = 'Warning';
+      else if (nodeDisp > 24.0) r = 'Watch';
+      else if (nodeDisp > 20.0) r = 'Advisory';
+      map[node.node_code] = r;
+    }
+    if (currentEvidence?.where.epicenterNode) {
+      map[currentEvidence.where.epicenterNode] = currentRiskState;
+    }
+    return map;
+  }, [latestReadings, currentEvidence, currentRiskState]);
+
   // Handle operator sign-off submission
   const handleAcknowledgeConfirm = async (payload: AcknowledgementPayload) => {
     if (!selectedAlertForAck) return;
@@ -103,367 +118,296 @@ export default function DashboardOverviewPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Simulation Active Bar */}
+    <div className="space-y-4 max-w-7xl mx-auto select-none">
+      {/* Simulation Active Notification Strip */}
       {isSimActive && (
-        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
+        <div className="px-3 py-2 bg-amber-500/10 border border-amber-500/30 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping shrink-0" />
             <span className="font-semibold font-mono">DETERMINISTIC SIMULATION ACTIVE:</span>
             <span>Scenario: {simState.scenarioId} &bull; Seed: {simState.seed} &bull; Speed: {simState.speed}x</span>
           </div>
-          <Link href="/simulator" className="font-semibold underline text-amber-700 dark:text-amber-300 shrink-0">
-            Open Simulation Controls &rarr;
+          <Link href="/simulator" className="font-semibold underline text-amber-800 dark:text-amber-300 shrink-0 font-mono">
+            Workbench Controls &rarr;
           </Link>
         </div>
       )}
 
-      {/* Top Colliery Operations Command Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-950 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xs">
+      {/* Top Operations Command Header */}
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
-              Colliery Operations Command Center
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+              Colliery Operations Command Surface
             </span>
             <ProvenanceBadge provenance={isSimActive ? 'SIMULATED' : 'DEMO'} size="sm" />
-            <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border-emerald-300 font-mono">
+            <span className="text-[10px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-1.5 py-0.5 rounded-xs font-mono">
               DGMS CMR 2017 REG. 112 ACTIVE
-            </Badge>
+            </span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-slate-50">
             Bhowra-West Colliery &bull; Underground Subsidence Surveillance
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            Jharia Coalfield &bull; Seam VII/VIII (185m–265m depth) &bull; Bord & Pillar Depillaring &bull; Real-time AI early warning
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+            Jharia Coalfield &bull; Seam VII/VIII (185m–265m depth) &bull; Bord &amp; Pillar Depillaring with Hydraulic Stowing
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 self-start md:self-center">
           <div className="text-right hidden sm:block">
-            <div className="text-xs font-medium text-slate-900 dark:text-slate-100">Duty Persona</div>
-            <div className="text-xs text-slate-500 font-mono">{role} ({profile?.full_name?.split(' ')[0]})</div>
+            <div className="text-[10px] text-slate-400 font-mono uppercase">On-Duty Persona</div>
+            <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">{role} ({profile?.full_name?.split(' ')[0] ?? 'Operator'})</div>
           </div>
           <RiskBadge state={currentRiskState} size="lg" />
         </div>
       </div>
 
-      {/* Active Incident Warning Callout OR Statutory Compliance Status */}
+      {/* Immediate Incident Warning Callout OR Statutory Compliance Nominal State */}
       {activeAlert ? (
-        <Card className={`border-2 animate-in fade-in duration-200 ${
-          activeAlert.severity === 'critical'
-            ? 'border-rose-500 bg-rose-500/10'
-            : activeAlert.severity === 'high'
-            ? 'border-orange-500 bg-orange-500/10'
-            : 'border-amber-500 bg-amber-500/10'
-        }`}>
-          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-full mt-0.5 shrink-0 text-white ${
-                activeAlert.severity === 'critical' ? 'bg-rose-600 animate-pulse' : 'bg-orange-600'
-              }`}>
-                <ShieldAlert className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <Badge variant="destructive" className="uppercase font-mono text-[10px]">
-                    ACTIVE {activeAlert.severity.toUpperCase()} ALERT
-                  </Badge>
-                  <RiskBadge state={activeAlert.risk_state} size="sm" />
-                  <span className="text-xs font-mono text-slate-500">
-                    District: {activeAlert.panel_id} &bull; Triggered: {new Date(activeAlert.triggered_at).toLocaleTimeString()}
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-slate-950 dark:text-slate-50">
-                  {activeAlert.title}
-                </h3>
-                <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 max-w-3xl leading-relaxed">
-                  {activeAlert.message}
-                </p>
-              </div>
+        <div
+          className={`p-3.5 rounded-sm border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+            activeAlert.severity === 'critical'
+              ? 'border-rose-400 bg-rose-50/90 dark:bg-rose-950/30 text-rose-950 dark:text-rose-100'
+              : activeAlert.severity === 'high'
+              ? 'border-orange-400 bg-orange-50/90 dark:bg-orange-950/30 text-orange-950 dark:text-orange-100'
+              : 'border-amber-400 bg-amber-50/90 dark:bg-amber-950/30 text-amber-950 dark:text-amber-100'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div className={`p-1.5 rounded-xs mt-0.5 text-white shrink-0 ${
+              activeAlert.severity === 'critical' ? 'bg-rose-600 animate-pulse' : 'bg-orange-600'
+            }`}>
+              <AlertTriangle className="h-4 w-4" />
             </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <span className="font-mono font-bold text-[10px] uppercase tracking-wider px-1.5 py-0.2 bg-black/10 rounded-xs">
+                  ACTIVE {activeAlert.severity.toUpperCase()} ALERT
+                </span>
+                <RiskBadge state={activeAlert.risk_state} size="sm" />
+                <span className="text-xs font-mono opacity-80">
+                  Panel: <strong>{activeAlert.panel_id}</strong> &bull; Triggered: {new Date(activeAlert.triggered_at).toLocaleTimeString()}
+                </span>
+              </div>
+              <div className="text-xs font-bold">{activeAlert.title}</div>
+              <p className="text-xs opacity-90 mt-0.5 line-clamp-2 max-w-4xl">
+                {activeAlert.message}
+              </p>
+            </div>
+          </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-              <Button
-                size="sm"
-                onClick={() => {
-                  setSelectedAlertForAck(activeAlert);
-                  setIsAckModalOpen(true);
-                }}
-                className={`font-semibold text-xs shadow-xs text-white ${
-                  activeAlert.severity === 'critical'
-                    ? 'bg-rose-600 hover:bg-rose-700'
-                    : 'bg-orange-600 hover:bg-orange-700'
-                }`}
-              >
-                Sign Off & Acknowledge
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            <Button
+              size="sm"
+              onClick={() => {
+                setSelectedAlertForAck(activeAlert);
+                setIsAckModalOpen(true);
+              }}
+              className={`font-semibold text-xs h-7 text-white shadow-none ${
+                activeAlert.severity === 'critical'
+                  ? 'bg-rose-600 hover:bg-rose-700'
+                  : 'bg-orange-600 hover:bg-orange-700'
+              }`}
+            >
+              Sign Off (CMR 112)
+            </Button>
+            <Link href="/alerts">
+              <Button size="sm" variant="outline" className="text-xs h-7">
+                Alert Center &rarr;
               </Button>
-              <Link href="/alerts">
-                <Button size="sm" variant="outline" className="text-xs">
-                  Alert Center &rarr;
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+            </Link>
+          </div>
+        </div>
       ) : (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center justify-between text-xs text-emerald-900 dark:text-emerald-300">
+        <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 rounded-sm flex items-center justify-between text-xs text-emerald-900 dark:text-emerald-300">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-            <span className="font-semibold font-mono">STATUTORY MONITORING STATUS:</span>
-            <span>All strata deformation parameters nominal. 0 active DGMS CMR 2017 Reg 112 evacuation orders.</span>
+            <span className="font-semibold font-mono">STATUTORY MONITORING NOMINAL:</span>
+            <span>All 16 strata monitoring stations reporting within baseline tolerances. 0 active DGMS evacuation directives.</span>
           </div>
-          <Link href="/alerts" className="font-semibold underline text-emerald-700 dark:text-emerald-400">
-            View Incident Queue &rarr;
+          <Link href="/alerts" className="font-semibold underline text-emerald-700 dark:text-emerald-400 font-mono">
+            Incident Queue &rarr;
           </Link>
         </div>
       )}
 
-      {/* Primary Key Metric Highlights */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricBlock
-          label="Biaxial Tilt (X-Axis)"
-          channelCode="TILT_X"
-          value={tiltVal}
-          unit="arcsec"
-          nominalRange={[-150, 150]}
-          riskState={Math.abs(tiltVal) > 120 ? 'Warning' : Math.abs(tiltVal) > 80 ? 'Advisory' : 'Normal'}
-          rateOfChange={isSimActive ? 0.8 : 0.05}
-          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
-        />
+      {/* Central Viewport Workspace: Underground GIS (Left) + Explainable Evidence Dossier (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left (7 Cols): Interactive Spatial Surveillance Map */}
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden flex flex-col">
+          <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-emerald-600" />
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-mono uppercase tracking-wide">
+                Underground GIS &bull; Panel Layout
+              </span>
+            </div>
 
-        <MetricBlock
-          label="Surface Displacement"
-          channelCode="DISP_Z"
-          value={dispVal}
-          unit="mm"
-          nominalRange={[0, 40]}
-          riskState={dispVal > 32 ? 'Warning' : dispVal > 24 ? 'Watch' : dispVal > 20 ? 'Advisory' : 'Normal'}
-          rateOfChange={isSimActive ? 0.35 : 0.02}
-          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
-        />
+            {/* Quick Layer Controls HUD */}
+            <div className="flex items-center gap-1.5 text-[11px] font-mono">
+              <button
+                type="button"
+                onClick={() => toggleLayer('panels')}
+                className={`px-1.5 py-0.5 rounded-xs border cursor-pointer ${
+                  activeLayers.panels ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-transparent' : 'border-slate-300 text-slate-500'
+                }`}
+              >
+                Panels
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleLayer('nodes')}
+                className={`px-1.5 py-0.5 rounded-xs border cursor-pointer ${
+                  activeLayers.nodes ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-transparent' : 'border-slate-300 text-slate-500'
+                }`}
+              >
+                Nodes
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleLayer('infrastructure')}
+                className={`px-1.5 py-0.5 rounded-xs border cursor-pointer ${
+                  activeLayers.infrastructure ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-transparent' : 'border-slate-300 text-slate-500'
+                }`}
+              >
+                Railway
+              </button>
+              <Link href="/gis" className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 ml-1">
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
 
-        <MetricBlock
-          label="Peak Particle Velocity"
-          channelCode="VIB_RMS"
-          value={vibVal}
-          unit="mm/s"
-          nominalRange={[0, 5]}
-          riskState={vibVal > 6.0 ? 'Warning' : vibVal > 4.0 ? 'Watch' : 'Normal'}
-          rateOfChange={isSimActive ? -0.4 : 0.01}
-          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
-        />
+          {/* Map Surface */}
+          <div className="p-2 flex-1 flex flex-col justify-center min-h-[380px]">
+            <GisMapCanvas
+              activeLayers={activeLayers}
+              selectedNodeCode={selectedNodeCode}
+              selectedEventId={selectedEventId}
+              onSelectNode={(code) => setSelectedNodeCode(code)}
+              onSelectEvent={(id) => setSelectedEventId(id)}
+              liveRiskByNode={liveRiskByNode}
+              className="w-full h-full min-h-[360px]"
+            />
+          </div>
 
-        <MetricBlock
-          label="Rockbolt / Pillar Strain"
-          channelCode="STRAIN"
-          value={strainVal}
-          unit="µε"
-          nominalRange={[-800, 1200]}
-          riskState={strainVal > 800 ? 'Watch' : 'Normal'}
-          rateOfChange={isSimActive ? 5.0 : 0.5}
-          provenance={isSimActive ? 'SIMULATED' : 'DEMO'}
-        />
-      </div>
+          <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-[11px] font-mono text-slate-500">
+            <span>Selected Station: <strong className="text-slate-800 dark:text-slate-200">{selectedNodeCode ?? 'None'}</strong></span>
+            <span>Projection: WGS84 &bull; Scale: 1:5000</span>
+          </div>
+        </div>
 
-      {/* Main Operational Two-Column Grid: Evidence Dossier & Fleet Surveillance */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: "Why This Risk Changed" Evidence Dossier */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Right (5 Cols): "Why This Risk Changed" Evidence Dossier */}
+        <div className="lg:col-span-5 flex flex-col space-y-3">
           <RiskEvidencePanel
             riskState={currentRiskState}
             evidence={currentEvidence}
             activeAnomalies={activeAnomalies}
+            className="flex-1 shadow-none"
           />
 
-          {/* Active Subsidence Event Progression */}
-          <Card className="border-slate-200 dark:border-slate-800">
-            <CardHeader className="p-4 pb-2 border-b border-slate-100 dark:border-slate-900">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-amber-500" />
-                  Demonstrated Subsidence Event Progression
-                </CardTitle>
-                <Badge variant="outline" className="text-[10px] font-mono">
-                  {GIS_SUBSIDENCE_EVENTS.length} Historical Records
-                </Badge>
-              </div>
-              <CardDescription className="text-xs">
-                Microseismic acoustic bursts and goaf break-line progression
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                {GIS_SUBSIDENCE_EVENTS.slice(0, 2).map((evt) => (
-                  <div
-                    key={evt.id}
-                    className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <RiskBadge state={evt.riskState} size="sm" />
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">
-                          {evt.title}
-                        </span>
-                        <ProvenanceBadge provenance={evt.provenance} size="sm" />
-                      </div>
-                      <p className="text-slate-600 dark:text-slate-400 text-[11px]">
-                        Epicenter: <strong>{evt.epicenterNodeCode}</strong> &bull; Affected: {evt.affectedNodeCodes.join(', ')} &bull; Peak Disp: {evt.maxDisplacementMm} mm
-                      </p>
-                    </div>
-
-                    <Link href="/events" className="shrink-0">
-                      <Button size="sm" variant="outline" className="h-7 text-xs font-mono">
-                        Inspect Timeline &rarr;
-                      </Button>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right 1 Col: Fleet Health, Situational GIS, & System Metrics */}
-        <div className="space-y-6">
-          {/* Sensor Fleet Status Card */}
-          <Card className="border-slate-200 dark:border-slate-800">
-            <CardHeader className="p-4 pb-2 border-b border-slate-100 dark:border-slate-900">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Server className="h-4 w-4 text-blue-500" />
-                  Edge Fleet & Telemetry Health
-                </CardTitle>
-                <Badge variant="outline" className="text-[10px] font-mono">
-                  {onlineNodes}/16 Online
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-mono">Fleet Mean Battery</div>
-                  <div className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                    {avgBattery}%
-                  </div>
-                </div>
-                <div className="p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                  <div className="text-[10px] text-slate-500 font-mono">Mean LoRaWAN RSSI</div>
-                  <div className="text-base font-bold font-mono text-blue-600 dark:text-blue-400">
-                    {avgRssi} dBm
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 pt-1">
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>Active Online Stations:</span>
-                  <span className="font-mono font-semibold text-emerald-600">{onlineNodes} nodes</span>
-                </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>Degraded / Weak Link:</span>
-                  <span className="font-mono font-semibold text-amber-600">{degradedNodes} nodes</span>
-                </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>Offline / Unreachable:</span>
-                  <span className="font-mono font-semibold text-rose-600">{offlineNodes} nodes</span>
-                </div>
-                <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>Physical Transducers:</span>
-                  <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">80 channels</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <Link href="/nodes" className="flex-1">
-                  <Button size="sm" variant="outline" className="w-full text-xs h-7 font-mono">
-                    Hardware Fleet &rarr;
-                  </Button>
-                </Link>
-                <Link href="/sensors" className="flex-1">
-                  <Button size="sm" variant="outline" className="w-full text-xs h-7 font-mono">
-                    Calibration &rarr;
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* GIS Situational Quick-View */}
-          <Card className="border-slate-200 dark:border-slate-800">
-            <CardHeader className="p-4 pb-2 border-b border-slate-100 dark:border-slate-900">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-emerald-500" />
-                  Spatial & GIS Surveillance
-                </CardTitle>
-                <Badge variant="outline" className="text-[10px] font-mono">
-                  WGS84 1:5000
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3 text-xs">
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
-                Underground extraction panels P-101 to P-104 georeferenced beneath Jharia leasehold bounds. Continuous clearance tracking against Indian Railways siding corridor (45m restriction).
-              </p>
-
-              <div className="p-2.5 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="flex justify-between font-mono text-[11px]">
-                  <span>Railway Corridor Clearance:</span>
-                  <span className="font-bold text-emerald-600">38.4 m (Pass)</span>
-                </div>
-                <div className="flex justify-between font-mono text-[11px]">
-                  <span>Synthetic InSAR Scatterers:</span>
-                  <span className="text-slate-500">8 PS Points</span>
-                </div>
-              </div>
-
-              <Link href="/gis">
-                <Button size="sm" className="w-full text-xs h-8 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900">
-                  Open Interactive GIS Canvas &rarr;
-                </Button>
+          {/* Action Directive Callout */}
+          <div className="p-3 rounded-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs space-y-1.5">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+              Statutory Inspection Directive
+            </div>
+            <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+              {currentRiskState === 'Critical' || currentRiskState === 'Warning'
+                ? 'Immediate withdrawal of depillaring crew from affected extraction panel. Verify hydraulic sand stowing line pressure and inspect railway surface siding buffer.'
+                : currentRiskState === 'Watch'
+                ? 'Heighten acoustic microseismic surveillance. Verify zero offset drift on borehole extensometers across Panel P-101.'
+                : 'Maintain routine 30-second telemetry polling interval. All subsidence velocity rates nominal.'}
+            </p>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500">
+              <span>Directive Code: DGMS-SOP-{currentRiskState.toUpperCase()}</span>
+              <Link href="/analytics" className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-0.5">
+                Full Analytics <ChevronRight className="h-3 w-3" />
               </Link>
-            </CardContent>
-          </Card>
-
-          {/* Ingestion & Persistence Engine Status */}
-          <Card className="border-slate-200 dark:border-slate-800">
-            <CardHeader className="p-3 pb-2 border-b border-slate-100 dark:border-slate-900">
-              <CardTitle className="text-xs font-semibold flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                <Zap className="h-3.5 w-3.5 text-amber-500" />
-                Ingestion Engine & Persistence Health
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 space-y-1.5 text-[11px] font-mono">
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Total Samples Ingested:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {ingestionStats.totalSamplesIngested.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Active Ingestion Source:</span>
-                <span className="font-semibold text-amber-600">
-                  {ingestionStats.activeSourceType}
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Supabase PostgreSQL:</span>
-                <span className="font-semibold text-emerald-600">
-                  ACTIVE_HEALTHY
-                </span>
-              </div>
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Dropped Frame Rate:</span>
-                <span className="text-slate-500">
-                  {ingestionStats.droppedSamplesCount} (0.00%)
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* CMR 2017 Regulatory Sign-Off Dialog */}
+      {/* Operational Telemetry & Fleet Status Strip */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
+            <span>BIAXIAL TILT (X)</span>
+            <span className="text-[10px]">TILT_X</span>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
+              {tiltVal.toFixed(2)} <span className="text-xs font-normal text-slate-500">arcsec</span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">Nominal: &plusmn;150</span>
+          </div>
+          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+            <span>Rate:</span>
+            <span className="text-slate-700 dark:text-slate-300">
+              {isSimActive ? '+0.80 arcsec/min' : '0.05 arcsec/min'}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
+            <span>SURFACE DISPLACEMENT</span>
+            <span className="text-[10px]">DISP_Z</span>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
+              {dispVal.toFixed(2)} <span className="text-xs font-normal text-slate-500">mm</span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">Limit: 30 mm</span>
+          </div>
+          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+            <span>Rate:</span>
+            <span className={dispVal > 30 ? 'text-rose-600 font-semibold' : 'text-slate-700 dark:text-slate-300'}>
+              {isSimActive ? '+0.35 mm/min' : '0.02 mm/min'}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
+            <span>VIBRATION VELOCITY</span>
+            <span className="text-[10px]">VIB_RMS</span>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
+              {vibVal.toFixed(2)} <span className="text-xs font-normal text-slate-500">mm/s</span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">PPV Limit: 5.0</span>
+          </div>
+          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+            <span>Rate:</span>
+            <span className="text-slate-700 dark:text-slate-300">
+              {isSimActive ? '-0.40 mm/s/min' : '0.01 mm/s/min'}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-mono mb-1">
+            <span>FLEET LINK BUDGET</span>
+            <span className="text-[10px]">ESP32 LoRa</span>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <div className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100">
+              {onlineNodes}/16 <span className="text-xs font-normal text-slate-500">Online</span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">Mean: {avgRssi} dBm</span>
+          </div>
+          <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+            <span>Mean Battery:</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+              {avgBattery}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Regulatory Acknowledgment Modal */}
       <AcknowledgeModal
         alert={selectedAlertForAck}
         isOpen={isAckModalOpen}

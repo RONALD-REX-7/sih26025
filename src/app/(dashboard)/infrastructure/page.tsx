@@ -1,13 +1,9 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DEMO_INFRASTRUCTURE } from '@/lib/data/mock-data';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { RiskBadge } from '@/components/industrial/risk-badge';
-import { MetricBlock } from '@/components/industrial/metric-block';
 import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { RiskState } from '@/lib/domain/risk-states';
 import { Building2, TrainTrack, Fan, Compass, ShieldAlert } from 'lucide-react';
@@ -18,7 +14,7 @@ export default function InfrastructurePage() {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'SURFACE_RAILWAY':
-        return <TrainTrack className="h-4 w-4 text-blue-600" />;
+        return <TrainTrack className="h-4 w-4 text-sky-600" />;
       case 'VENTILATION_SHAFT':
         return <Fan className="h-4 w-4 text-emerald-600" />;
       case 'MAIN_HAULAGE_ROADWAY':
@@ -73,12 +69,12 @@ export default function InfrastructurePage() {
   ).length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-4 max-w-7xl mx-auto select-none">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
               Structural Integrity &amp; Surface Protection
             </span>
             <ProvenanceBadge
@@ -86,164 +82,128 @@ export default function InfrastructurePage() {
               size="sm"
             />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Critical Infrastructure Surveillance
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Critical Infrastructure &amp; Buffer Zone Surveillance
           </h1>
           <p className="text-xs text-slate-500">
             DGMS safety perimeters, railway siding overlays, and underground ventilation shaft protection barriers.
           </p>
         </div>
 
-        <Badge
-          variant="outline"
-          className={`text-xs font-mono ${
-            assetsAtRisk > 0
-              ? 'bg-amber-50 text-amber-700 border-amber-300'
-              : 'bg-emerald-50 text-emerald-700 border-emerald-300'
-          }`}
-        >
+        <span className={`px-2 py-0.5 rounded-xs border font-mono text-xs ${
+          assetsAtRisk > 0
+            ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+            : 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+        }`}>
           {assetsAtRisk > 0
-            ? `${assetsAtRisk} Asset${assetsAtRisk > 1 ? 's' : ''} Require Attention`
+            ? `${assetsAtRisk} Asset${assetsAtRisk > 1 ? 's' : ''} Require Inspection`
             : `${enrichedAssets.length} Assets Nominal`}
-        </Badge>
+        </span>
       </div>
 
-      {/* Summary Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricBlock
-          label="Total Protected Assets"
-          channelCode="INF-TOT-AST"
-          value={enrichedAssets.length}
-          unit="structures"
-          nominalRange={[3, 3]}
-          riskState="Normal"
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Assets At Risk"
-          channelCode="INF-AT-RISK"
-          value={assetsAtRisk}
-          unit="flagged"
-          nominalRange={[0, 0]}
-          riskState={assetsAtRisk > 0 ? 'Warning' : 'Normal'}
-          provenance={state.status === 'running' ? 'SIMULATED' : 'DEMO'}
-        />
-        <MetricBlock
-          label="Active Anomalies on Assets"
-          channelCode="INF-ANOM"
-          value={enrichedAssets.reduce((sum, a) => sum + a.relatedAnomalyCount, 0)}
-          unit="detected"
-          nominalRange={[0, 2]}
-          riskState={enrichedAssets.some((a) => a.relatedAnomalyCount > 0) ? 'Advisory' : 'Normal'}
-          provenance={state.status === 'running' ? 'SIMULATED' : 'DEMO'}
-        />
-        <MetricBlock
-          label="Mine Risk Level"
-          channelCode="INF-MINE-RSK"
-          value={['Normal', 'Advisory', 'Watch', 'Warning', 'Critical'].indexOf(currentRiskState)}
-          unit={`(${currentRiskState})`}
-          nominalRange={[0, 1]}
-          riskState={currentRiskState}
-          provenance={state.status === 'running' ? 'SIMULATED' : 'DEMO'}
-        />
+      {/* Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Protected Structures</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {enrichedAssets.length} <span className="text-[10px] font-normal text-slate-500">assets</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Perimeter Strain Limit</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            3.0 <span className="text-[10px] font-normal text-slate-500">mm/m DGMS</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Railway Siding Buffer</div>
+          <div className="text-base font-bold text-sky-700 dark:text-sky-400 mt-0.5">
+            45.0m <span className="text-[10px] font-normal text-slate-500">CMR 2017</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Global Colliery Risk</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {currentRiskState}
+          </div>
+        </div>
       </div>
 
       {/* Infrastructure Registry Table */}
-      <Card className="border-slate-200 dark:border-slate-800">
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-purple-600" />
-            Protected Assets &amp; Regulatory Buffer Zones
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Ground movement tolerance limits specified under Coal Mines Regulations (CMR 2017). Risk states derived from live sensor anomalies.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="text-[11px] font-mono">
-                <TableHead>Asset Code</TableHead>
-                <TableHead>Structure Name</TableHead>
-                <TableHead>Spatial Location</TableHead>
-                <TableHead>DGMS Buffer Margin</TableHead>
-                <TableHead>Max Strain Limit</TableHead>
-                <TableHead>Monitoring Nodes</TableHead>
-                <TableHead>Anomalies</TableHead>
-                <TableHead>Stability Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden">
+        <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-xs font-mono">
+          <span className="font-bold text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5">
+            <Building2 className="h-3.5 w-3.5 text-slate-700 dark:text-slate-300" />
+            Protected Assets &amp; Regulatory Buffer Register
+          </span>
+          <span className="text-[10px] text-slate-400">DGMS CMR 2017 Reg. 112 Compliance</span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-[10px] font-mono text-slate-400 uppercase">
+              <tr>
+                <th className="py-2.5 px-3 text-left">Asset Code</th>
+                <th className="py-2.5 px-3 text-left">Structure Name</th>
+                <th className="py-2.5 px-3 text-left">Spatial Location</th>
+                <th className="py-2.5 px-3 text-right">Buffer Margin</th>
+                <th className="py-2.5 px-3 text-right">Strain Limit</th>
+                <th className="py-2.5 px-3 text-left">Stations</th>
+                <th className="py-2.5 px-3 text-center">Anomalies</th>
+                <th className="py-2.5 px-3 text-center">Stability Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-[11px]">
               {enrichedAssets.map((asset) => (
-                <TableRow
+                <tr
                   key={asset.id}
-                  className={`text-xs ${
+                  className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 ${
                     asset.isAffected ? 'bg-amber-50/30 dark:bg-amber-950/10' : ''
                   }`}
                 >
-                  <TableCell className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100">
                     {asset.code}
                     {asset.isAffected && (
-                      <Badge
-                        variant="outline"
-                        className="ml-1.5 text-[9px] px-1 py-0 bg-amber-500/10 text-amber-600 border-amber-500/30"
-                      >
+                      <span className="ml-1.5 text-[9px] px-1 py-0.2 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 rounded-xs">
                         AFFECTED
-                      </Badge>
+                      </span>
                     )}
-                  </TableCell>
-                  <TableCell className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  </td>
+                  <td className="py-2.5 px-3 font-sans font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                     {getCategoryIcon(asset.category)}
                     <span>{asset.name}</span>
-                  </TableCell>
-                  <TableCell className="text-slate-500 text-[11px]">
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-500 font-sans text-[11px]">
                     {asset.location}
-                  </TableCell>
-                  <TableCell className="font-mono text-[11px]">
-                    {asset.regulatoryBufferDistanceMeters} meters
-                  </TableCell>
-                  <TableCell className="font-mono text-slate-600 dark:text-slate-400">
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400">
+                    {asset.regulatoryBufferDistanceMeters}m
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400">
                     {asset.criticalStrainLimitMmPerM} mm/m
-                  </TableCell>
-                  <TableCell className="font-mono text-[11px] text-slate-500">
-                    <div className="flex items-center gap-1">
-                      <span>{asset.monitoringNodeCodes.join(', ')}</span>
-                      {Object.keys(latestHealths).length > 0 && (
-                        <Badge
-                          variant="outline"
-                          className={`text-[9px] font-mono ml-1 ${
-                            asset.nodeOnlineCount === asset.totalNodes
-                              ? 'text-emerald-600 border-emerald-300'
-                              : 'text-amber-600 border-amber-300'
-                          }`}
-                        >
-                          {asset.nodeOnlineCount}/{asset.totalNodes}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-500 text-[10px]">
+                    {asset.monitoringNodeCodes.join(', ')}
+                  </td>
+                  <td className="py-2.5 px-3 text-center">
                     {asset.relatedAnomalyCount > 0 ? (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] font-mono bg-rose-50 text-rose-700 border-rose-300"
-                      >
-                        <ShieldAlert className="h-3 w-3 mr-0.5" />
+                      <span className="px-1.5 py-0.2 rounded-xs text-[10px] bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 font-bold inline-flex items-center gap-0.5">
+                        <ShieldAlert className="h-3 w-3" />
                         {asset.relatedAnomalyCount}
-                      </Badge>
+                      </span>
                     ) : (
-                      <span className="text-[10px] font-mono text-slate-400">None</span>
+                      <span className="text-slate-400 text-[10px]">Nominal</span>
                     )}
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="py-2.5 px-3 text-center">
                     <RiskBadge state={asset.derivedRisk} size="sm" showLevel={false} />
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

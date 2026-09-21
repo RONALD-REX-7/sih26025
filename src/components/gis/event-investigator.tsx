@@ -16,12 +16,14 @@ import {
 interface EventInvestigatorProps {
   event: SubsidenceEventRecord;
   onSelectNode: (nodeCode: string) => void;
+  onClose?: () => void;
   className?: string;
 }
 
 export function EventInvestigator({
   event,
   onSelectNode,
+  onClose,
   className,
 }: EventInvestigatorProps) {
   return (
@@ -44,9 +46,21 @@ export function EventInvestigator({
             </div>
           </div>
 
-          <Badge variant="outline" className="text-[10px] font-mono uppercase">
-            {event.type.replace(/_/g, ' ')}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[10px] font-mono uppercase">
+              {event.type.replace(/_/g, ' ')}
+            </Badge>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs px-1.5 py-0.5 rounded"
+                title="Close drawer"
+              >
+                &times;
+              </button>
+            )}
+          </div>
         </div>
         <div className="font-semibold text-xs text-slate-800 dark:text-slate-200 mt-2 font-mono">
           {event.title}

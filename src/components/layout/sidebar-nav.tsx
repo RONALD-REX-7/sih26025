@@ -15,13 +15,10 @@ import {
   ClipboardList,
   FileSpreadsheet,
   Settings,
-  Flame,
-  ShieldCheck,
   Radio,
   Server,
   Play,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 
@@ -29,7 +26,6 @@ interface NavItem {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
   isAlert?: boolean;
 }
 
@@ -52,7 +48,7 @@ const NAV_GROUPS: NavGroup[] = [
     groupName: 'INTELLIGENCE',
     items: [
       { name: 'Node Fleet', href: '/nodes', icon: Server },
-      { name: 'Sensor Metrology', href: '/sensors', icon: Cpu },
+      { name: 'Sensor Analytics', href: '/sensors', icon: Cpu },
       { name: 'Subsidence Events', href: '/events', icon: Activity },
       { name: 'AI Risk Analytics', href: '/analytics', icon: TrendingUp },
       { name: 'Mine Simulator', href: '/simulator', icon: Play },
@@ -61,7 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     groupName: 'RESPONSE',
     items: [
-      { name: 'Alerts & Evac', href: '/alerts', icon: AlertOctagon, isAlert: true },
+      { name: 'Alerts & Evacuation', href: '/alerts', icon: AlertOctagon, isAlert: true },
       { name: 'Infrastructure', href: '/infrastructure', icon: Building2 },
     ],
   },
@@ -94,18 +90,15 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
       {/* Brand Header */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-sm bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0">
-            <Flame className="h-3.5 w-3.5" />
+          <div className="h-6 w-6 rounded-sm bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center font-mono font-bold text-xs shrink-0">
+            25
           </div>
           <div>
-            <div className="font-bold text-xs tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              SIH26025
-              <Badge variant="outline" className="text-[9px] font-mono py-0 px-1 border-slate-300 dark:border-slate-700">
-                v1.0
-              </Badge>
+            <div className="font-bold text-xs tracking-tight text-slate-900 dark:text-slate-100">
+              SIH26025 &bull; CMR 2017
             </div>
             <p className="text-[10px] text-slate-500 font-mono leading-tight">
-              Mine Subsidence Intelligence
+              Subsidence Surveillance
             </p>
           </div>
         </div>
@@ -138,21 +131,15 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon
-                        className={cn(
-                          'h-3.5 w-3.5 shrink-0',
-                          isActive ? 'text-amber-400 dark:text-amber-600' : 'text-slate-400'
-                        )}
-                      />
-                      <span className="truncate">{item.name}</span>
+                      <Icon className={cn('h-3.5 w-3.5 shrink-0', isActive ? 'text-white dark:text-slate-900' : 'text-slate-500')} />
+                      <span>{item.name}</span>
                     </div>
+
                     {hasAlertBadge && (
                       <span
                         className={cn(
-                          'text-[9px] font-mono px-1.5 py-0.2 rounded-xs font-semibold',
-                          criticalCount > 0
-                            ? 'bg-rose-600 text-white animate-pulse font-bold'
-                            : 'bg-amber-500 text-slate-950 font-bold'
+                          'px-1.5 py-0.2 rounded-xs text-[10px] font-mono font-bold text-white',
+                          criticalCount > 0 ? 'bg-rose-600 animate-pulse' : 'bg-amber-600'
                         )}
                       >
                         {activeCount}
@@ -166,17 +153,10 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
         ))}
       </nav>
 
-      {/* DGMS Standards Box */}
-      <div className="p-2 border-t border-slate-200 dark:border-slate-800">
-        <div className="p-2 rounded-sm border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-[10px] text-slate-600 dark:text-slate-400 space-y-1">
-          <div className="flex items-center gap-1.5 text-slate-900 dark:text-slate-200 font-semibold text-[10px]">
-            <ShieldCheck className="h-3 w-3 text-emerald-600 shrink-0" />
-            DGMS CMR 2017 Reg. 111
-          </div>
-          <p className="text-[9px] leading-relaxed text-slate-500">
-            Coal mine subsidence monitoring standard & ground stability compliance.
-          </p>
-        </div>
+      {/* Footer Info */}
+      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 font-mono flex items-center justify-between">
+        <span>Bhowra-West</span>
+        <span>v1.0-RC</span>
       </div>
     </aside>
   );

@@ -1,25 +1,20 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { SensorNode, NodeStatus } from '@/lib/domain/types';
 import { DEMO_NODES } from '@/lib/data/mock-data';
 import { useAlertStore } from '@/lib/alerts/alert-store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Battery,
   RefreshCw,
   Cpu,
-  Radio,
   Wrench,
   Wifi,
   CheckCircle2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
-import { MetricBlock } from '@/components/industrial/metric-block';
 
 export default function NodesPage() {
   const { recordAudit, initAlertEngine } = useAlertStore();
@@ -99,32 +94,32 @@ export default function NodesPage() {
         return n;
       })
     );
-    setNotice(`Maintenance status updated for ${nodeCode}. Audit entry committed.`);
-    setTimeout(() => setNotice(null), 4000);
+    setNotice(`Station ${nodeCode} toggled. Audit log entry recorded.`);
+    setTimeout(() => setNotice(null), 3000);
   };
 
-  const filteredNodes = useMemo(() => {
-    if (selectedPanel === 'ALL') return nodes;
-    return nodes.filter((n) => n.panel_id?.toLowerCase() === selectedPanel.toLowerCase());
-  }, [nodes, selectedPanel]);
+  const filteredNodes = nodes.filter((n) => {
+    if (selectedPanel === 'ALL') return true;
+    return n.panel?.code?.toLowerCase() === selectedPanel.toLowerCase() || n.panel_id?.toLowerCase() === selectedPanel.toLowerCase();
+  });
 
   const onlineCount = nodes.filter((n) => n.status === 'online').length;
   const maintenanceCount = nodes.filter((n) => n.status === 'maintenance').length;
-  const avgBattery = (nodes.reduce((acc, n) => acc + (n.battery_level || 100), 0) / (nodes.length || 1)).toFixed(1);
+  const avgBattery = (nodes.reduce((acc, n) => acc + (n.battery_level ?? 95), 0) / (nodes.length || 1)).toFixed(1);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-4 max-w-7xl mx-auto select-none">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
               <Cpu className="h-3.5 w-3.5 text-sky-600" />
-              EDGE HARDWARE OPERATIONS &bull; CMR 2017 REG 112
+              Edge Hardware Operations &bull; CMR 2017 Reg. 112
             </span>
             <ProvenanceBadge provenance={isLiveSupabase ? 'LIVE' : 'DEMO'} size="sm" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Sensor Node Fleet &amp; Hardware Inventory
           </h1>
           <p className="text-xs text-slate-500">
@@ -138,7 +133,7 @@ export default function NodesPage() {
             size="sm"
             onClick={fetchNodes}
             disabled={isLoading}
-            className="text-xs font-mono"
+            className="text-xs font-mono h-8"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh Fleet
@@ -147,182 +142,130 @@ export default function NodesPage() {
       </div>
 
       {notice && (
-        <div className="p-3 text-xs bg-emerald-50 text-emerald-800 border border-emerald-300 rounded flex items-center gap-2 animate-in fade-in">
+        <div className="p-2.5 text-xs bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-sm flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
 
-      {/* Fleet Telemetry Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricBlock
-          label="Total Deployed Stations"
-          channelCode="FLEET-STN-TOT"
-          value={nodes.length}
-          unit="nodes"
-          nominalRange={[16, 16]}
-          riskState="Normal"
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Active Transmitting"
-          channelCode="FLEET-TX-ACT"
-          value={onlineCount}
-          unit="online"
-          nominalRange={[14, 16]}
-          riskState={onlineCount < 14 ? 'Advisory' : 'Normal'}
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Maintenance Bay"
-          channelCode="FLEET-MAINT"
-          value={maintenanceCount}
-          unit="nodes"
-          nominalRange={[0, 2]}
-          riskState="Normal"
-          provenance="DEMO"
-        />
-        <MetricBlock
-          label="Fleet Mean Battery"
-          channelCode="FLEET-BAT-AVG"
-          value={parseFloat(avgBattery)}
-          unit="%"
-          nominalRange={[80, 100]}
-          riskState={parseFloat(avgBattery) < 70 ? 'Watch' : 'Normal'}
-          provenance="DEMO"
-        />
+      {/* Fleet Summary Bar (Compact) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Deployed Stations</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {nodes.length} <span className="text-[10px] font-normal text-slate-500">stations</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Active Telemetry</div>
+          <div className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+            {onlineCount} <span className="text-[10px] font-normal text-slate-500">online</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Maintenance Bay</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {maintenanceCount} <span className="text-[10px] font-normal text-slate-500">units</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-3">
+          <div className="text-[10px] text-slate-400 uppercase">Mean Battery</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+            {avgBattery}% <span className="text-[10px] font-normal text-slate-500">LiFePO4</span>
+          </div>
+        </div>
       </div>
 
-      {/* Panel Filter Bar */}
-      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-        <CardContent className="p-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-            <Radio className="h-3.5 w-3.5 text-slate-400" />
-            <span>Filter District Panel:</span>
-          </div>
-          <div className="flex items-center gap-2 overflow-x-auto">
-            {['ALL', 'p-101', 'p-102', 'p-103', 'p-104'].map((p) => (
-              <Button
-                key={p}
-                variant={selectedPanel === p ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setSelectedPanel(p)}
-                className={`text-[11px] h-7 px-2.5 font-mono uppercase ${
-                  selectedPanel === p
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'text-slate-600 dark:text-slate-400'
-                }`}
-              >
-                {p}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* District Filter Toolbar */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm p-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-slate-500">District Filter:</span>
+          {['ALL', 'p-101', 'p-102', 'p-103', 'p-104'].map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setSelectedPanel(p)}
+              className={`px-2 py-0.5 text-xs font-mono rounded-xs border uppercase cursor-pointer ${
+                selectedPanel === p
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-bold border-transparent'
+                  : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+        <span className="text-xs font-mono text-slate-400">{filteredNodes.length} nodes listed</span>
+      </div>
 
-      {/* Hardware Fleet Inventory Table */}
-      <Card className="border-slate-200 dark:border-slate-800">
-        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Cpu className="h-4 w-4 text-sky-600" />
-              ESP32 Edge Node Hardware Fleet ({filteredNodes.length})
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Microcontroller firmware versions, battery telemetry, LoRaWAN backhaul signal, and calibration status
-            </CardDescription>
-          </div>
-          <Badge variant="outline" className="font-mono text-[10px]">
-            {isLiveSupabase ? 'Supabase Sync' : 'Local Deterministic Fleet'}
-          </Badge>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="text-[11px] font-mono bg-slate-50/50 dark:bg-slate-900/50">
-                <TableHead>Node Code</TableHead>
-                <TableHead>Panel Location</TableHead>
-                <TableHead>Hardware &amp; Firmware</TableHead>
-                <TableHead>Battery Status</TableHead>
-                <TableHead>Wireless Link</TableHead>
-                <TableHead>Last Heartbeat</TableHead>
-                <TableHead>Operational State</TableHead>
-                <TableHead className="text-right">Maintenance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredNodes.map((node) => {
-                const isMaintenance = node.status === 'maintenance';
-                return (
-                  <TableRow key={node.id} className="text-xs font-mono hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
-                    <TableCell className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                      {node.node_code}
-                    </TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-300">
-                      <span className="font-semibold uppercase">{node.panel?.code || node.panel_id || 'General'}</span>
-                      <p className="text-[10px] text-slate-400">
-                        {node.latitude.toFixed(4)}&deg;N, {node.longitude.toFixed(4)}&deg;E
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-300">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-semibold">{node.hardware_version || 'ESP32-S3-WROOM-1'}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 font-mono">{node.firmware_version || 'v1.0.4-dgms'}</p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Battery className={`h-4 w-4 ${node.battery_level < 50 ? 'text-rose-500' : 'text-emerald-600'}`} />
-                        <span className="font-semibold">{node.battery_level ? node.battery_level.toFixed(1) : '95.0'}%</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400">LiFePO4 Solar</p>
-                    </TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-400">
-                      <div className="flex items-center gap-1.5 text-[11px]">
-                        <Wifi className="h-3 w-3 text-emerald-600" />
-                        <span>-68 dBm</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400">SNR: +8.4 dB &bull; 0.1% loss</p>
-                    </TableCell>
-                    <TableCell className="text-slate-500 text-[11px] whitespace-nowrap">
-                      12s ago
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`text-[10px] font-mono capitalize ${
-                          node.status === 'online'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                            : node.status === 'maintenance'
-                            ? 'bg-amber-50 text-amber-700 border-amber-300'
-                            : 'bg-rose-50 text-rose-700 border-rose-300'
-                        }`}
-                      >
-                        {node.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant={isMaintenance ? 'default' : 'outline'}
-                        onClick={() => handleToggleMaintenance(node.node_code)}
-                        className={`h-6 text-[10px] font-mono px-2 cursor-pointer ${
-                          isMaintenance
-                            ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                            : 'text-slate-600 border-slate-300 hover:bg-slate-100'
-                        }`}
-                      >
-                        <Wrench className="h-3 w-3 mr-1" />
-                        {isMaintenance ? 'Exit Maint' : 'Set Maint'}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Fleet Inventory Table */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs font-mono">
+            <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-[10px] text-slate-400 uppercase">
+              <tr>
+                <th className="py-2.5 px-3 text-left">Station Code</th>
+                <th className="py-2.5 px-3 text-left">District Panel</th>
+                <th className="py-2.5 px-3 text-left">Coordinates (WGS84)</th>
+                <th className="py-2.5 px-3 text-right">Battery</th>
+                <th className="py-2.5 px-3 text-right">LoRa RSSI</th>
+                <th className="py-2.5 px-3 text-center">Status</th>
+                <th className="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-[11px]">
+              {filteredNodes.map((node) => (
+                <tr key={node.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                  <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100">
+                    {node.node_code}
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400 font-sans">
+                    {node.panel?.name ?? node.panel_id}
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-500">
+                    {node.latitude.toFixed(4)}&deg;N, {node.longitude.toFixed(4)}&deg;E
+                  </td>
+                  <td className="py-2.5 px-3 text-right">
+                    <span className="inline-flex items-center gap-1">
+                      <Battery className="h-3.5 w-3.5 text-emerald-600" />
+                      {node.battery_level ?? 95}%
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400">
+                    <span className="inline-flex items-center gap-1">
+                      <Wifi className="h-3 w-3 text-slate-400" />
+                      {node.current_health?.signal_rssi ?? -74} dBm
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-center">
+                    <span
+                      className={`px-1.5 py-0.2 rounded-xs text-[10px] uppercase font-bold ${
+                        node.status === 'online'
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                          : node.status === 'maintenance'
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                      }`}
+                    >
+                      {node.status}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleMaintenance(node.node_code)}
+                      className="px-2 py-0.5 rounded-xs border border-slate-200 dark:border-slate-700 text-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <Wrench className="h-3 w-3 text-slate-500" />
+                      {node.status === 'maintenance' ? 'Release' : 'Service'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

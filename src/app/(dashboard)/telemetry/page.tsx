@@ -160,45 +160,45 @@ export default function TelemetryPage() {
         </div>
       </div>
 
-      {/* Top Telemetry KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Ingested Samples</p>
-          <p className="text-lg font-bold font-mono tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+      {/* High-Density Ingestion Status Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-mono">
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Ingested Samples</p>
+          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
             {ingestionStats.totalSamplesIngested.toLocaleString()}
           </p>
-          <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-            {readingsList.length} active channels
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {readingsList.length} active channels synchronized
           </p>
         </div>
 
-        <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Reporting Nodes</p>
-          <p className="text-lg font-bold font-mono tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
-            {onlineNodesCount} <span className="text-xs text-slate-400 font-normal">/ 16 fleet</span>
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Reporting Fleet</p>
+          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+            {onlineNodesCount} <span className="text-xs text-slate-400 font-normal">/ 16 nodes</span>
           </p>
-          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
-            {Math.round((onlineNodesCount / 16) * 100)}% fleet health
+          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+            {Math.round((onlineNodesCount / 16) * 100)}% fleet online • RS-485 / RF
           </p>
         </div>
 
-        <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Mine Risk Level</p>
-          <div className="mt-1">
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Current Risk State</p>
+          <div className="mt-1 flex items-center gap-2">
             <RiskBadge state={currentRiskState} size="sm" />
           </div>
-          <p className="text-[10px] text-slate-500 font-mono mt-1">
+          <p className="text-[10px] text-slate-500 mt-1">
             Scenario: {state.scenarioId}
           </p>
         </div>
 
-        <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono font-semibold">DB Buffer & Flush</p>
-          <p className="text-lg font-bold font-mono tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
-            5s sync
+        <div className="p-3">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Ingestion Engine</p>
+          <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100 mt-0.5">
+            5s DB Buffer
           </p>
-          <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-            Persistence: healthy
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            Dropped: {ingestionStats.droppedSamplesCount} • Errors: {ingestionStats.persistenceErrorsCount}
           </p>
         </div>
       </div>

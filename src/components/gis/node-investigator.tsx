@@ -26,6 +26,7 @@ interface NodeInvestigatorProps {
   latestReadings: Record<string, { value: number; unit: string; qualityScore?: number }>;
   associatedEvents: SubsidenceEventRecord[];
   onSelectEvent?: (eventId: string) => void;
+  onClose?: () => void;
   className?: string;
 }
 
@@ -36,6 +37,7 @@ export function NodeInvestigator({
   latestReadings,
   associatedEvents,
   onSelectEvent,
+  onClose,
   className,
 }: NodeInvestigatorProps) {
   const [activeTab, setActiveTab] = useState<'telemetry' | 'anomalies' | 'evidence' | 'events'>('telemetry');
@@ -71,16 +73,28 @@ export function NodeInvestigator({
             </div>
           </div>
 
-          <Badge
-            variant="outline"
-            className={`text-[10px] font-mono uppercase ${
-              node.status === 'online'
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                : 'bg-red-50 text-red-700 border-red-300'
-            }`}
-          >
-            {node.status}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <Badge
+              variant="outline"
+              className={`text-[10px] font-mono uppercase ${
+                node.status === 'online'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                  : 'bg-red-50 text-red-700 border-red-300'
+              }`}
+            >
+              {node.status}
+            </Badge>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs px-1.5 py-0.5 rounded"
+                title="Close drawer"
+              >
+                &times;
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Edge Hardware Quick Metrics */}
