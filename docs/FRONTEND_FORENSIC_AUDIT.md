@@ -2,7 +2,7 @@
 **Document Version:** 1.0.0  
 **Audit Date:** 2026-09-21  
 **Target Platform:** SIH26025 — Real-Time Underground Mine Subsidence Monitoring & Early Warning Platform (DGMS CMR 2017 Reg 112 Compliance)  
-**Evaluation Scope:** Live Production Deployment (https://sih26025.vercel.app) & Local Verification Engine via Chrome DevTools MCP  
+**Evaluation Scope:** Live Production Deployment (https://mineguard-sih26025.vercel.app) & Local Verification Engine via Chrome DevTools MCP  
 
 ---
 

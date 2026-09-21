@@ -8,7 +8,7 @@
 ## 1. System Identity & Production Configuration
 
 - **Target Platform**: Vercel (Production Cloud Infrastructure)
-- **Deployment URL (Canonical Production)**: [https://sih26025.vercel.app](https://sih26025.vercel.app)
+- **Deployment URL (Canonical Production)**: [https://mineguard-sih26025.vercel.app](https://mineguard-sih26025.vercel.app)
 - **Team / Organization**: `spirit16` (Team Name: `SPIRIT`)
 - **Project ID**: `prj_Ace0t9IThUbnnBqs3avuhiTrCukP`
 - **Deployment ID**: `dpl_DQb4p8erY5oTL9jp7aX4RxqUk48g`
@@ -51,7 +51,7 @@
 
 ## 3. Live Edge Telemetry API Ingestion Verification
 
-Tested directly against the live Vercel production endpoint: `https://sih26025.vercel.app/api/telemetry/ingest`
+Tested directly against the live Vercel production endpoint: `https://mineguard-sih26025.vercel.app/api/telemetry/ingest`
 
 | Test Case | Request Headers & Payload | Expected Status | Live Production Status | Response Body Verification |
 |---|---|---|---|---|
@@ -65,7 +65,7 @@ Tested directly against the live Vercel production endpoint: `https://sih26025.v
 
 ## 4. Live Production Route Status & Payload Verification
 
-All 15 operational routes tested directly on `https://sih26025.vercel.app`:
+All 15 operational routes tested directly on `https://mineguard-sih26025.vercel.app`:
 
 | Route Path | View / Functional Layer | HTTP Status | Response Size | Console Errors |
 |---|---|---|---|---|
@@ -92,7 +92,7 @@ All 15 operational routes tested directly on `https://sih26025.vercel.app`:
 Verified interactively via Chrome DevTools on the live Vercel deployment:
 
 1. **Dashboard Initialization**:
-   - Live URL `https://sih26025.vercel.app` rendered Bhowra-West Colliery Command.
+   - Live URL `https://mineguard-sih26025.vercel.app` rendered Bhowra-West Colliery Command.
    - Initial condition verified as `Condition: NORMAL [L0]`, Fleet `16/16 Online`, Active Directives `1 ADVISORY [L1]` on Panel P-101.
    - Zero console errors, zero hydration mismatches.
 2. **Deterministic Strata Simulator**:

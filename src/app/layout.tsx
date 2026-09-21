@@ -21,6 +21,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://mineguard-sih26025.vercel.app'),
   title: 'SIH26025 — Real-Time Underground Mine Subsidence Monitoring & Early Warning System',
   description:
     'AI-enabled low-cost real-time mine subsidence monitoring, multi-sensor fusion, and early warning platform for Indian coal mines (DGMS compliant prototype).',

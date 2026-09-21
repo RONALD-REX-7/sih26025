@@ -4,7 +4,7 @@
 > **Nodal Ministry:** Ministry of Coal / Coal India Limited (CIL)  
 > **Benchmark Colliery:** Moonidih Underground Project, BCCL, Jharia Coalfield, Jharkhand, India  
 > **Regulatory Baseline:** Directorate General of Mines Safety (DGMS) CMR 2017 (Reg 112 & 114)  
-> **Live Deployment:** [https://sih26025.vercel.app](https://sih26025.vercel.app)
+> **Live Deployment:** [https://mineguard-sih26025.vercel.app](https://mineguard-sih26025.vercel.app)
 
 ---
 
