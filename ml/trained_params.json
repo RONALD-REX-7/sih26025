@@ -1,0 +1,17 @@
+{
+  "tilt_mean": 12.4227,
+  "tilt_std": 0.2156,
+  "tilt_mad": 0.1945,
+  "disp_mean": 18.499,
+  "disp_std": 0.0831,
+  "disp_mad": 0.06,
+  "vib_mean": 1.7945,
+  "vib_std": 0.1513,
+  "strain_mean": 419.9648,
+  "strain_std": 1.4747,
+  "z_threshold": 2.5,
+  "tilt_rate_threshold_deg_hr": 0.5,
+  "disp_rate_threshold_mm_hr": 2.0,
+  "vib_threshold_rms": 4.5,
+  "samples_trained": 650
+}

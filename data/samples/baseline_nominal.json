@@ -1,0 +1,56 @@
+{
+  "provenance": "SYNTHETIC",
+  "scenario": "Nominal 24-Hour Strata Baseline",
+  "colliery": "Moonidih Underground Mine (BCCL)",
+  "panel": "P-101",
+  "sampling_cadence_sec": 300,
+  "stations": ["SN-101", "SN-102", "SN-103", "SN-104"],
+  "summary": {
+    "mean_tilt_deg": 12.42,
+    "std_tilt_deg": 0.18,
+    "mean_disp_mm": 18.52,
+    "std_disp_mm": 0.09,
+    "mean_vib_rms": 1.45,
+    "std_vib_rms": 0.32,
+    "mean_strain_ue": 420.5,
+    "std_strain_ue": 4.2
+  },
+  "sample_records": [
+    {
+      "timestamp": 1789900000,
+      "node_code": "SN-102",
+      "tilt_x_deg": 12.41,
+      "tilt_y_deg": 8.19,
+      "displacement_mm": 18.51,
+      "vibration_rms": 1.25,
+      "strain_microstrain": 421.2,
+      "battery_mv": 3250,
+      "rssi_dbm": -82,
+      "risk_state": "Normal"
+    },
+    {
+      "timestamp": 1789900300,
+      "node_code": "SN-102",
+      "tilt_x_deg": 12.43,
+      "tilt_y_deg": 8.21,
+      "displacement_mm": 18.53,
+      "vibration_rms": 1.38,
+      "strain_microstrain": 420.8,
+      "battery_mv": 3250,
+      "rssi_dbm": -83,
+      "risk_state": "Normal"
+    },
+    {
+      "timestamp": 1789900600,
+      "node_code": "SN-102",
+      "tilt_x_deg": 12.40,
+      "tilt_y_deg": 8.18,
+      "displacement_mm": 18.49,
+      "vibration_rms": 1.15,
+      "strain_microstrain": 419.9,
+      "battery_mv": 3248,
+      "rssi_dbm": -81,
+      "risk_state": "Normal"
+    }
+  ]
+}

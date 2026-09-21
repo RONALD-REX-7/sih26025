@@ -7,7 +7,6 @@ import { RiskBadge } from '@/components/industrial/risk-badge';
 import { StateContainer } from '@/components/industrial/state-container';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
 import { EscalateModal } from '@/components/industrial/escalate-modal';
-import { Button } from '@/components/ui/button';
 import {
   CheckCircle2,
   Bell,
@@ -15,7 +14,6 @@ import {
   VolumeX,
   Radio,
   Send,
-  AlertTriangle,
 } from 'lucide-react';
 import { AcknowledgementPayload, EscalationPayload } from '@/lib/alerts/alert-types';
 
@@ -23,7 +21,6 @@ export default function AlertsPage() {
   const {
     alerts,
     activeCount,
-    criticalCount,
     isAlarmMuted,
     isAlarmPlaying,
     notificationHistory,
@@ -179,21 +176,40 @@ export default function AlertsPage() {
         </div>
 
         {activeTab === 'queue' && (
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono-tech">
-            <span className="text-[#52606D]">Severity:</span>
-            {['ALL', 'Critical', 'Warning', 'Watch', 'Advisory'].map((r) => (
-              <button
-                key={r}
-                onClick={() => setSelectedRisk(r)}
-                className={`px-2 py-0.5 text-xs font-mono-tech rounded-sm border cursor-pointer transition-colors ${
-                  selectedRisk === r
-                    ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
-                    : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
-                }`}
-              >
-                {r}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono-tech">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[#52606D]">Severity:</span>
+              {['ALL', 'Critical', 'Warning', 'Watch', 'Advisory'].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setSelectedRisk(r)}
+                  className={`px-2 py-0.5 text-xs font-mono-tech rounded-sm border cursor-pointer transition-colors ${
+                    selectedRisk === r
+                      ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
+                      : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-[#52606D]">Status:</span>
+              {['ALL', 'active', 'acknowledged', 'escalated'].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSelectedStatus(s)}
+                  className={`px-2 py-0.5 text-xs font-mono-tech rounded-sm border cursor-pointer capitalize transition-colors ${
+                    selectedStatus === s
+                      ? 'bg-[#173B57] text-[#FFFFFF] font-semibold border-[#173B57]'
+                      : 'border-[#D7DEDC] text-[#52606D] hover:bg-[#EDF1F0]'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

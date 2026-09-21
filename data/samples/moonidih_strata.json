@@ -1,0 +1,73 @@
+{
+  "provenance": "REFERENCE",
+  "colliery": "Moonidih Project (BCCL)",
+  "coalfield": "Jharia Coalfield",
+  "formation": "Barakar Formation (Lower Gondwana)",
+  "location": {
+    "latitude": 23.7383,
+    "longitude": 86.3511,
+    "epsg": "EPSG:4326"
+  },
+  "borehole_id": "BH-MDH-14",
+  "total_depth_m": 480.0,
+  "extraction_seams": [
+    {
+      "seam_name": "XVI Top",
+      "depth_m": 280.5,
+      "thickness_m": 3.2,
+      "mining_method": "Mechanised Longwall Retreat",
+      "status": "Active Extraction (Panel P-101)"
+    },
+    {
+      "seam_name": "XV Seam",
+      "depth_m": 345.0,
+      "thickness_m": 4.1,
+      "mining_method": "Continuous Miner Depillaring",
+      "status": "Planned Extraction (Panel P-102)"
+    }
+  ],
+  "lithological_layers": [
+    {
+      "depth_from_m": 0.0,
+      "depth_to_m": 18.0,
+      "lithology": "Alluvial soil and weathered sandstone",
+      "density_t_m3": 1.95,
+      "compressive_strength_mpa": 12.0
+    },
+    {
+      "depth_from_m": 18.0,
+      "depth_to_m": 95.0,
+      "lithology": "Coarse to medium-grained Barakar sandstone",
+      "density_t_m3": 2.45,
+      "compressive_strength_mpa": 48.5
+    },
+    {
+      "depth_from_m": 95.0,
+      "depth_to_m": 180.0,
+      "lithology": "Interbedded carbonaceous shale and siltstone",
+      "density_t_m3": 2.30,
+      "compressive_strength_mpa": 32.0
+    },
+    {
+      "depth_from_m": 180.0,
+      "depth_to_m": 280.5,
+      "lithology": "Massive quartzitic sandstone (Main Roof)",
+      "density_t_m3": 2.60,
+      "compressive_strength_mpa": 68.0
+    },
+    {
+      "depth_from_m": 280.5,
+      "depth_to_m": 283.7,
+      "lithology": "Coal Seam XVI Top",
+      "density_t_m3": 1.35,
+      "compressive_strength_mpa": 22.0
+    },
+    {
+      "depth_from_m": 283.7,
+      "depth_to_m": 310.0,
+      "lithology": "Hard sandy shale floor",
+      "density_t_m3": 2.40,
+      "compressive_strength_mpa": 52.0
+    }
+  ]
+}

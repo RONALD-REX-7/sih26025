@@ -1,8 +1,41 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ==============================================================================
+# SIH26025 Professional Repository Git Ignore Configuration
+# ==============================================================================
 
-# dependencies
-/node_modules
-/.pnp
+# ------------------------------------------------------------------------------
+# 1. Environment & Secrets (NEVER COMMIT PRODUCTION CREDENTIALS)
+# ------------------------------------------------------------------------------
+.env*
+!.env.example
+*.pem
+*.key
+*.p12
+*.cert
+*.id_rsa*
+*.pub
+
+# ------------------------------------------------------------------------------
+# 2. Node.js & Web Platform
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Next.js Build Outputs
+.next/
+out/
+build/
+dist/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Yarn Berry
+.pnp/
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,33 +43,52 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
+# Test Coverage
+coverage/
+.nyc_output/
 
-# next.js
-/.next/
-/out/
+# ------------------------------------------------------------------------------
+# 3. Embedded Firmware (PlatformIO & Espressif ESP32)
+# ------------------------------------------------------------------------------
+.pio/
+.pioenvs/
+.piolibdeps/
+.clangd/
+.gcc-flags.json
+*.elf
+*.bin
+*.hex
 
-# production
-/build
+# ------------------------------------------------------------------------------
+# 4. Python & Machine Learning
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# misc
+# ------------------------------------------------------------------------------
+# 5. OS & IDE Metadata
+# ------------------------------------------------------------------------------
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+.idea/
+*.sublime-project
+*.sublime-workspace

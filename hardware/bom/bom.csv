@@ -1,0 +1,14 @@
+Item,Category,Manufacturer,PartNumber,Package,Interface,UnitQty,UnitPriceINR,Role
+1,Microcontroller,Espressif Systems,ESP32-S3-WROOM-1-N8R2,Module,SPI/I2C/UART,1,340.00,Edge compute and FreeRTOS control
+2,RF Transceiver,Semtech,SX1262IMLTRT,QFN-24,SPI,1,420.00,LoRa IN865 long-range telemetry
+3,Antenna,Industrial,ANT-868-CW-HWR-SMA,SMA,RF,1,240.00,Sub-GHz 3dBi whip antenna
+4,Inclinometer,CEVA/Bosch,BNO085,LGA-28,I2C,1,780.00,Dual-axis tilt and sag measurement
+5,ADC,Texas Instruments,ADS1220IPWR,TSSOP-16,SPI,1,450.00,24-bit strain gauge bridge readout
+6,Vibration,Murata,PKM13EPYH4002-B0,Through-Hole,Analog,1,190.00,Strata microseismic detection
+7,LDO,Texas Instruments,TPS7A2533DBVR,SOT-23-5,Power,1,65.00,3.3V ultra-low quiescent LDO
+8,Battery,EVE Energy,IFR18650-3200,18650 Cylindrical,Power,1,420.00,3.2V 3200mAh LiFePO4 cell
+9,Protection,Custom,HY2112-CB,SOT-23-6,Power,1,95.00,Battery safety management
+10,PCB,Fabricator,4-Layer FR4 1.6mm,Custom 80x60mm,PCB,1,160.00,Circuit substrate
+11,Enclosure,Gainta,G2108C,Box 120x80x55mm,Mechanical,1,750.00,IP68 enclosure
+12,Cable Glands,Jacob GmbH,M12-IP68-Brass,M12 Thread,Mechanical,2,180.00,Environmental cable seal
+13,Mounting,Fabricator,SS304 Bracket,3mm Plate,Mechanical,1,220.00,Rockbolt clamp

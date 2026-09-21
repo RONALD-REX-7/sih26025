@@ -12,7 +12,6 @@ import {
   TrainTrack,
   Fan,
   Compass,
-  ShieldAlert,
   ShieldCheck,
   MapPin,
   ExternalLink,

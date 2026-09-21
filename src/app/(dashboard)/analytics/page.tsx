@@ -8,14 +8,11 @@ import {
   Activity,
   Network,
   Info,
-  SlidersHorizontal,
 } from 'lucide-react';
 
 export default function AnalyticsPage() {
   const [selectedPanel, setSelectedPanel] = useState<'P-101' | 'P-102' | 'P-103' | 'P-104'>('P-101');
-  const { currentRiskState, currentEvidence, latestReadings, state: simState } = useSimulatorStore();
-
-  const isSimActive = simState.status === 'running';
+  const { currentRiskState, currentEvidence, latestReadings } = useSimulatorStore();
 
   const spatialCorrelation = currentEvidence?.spatialCorrelationScore ?? 0.84;
   const modalityAgreement = currentEvidence?.modalityAgreementScore ?? 0.88;

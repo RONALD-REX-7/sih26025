@@ -2,16 +2,14 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth/auth-context';
 import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { Alert } from '@/lib/domain/types';
 import { AcknowledgementPayload } from '@/lib/alerts/alert-types';
-import { DEMO_NODES, DEMO_PANELS } from '@/lib/data/mock-data';
+import { DEMO_NODES } from '@/lib/data/mock-data';
 import { GisLayerId } from '@/lib/domain/gis-types';
 import { RiskState } from '@/lib/domain/risk-states';
 import { RiskBadge } from '@/components/industrial/risk-badge';
-import { StatusDot } from '@/components/industrial/status-dot';
 import { RiskEvidencePanel } from '@/components/industrial/risk-evidence-panel';
 import { GisMapCanvas } from '@/components/gis/gis-map-canvas';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
@@ -19,17 +17,13 @@ import { Button } from '@/components/ui/button';
 import {
   MapPin,
   AlertTriangle,
-  CheckCircle2,
   ChevronRight,
   ExternalLink,
-  Radio,
   FileCheck,
   Shield,
-  Layers,
 } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
-  const { role, profile } = useAuth();
   const {
     latestReadings,
     latestHealths,
@@ -253,7 +247,7 @@ export default function DashboardOverviewPage() {
           </div>
 
           {/* Map Surface */}
-          <div className="p-2 flex-1 flex flex-col justify-center min-h-[400px]">
+          <div className="p-2 flex-1 flex flex-col justify-center min-h-100">
             <GisMapCanvas
               activeLayers={activeLayers}
               selectedNodeCode={selectedNodeCode}
@@ -261,7 +255,7 @@ export default function DashboardOverviewPage() {
               onSelectNode={(code) => setSelectedNodeCode(code)}
               onSelectEvent={(id) => setSelectedEventId(id)}
               liveRiskByNode={liveRiskByNode}
-              className="w-full h-full min-h-[380px]"
+              className="w-full h-full min-h-95"
             />
           </div>
 

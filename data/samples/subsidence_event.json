@@ -1,0 +1,65 @@
+{
+  "provenance": "SYNTHETIC",
+  "scenario": "Progressive Multi-Station Strata Subsidence Sequence",
+  "colliery": "Moonidih Underground Mine (BCCL)",
+  "panel": "P-101",
+  "primary_station": "SN-102",
+  "corroborating_station": "SN-101",
+  "sequence": [
+    {
+      "step": 1,
+      "elapsed_sec": 0,
+      "risk_state": "Normal",
+      "tilt_x_deg": 12.40,
+      "displacement_mm": 18.50,
+      "vibration_rms": 1.40,
+      "strain_microstrain": 420.0,
+      "spatial_correlation": 0.35,
+      "verdict": "Within statutory tolerances"
+    },
+    {
+      "step": 2,
+      "elapsed_sec": 300,
+      "risk_state": "Advisory",
+      "tilt_x_deg": 13.10,
+      "displacement_mm": 20.20,
+      "vibration_rms": 2.60,
+      "strain_microstrain": 490.0,
+      "spatial_correlation": 0.62,
+      "verdict": "Initial rate-of-change acceleration detected on SN-102"
+    },
+    {
+      "step": 3,
+      "elapsed_sec": 310,
+      "risk_state": "Watch",
+      "tilt_x_deg": 14.25,
+      "displacement_mm": 23.40,
+      "vibration_rms": 3.40,
+      "strain_microstrain": 580.0,
+      "spatial_correlation": 0.78,
+      "verdict": "High displacement rate corroborated by SN-101 (r = +0.78). Cadence escalated to 10s."
+    },
+    {
+      "step": 4,
+      "elapsed_sec": 320,
+      "risk_state": "Warning",
+      "tilt_x_deg": 15.80,
+      "displacement_mm": 27.80,
+      "vibration_rms": 4.60,
+      "strain_microstrain": 720.0,
+      "spatial_correlation": 0.86,
+      "verdict": "Borehole sag exceeding 2.0 mm/hr. Multi-modal agreement score = 0.88."
+    },
+    {
+      "step": 5,
+      "elapsed_sec": 330,
+      "risk_state": "Critical",
+      "tilt_x_deg": 17.50,
+      "displacement_mm": 33.50,
+      "vibration_rms": 5.80,
+      "strain_microstrain": 890.0,
+      "spatial_correlation": 0.92,
+      "verdict": "Critical roof sagging acceleration across extraction panel. Emergency directive dispatched. DGMS Reg 112 sign-off required."
+    }
+  ]
+}

@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
-import { StatusDot } from '@/components/industrial/status-dot';
 
 export default function NodesPage() {
   const { recordAudit, initAlertEngine } = useAlertStore();

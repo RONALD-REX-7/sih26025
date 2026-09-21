@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { StatusDot } from '@/components/industrial/status-dot';
 import {
-  Sliders,
   CheckCircle2,
   Filter,
   X,

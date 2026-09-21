@@ -10,7 +10,7 @@ import { Activity, Play, Filter } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EventsPage() {
-  const { activeAnomalies, state, initEngine } = useSimulatorStore();
+  const { activeAnomalies, initEngine } = useSimulatorStore();
   const { alerts, initAlertEngine, activeCount } = useAlertStore();
   const [selectedRisk, setSelectedRisk] = useState<string>('ALL');
 

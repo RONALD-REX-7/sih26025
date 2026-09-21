@@ -16,8 +16,6 @@ import {
   Copy,
   Check,
   Cpu,
-  Sliders,
-  ShieldCheck,
 } from 'lucide-react';
 
 export default function SimulatorPage() {
