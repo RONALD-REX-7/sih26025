@@ -51,8 +51,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     groupName: 'INTELLIGENCE',
     items: [
-      { name: 'Node Fleet', href: '/nodes', icon: Server, badge: '16' },
-      { name: 'Sensor Metrology', href: '/sensors', icon: Cpu, badge: '80' },
+      { name: 'Node Fleet', href: '/nodes', icon: Server },
+      { name: 'Sensor Metrology', href: '/sensors', icon: Cpu },
       { name: 'Subsidence Events', href: '/events', icon: Activity },
       { name: 'AI Risk Analytics', href: '/analytics', icon: TrendingUp },
       { name: 'Mine Simulator', href: '/simulator', icon: Play },
@@ -80,22 +80,27 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  className?: string;
+  onItemClick?: () => void;
+}
+
+export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
   const pathname = usePathname();
   const { activeCount, criticalCount } = useAlertStore();
 
   return (
-    <aside className="w-60 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0">
+    <aside className={cn('w-56 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none', className)}>
       {/* Brand Header */}
-      <div className="p-3.5 border-b border-slate-200 dark:border-slate-800">
+      <div className="p-3 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0">
-            <Flame className="h-4 w-4" />
+          <div className="h-6 w-6 rounded-sm bg-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0">
+            <Flame className="h-3.5 w-3.5" />
           </div>
           <div>
             <div className="font-bold text-xs tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
               SIH26025
-              <Badge variant="secondary" className="text-[9px] font-mono py-0 px-1 bg-slate-100 dark:bg-slate-800">
+              <Badge variant="outline" className="text-[9px] font-mono py-0 px-1 border-slate-300 dark:border-slate-700">
                 v1.0
               </Badge>
             </div>
@@ -107,10 +112,10 @@ export function SidebarNav() {
       </div>
 
       {/* Grouped Navigation */}
-      <nav className="flex-1 p-2 space-y-4 overflow-y-auto">
+      <nav className="flex-1 p-2 space-y-3 overflow-y-auto">
         {NAV_GROUPS.map((group) => (
-          <div key={group.groupName} className="space-y-1">
-            <div className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+          <div key={group.groupName} className="space-y-0.5">
+            <div className="px-2 text-[9px] font-bold uppercase tracking-wider text-slate-400 font-mono mb-1">
               {group.groupName}
             </div>
             <div className="space-y-0.5">
@@ -118,16 +123,15 @@ export function SidebarNav() {
                 const isActive =
                   pathname === item.href || (item.href === '/dashboard' && pathname === '/');
                 const Icon = item.icon;
-
-                const displayBadge = item.isAlert && activeCount > 0 ? `${activeCount}` : item.badge;
-                const isAlertBadge = item.isAlert && activeCount > 0;
+                const hasAlertBadge = item.isAlert && activeCount > 0;
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={onItemClick}
                     className={cn(
-                      'flex items-center justify-between px-2.5 py-1.5 rounded text-xs font-medium transition-colors',
+                      'flex items-center justify-between px-2 py-1.5 rounded-sm text-xs font-medium transition-colors',
                       isActive
                         ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100'
@@ -140,22 +144,18 @@ export function SidebarNav() {
                           isActive ? 'text-amber-400 dark:text-amber-600' : 'text-slate-400'
                         )}
                       />
-                      <span>{item.name}</span>
+                      <span className="truncate">{item.name}</span>
                     </div>
-                    {displayBadge && (
+                    {hasAlertBadge && (
                       <span
                         className={cn(
-                          'text-[9px] font-mono px-1 py-0.2 rounded font-semibold',
-                          isAlertBadge
-                            ? criticalCount > 0
-                              ? 'bg-rose-600 text-white animate-pulse font-bold'
-                              : 'bg-amber-500 text-slate-950 font-bold'
-                            : isActive
-                            ? 'bg-slate-800 text-amber-300 dark:bg-slate-200 dark:text-amber-700'
-                            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                          'text-[9px] font-mono px-1.5 py-0.2 rounded-xs font-semibold',
+                          criticalCount > 0
+                            ? 'bg-rose-600 text-white animate-pulse font-bold'
+                            : 'bg-amber-500 text-slate-950 font-bold'
                         )}
                       >
-                        {displayBadge}
+                        {activeCount}
                       </span>
                     )}
                   </Link>
@@ -167,14 +167,14 @@ export function SidebarNav() {
       </nav>
 
       {/* DGMS Standards Box */}
-      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800">
-        <div className="p-2 rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-[10px] text-slate-600 dark:text-slate-400 space-y-1">
+      <div className="p-2 border-t border-slate-200 dark:border-slate-800">
+        <div className="p-2 rounded-sm border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-[10px] text-slate-600 dark:text-slate-400 space-y-1">
           <div className="flex items-center gap-1.5 text-slate-900 dark:text-slate-200 font-semibold text-[10px]">
             <ShieldCheck className="h-3 w-3 text-emerald-600 shrink-0" />
             DGMS CMR 2017 Reg. 111
           </div>
           <p className="text-[9px] leading-relaxed text-slate-500">
-            Coal mine subsidence monitoring standard & Bord & Pillar ground stability.
+            Coal mine subsidence monitoring standard & ground stability compliance.
           </p>
         </div>
       </div>

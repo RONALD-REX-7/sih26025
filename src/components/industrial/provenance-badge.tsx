@@ -25,14 +25,13 @@ export function ProvenanceBadge({
     <Badge
       variant="outline"
       className={cn(
-        'uppercase border rounded shadow-none inline-flex items-center gap-1',
+        'uppercase border rounded-sm shadow-none inline-flex items-center',
         config.badgeClass,
         sizeClasses[size],
         className
       )}
       title={config.description}
     >
-      <span className="h-1 w-1 rounded-full bg-white/70 inline-block shrink-0" />
       <span>{config.label}</span>
     </Badge>
   );

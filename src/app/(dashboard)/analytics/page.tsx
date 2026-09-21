@@ -15,7 +15,6 @@ import {
   SlidersHorizontal,
   CheckCircle2,
   Info,
-  ShieldAlert,
   AlertCircle,
 } from 'lucide-react';
 

@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DEMO_INFRASTRUCTURE, DEMO_NODES } from '@/lib/data/mock-data';
+import { DEMO_INFRASTRUCTURE } from '@/lib/data/mock-data';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { RiskBadge } from '@/components/industrial/risk-badge';
 import { MetricBlock } from '@/components/industrial/metric-block';

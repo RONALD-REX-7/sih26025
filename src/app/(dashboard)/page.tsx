@@ -19,23 +19,10 @@ import { MetricBlock } from '@/components/industrial/metric-block';
 import { RiskEvidencePanel } from '@/components/industrial/risk-evidence-panel';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
 import {
-  Layers,
-  Cpu,
   MapPin,
-  Building2,
   Activity,
-  ShieldCheck,
   ShieldAlert,
   CheckCircle2,
-  Radio,
-  Clock,
-  HardDrive,
-  Play,
-  ArrowRight,
-  TrendingUp,
-  SlidersHorizontal,
-  FileSpreadsheet,
-  AlertTriangle,
   Server,
   Zap,
 } from 'lucide-react';
@@ -54,13 +41,10 @@ export default function DashboardOverviewPage() {
 
   const {
     alerts,
-    activeCount,
-    criticalCount,
     acknowledgeAlert,
     initAlertEngine,
   } = useAlertStore();
 
-  const [selectedPanel, setSelectedPanel] = useState<string>('ALL');
   const [selectedAlertForAck, setSelectedAlertForAck] = useState<Alert | null>(null);
   const [isAckModalOpen, setIsAckModalOpen] = useState(false);
 

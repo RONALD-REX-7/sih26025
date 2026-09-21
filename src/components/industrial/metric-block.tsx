@@ -9,13 +9,18 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface MetricBlockProps {
   label: string;
-  channelCode: string;
+  channelCode?: string;
   value: number;
   unit: string;
-  nominalRange: [number, number];
+  nominalRange?: [number, number];
   riskState?: RiskState;
   rateOfChange?: number; // per minute
   provenance?: DataProvenance;
+  showProvenance?: boolean;
+  showRangeBar?: boolean;
+  showSign?: boolean;
+  precision?: number;
+  showRiskBadge?: boolean;
   className?: string;
 }
 
@@ -28,60 +33,84 @@ export function MetricBlock({
   riskState = 'Normal',
   rateOfChange,
   provenance = 'DEMO',
+  showProvenance = false,
+  showRangeBar = true,
+  showSign = false,
+  precision = 2,
+  showRiskBadge = true,
   className,
 }: MetricBlockProps) {
-  const [minNominal, maxNominal] = nominalRange;
-  const isOutOfNominal = value < minNominal || value > maxNominal;
+  const [minNominal, maxNominal] = nominalRange ?? [0, 0];
+  const hasRange = nominalRange !== undefined && nominalRange[0] !== nominalRange[1];
+  const isOutOfNominal = hasRange && (value < minNominal || value > maxNominal);
 
   // Percentage within nominal span for visual bar
   const span = Math.max(maxNominal - minNominal, 1);
-  const clampedPct = Math.min(Math.max(((value - minNominal) / span) * 100, 0), 100);
+  const clampedPct = hasRange
+    ? Math.min(Math.max(((value - minNominal) / span) * 100, 0), 100)
+    : 0;
+
+  // Format value cleanly
+  const formattedValue = precision === 0
+    ? Math.round(value).toString()
+    : value.toFixed(precision);
+
+  const displayValue = showSign && value > 0
+    ? `+${formattedValue}`
+    : formattedValue;
 
   return (
-    <Card className={cn('border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5', className)}>
-      <CardContent className="p-0 space-y-2.5">
-        {/* Header: Label & Provenance */}
+    <Card className={cn('rounded-md border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-none', className)}>
+      <CardContent className="p-0 space-y-2">
+        {/* Header: Label & Optional Channel/Provenance */}
         <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">{label}</span>
-            <span className="font-mono text-[10px] text-slate-400">({channelCode})</span>
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{label}</span>
+            {channelCode && !channelCode.startsWith('FLEET-') && !channelCode.startsWith('SYS-') && !channelCode.startsWith('MET-') && !channelCode.startsWith('EVT-') && !channelCode.startsWith('INF-') && (
+              <span className="font-mono text-[10px] text-slate-400 shrink-0">({channelCode})</span>
+            )}
           </div>
-          <ProvenanceBadge provenance={provenance} size="sm" />
+          {showProvenance && <ProvenanceBadge provenance={provenance} size="sm" />}
         </div>
 
         {/* Big Reading Value */}
         <div className="flex items-baseline justify-between">
           <div className="flex items-baseline gap-1.5">
-            <span className={cn('text-2xl font-black font-mono tracking-tight', isOutOfNominal ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100')}>
-              {value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2)}
+            <span className={cn(
+              'text-xl font-bold font-mono tabular-nums tracking-tight',
+              isOutOfNominal ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-slate-100'
+            )}>
+              {displayValue}
             </span>
-            <span className="text-xs font-mono text-slate-500">{unit}</span>
+            {unit && <span className="text-xs font-mono text-slate-500">{unit}</span>}
           </div>
-          <RiskBadge state={riskState} size="sm" showLevel={false} />
+          {showRiskBadge && <RiskBadge state={riskState} size="sm" showLevel={false} />}
         </div>
 
-        {/* Range Bar Indicator */}
-        <div className="space-y-1">
-          <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
-            <div
-              className={cn(
-                'h-full rounded-full transition-all duration-300',
-                riskState === 'Critical' ? 'bg-red-500' : riskState === 'Warning' ? 'bg-orange-500' : 'bg-emerald-500'
-              )}
-              style={{ width: `${clampedPct}%` }}
-            />
+        {/* Range Bar Indicator (only if valid range and requested) */}
+        {hasRange && showRangeBar && (
+          <div className="space-y-1 pt-0.5">
+            <div className="h-1 w-full rounded-sm bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+              <div
+                className={cn(
+                  'h-full rounded-sm transition-all duration-300',
+                  riskState === 'Critical' ? 'bg-red-500' : riskState === 'Warning' ? 'bg-orange-500' : 'bg-emerald-500'
+                )}
+                style={{ width: `${clampedPct}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[9px] font-mono text-slate-400">
+              <span>Min {minNominal}</span>
+              <span>Nominal Range</span>
+              <span>Max {maxNominal}</span>
+            </div>
           </div>
-          <div className="flex justify-between text-[9px] font-mono text-slate-400">
-            <span>Min {minNominal}</span>
-            <span>Nominal Range</span>
-            <span>Max {maxNominal}</span>
-          </div>
-        </div>
+        )}
 
         {/* Rate of Change Footer */}
         {rateOfChange !== undefined && (
-          <div className="pt-1 border-t border-slate-100 dark:border-slate-900 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-            <span>Rate of Change:</span>
+          <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+            <span>Rate:</span>
             <span className="flex items-center gap-0.5 font-medium text-slate-700 dark:text-slate-300">
               {rateOfChange > 0 ? (
                 <TrendingUp className="h-3 w-3 text-amber-500" />

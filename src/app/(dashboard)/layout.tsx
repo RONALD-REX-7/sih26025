@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { DemoBanner } from '@/components/layout/demo-banner';
 import { TopHeader } from '@/components/layout/top-header';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
 
@@ -11,22 +10,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Top persistent evaluation demo banner */}
-      <DemoBanner />
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* Desktop Left Operational Sidebar (hidden on < lg) */}
+      <SidebarNav className="hidden lg:flex" />
 
-      {/* Main App Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Operational Sidebar */}
-        <SidebarNav />
-
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          <TopHeader />
-          <main className="flex-1 p-6 bg-slate-100/60 dark:bg-slate-900/50">
-            {children}
-          </main>
-        </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        <TopHeader />
+        <main className="flex-1 p-4 sm:p-5 overflow-y-auto bg-slate-100/70 dark:bg-slate-900/40">
+          {children}
+        </main>
       </div>
     </div>
   );
