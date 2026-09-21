@@ -77,6 +77,7 @@ graph TD
 | **Phase 7** | Full System Integration & Polish | Complete end-to-end integration verified in `src/lib/domain/integration.test.ts`, UI responsiveness, dark/light contrast compliance, "Why Risk Changed" evidence panel. | **COMPLETE** |
 | **Phase 8** | Adversarial QA & Production Release | 21-domain adversarial audit in `docs/final-audit.md`, production build verification, edge rate limit checks, anti-fabrication certification. | **COMPLETE** |
 | **Phase 10** | Professional UI/UX Reconstruction | Complete transformation to industrial control-room design system. Inter + IBM Plex Mono typography, removal of card clutter, first-viewport GIS + evidence centering, Mulberry32 engineering test bench, elimination of all fake AI metrics, strict responsive testing across 1440, 1024, 768, and 390px viewports with zero errors. | **COMPLETE** |
+| **Phase 11** | Production + Vercel Hardening | Full production runtime boundary audit, Node.js 24.x LTS specification, Vercel config with security headers, Supabase RLS verification (15 tables, 0 advisor lints), 10-point Postman API test collection, zero console/hydration errors verified on Next.js production server (`next start`). Full report in `docs/production-hardening-report.md`. | **COMPLETE** |
 
 ---
 

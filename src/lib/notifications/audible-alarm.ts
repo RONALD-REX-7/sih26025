@@ -17,9 +17,13 @@ export class AudibleAlarm {
 
   private constructor() {
     if (typeof window !== 'undefined') {
-      const savedMute = localStorage.getItem('sih26025_alarm_muted');
-      if (savedMute !== null) {
-        this.isMuted = savedMute === 'true';
+      try {
+        const savedMute = localStorage.getItem('sih26025_alarm_muted');
+        if (savedMute !== null) {
+          this.isMuted = savedMute === 'true';
+        }
+      } catch {
+        // Fallback gracefully if storage access is restricted
       }
     }
   }
@@ -48,7 +52,11 @@ export class AudibleAlarm {
   public setMuted(muted: boolean): void {
     this.isMuted = muted;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('sih26025_alarm_muted', String(muted));
+      try {
+        localStorage.setItem('sih26025_alarm_muted', String(muted));
+      } catch {
+        // Fallback gracefully if storage access is restricted
+      }
     }
     if (muted) {
       this.stopAlarm();

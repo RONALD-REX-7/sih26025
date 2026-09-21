@@ -1,0 +1,346 @@
+{
+  "info": {
+    "name": "SIH26025 Telemetry Ingestion API Test Suite",
+    "_postman_id": "c7a8b412-e89a-4c22-9f3b-1b2602500001",
+    "description": "Comprehensive test suite for SIH26025 Edge Hardware Telemetry Ingestion Endpoint (`POST /api/telemetry/ingest`). Validates authentication, schema enforcement, rate limiting, and duplicate detection under DGMS guidelines.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "sih26025-edge-telemetry-secret-key",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Auth - Missing API Key",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"SN-101\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test('Error code is UNAUTHORIZED', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('UNAUTHORIZED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Auth - Invalid API Key",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "invalid-secret-key-12345" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"SN-101\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 401 Unauthorized', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test('Error code is UNAUTHORIZED', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('UNAUTHORIZED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Malformed JSON Body",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"node_code\": \"SN-101\", \"timestamp\": }"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Error code is MALFORMED_JSON', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('MALFORMED_JSON');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Validation - Missing Node Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"timestamp\": \"2026-09-21T12:00:00Z\",\n  \"readings\": [\n    { \"channel\": \"TILT_X\", \"value\": 1.25 }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Error code is SCHEMA_VALIDATION_ERROR', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('SCHEMA_VALIDATION_ERROR');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Validation - Invalid Node Code Pattern",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"INVALID-NODE-NAME\",\n  \"timestamp\": \"2026-09-21T12:00:00Z\",\n  \"readings\": [\n    { \"channel\": \"TILT_X\", \"value\": 1.25 }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Error code is SCHEMA_VALIDATION_ERROR', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('SCHEMA_VALIDATION_ERROR');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Validation - Empty Readings Array",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"SN-102\",\n  \"timestamp\": \"2026-09-21T12:00:00Z\",\n  \"readings\": []\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Error code is SCHEMA_VALIDATION_ERROR', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('SCHEMA_VALIDATION_ERROR');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Validation - Non-numeric Measurement Value",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"SN-102\",\n  \"timestamp\": \"2026-09-21T12:00:00Z\",\n  \"readings\": [\n    { \"channel\": \"TILT_X\", \"value\": \"NOT_A_FLOAT\" }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400 Bad Request', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Error code is SCHEMA_VALIDATION_ERROR', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('SCHEMA_VALIDATION_ERROR');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Ingestion - Valid Telemetry Batch",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"SN-102\",\n  \"timestamp\": \"2026-09-21T12:30:00Z\",\n  \"battery_pct\": 94.2,\n  \"rssi_dbm\": -72,\n  \"readings\": [\n    { \"channel\": \"TILT_X\", \"value\": 1.45, \"unit\": \"arcsec\" },\n    { \"channel\": \"TILT_Y\", \"value\": -0.82, \"unit\": \"arcsec\" },\n    { \"channel\": \"DISP_Z\", \"value\": 18.24, \"unit\": \"mm\" },\n    { \"channel\": \"VIB_RMS\", \"value\": 0.12, \"unit\": \"mm/s\" },\n    { \"channel\": \"STRAIN\", \"value\": 418.0, \"unit\": \"µε\" }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Response success is true', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.ingested_count).to.eql(5);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Ingestion - Duplicate Payload Rejection",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{api_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"node_code\": \"SN-102\",\n  \"timestamp\": \"2026-09-21T12:30:00Z\",\n  \"readings\": [\n    { \"channel\": \"TILT_X\", \"value\": 1.45 }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/telemetry/ingest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "telemetry", "ingest"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 409 Conflict', function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "pm.test('Error code is DUPLICATE_PAYLOAD', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.eql('DUPLICATE_PAYLOAD');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -30,8 +30,14 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh auth token
-  await supabase.auth.getUser();
+  // Refresh auth token safely (degrades gracefully in demo or offline mode)
+  try {
+    if (supabaseUrl && !supabaseUrl.includes('placeholder') && !supabaseKey.includes('placeholder')) {
+      await supabase.auth.getUser();
+    }
+  } catch {
+    // Network or credential failure in middleware should not halt request processing
+  }
 
   // Allow unauthenticated demo exploration unless strictly configured otherwise
   return supabaseResponse;

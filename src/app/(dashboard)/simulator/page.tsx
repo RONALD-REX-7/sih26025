@@ -56,7 +56,9 @@ export default function SimulatorPage() {
   };
 
   const handleCopySeed = () => {
-    navigator.clipboard.writeText(state.seed.toString());
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(state.seed.toString()).catch(() => {});
+    }
     setCopiedSeed(true);
     setTimeout(() => setCopiedSeed(false), 2000);
   };
