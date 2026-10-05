@@ -70,15 +70,24 @@ describe('SimulatorEngine Physics & Determinism', () => {
     expect(sn105Health.signalRssiDbm).toBe(-128);
   });
 
-  it('validates all 80 generated telemetry channels satisfy the unified contract schema', () => {
+  it('validates all 96 generated telemetry channels (including crack extensometer) satisfy unified contract schema', () => {
     const engine = new SimulatorEngine(300, 'ESCALATING_MULTIMODAL_ANOMALY');
-    const { samples } = engine.generateTick();
+    const { samples, interNodeMovements } = engine.generateTick();
 
-    expect(samples.length).toBe(80); // 16 nodes * 5 channels
+    expect(samples.length).toBe(96); // 16 nodes * 6 channels (Tilt X/Y, Disp Z, Vib, Strain, Crack)
     for (const sample of samples) {
       expect(validateTelemetrySample(sample)).toBe(true);
       expect(sample.provenance).toBe('SIMULATED');
     }
+
+    // Verify crack channel presence
+    const crackSamples = samples.filter((s) => s.sensorType === 'crack');
+    expect(crackSamples.length).toBe(16);
+
+    // Verify inter-node relative movement calculation
+    expect(interNodeMovements).toBeDefined();
+    expect(interNodeMovements!.length).toBeGreaterThan(0);
+    expect(interNodeMovements![0].pairId).toBe('PAIR-101-102');
   });
 
   it('confirms all 9 scenario definitions are properly registered with DGMS guidelines', () => {

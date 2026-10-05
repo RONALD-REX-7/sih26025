@@ -20,6 +20,7 @@ export type SensorType =
   | 'displacement'
   | 'vibration'
   | 'strain'
+  | 'crack'
   | 'moisture'
   | 'pore_pressure'
   | 'acoustic_emission';
@@ -64,7 +65,7 @@ export const SENSOR_METADATA: Record<SensorType, SensorMetadata> = {
     warningThreshold: 60,
     criticalThreshold: 100,
     rateOfChangeLimitPerMinute: 3.5,
-    description: 'Surface crack / borehole displacement gauge measuring progressive subsidence',
+    description: 'Surface borehole displacement gauge measuring progressive subsidence',
   },
   vibration: {
     type: 'vibration',
@@ -85,6 +86,16 @@ export const SENSOR_METADATA: Record<SensorType, SensorMetadata> = {
     criticalThreshold: 2800,
     rateOfChangeLimitPerMinute: 150,
     description: 'Vibrating wire strain gauge installed on roof support pillars',
+  },
+  crack: {
+    type: 'crack',
+    displayName: 'Crack / Fissure Aperture Extensometer',
+    unit: 'mm',
+    nominalRange: [0.0, 1.5],
+    warningThreshold: 5.0,
+    criticalThreshold: 12.0,
+    rateOfChangeLimitPerMinute: 0.8,
+    description: 'Surface crack / fissure dilation gauge measuring tensile stratal separation (Prototype channel)',
   },
   moisture: {
     type: 'moisture',
@@ -133,9 +144,56 @@ export const DEMO_MINE_INFO = {
   defaultProvenance: 'DEMO' as DataProvenance,
 };
 
+// Regulatory reference mapping (CMR 2017 Reg 112 & Technical Circulars)
+// Note: Prototype threshold benchmarks for engineering decision support; not a legal compliance determination.
 export const DGMS_REGULATORY_THRESHOLDS = {
-  maxAllowableSubsidenceSlope: 3.0, // mm/m
-  criticalSubsidenceSlope: 10.0, // mm/m
+  maxAllowableSubsidenceSlope: 3.0, // mm/m (Warning indicator)
+  criticalSubsidenceSlope: 10.0, // mm/m (Evacuation indicator)
   maxAllowableHorizontalStrain: 2.0, // mm/m
   railwayProtectedMarginMeters: 45.0, // distance buffer
+  referenceRegulation: 'Coal Mines Regulations 2017, Regulation 112 (Subsidence Management)',
 };
+
+export interface InterNodePairConfig {
+  pairId: string;
+  nodeA: string;
+  nodeB: string;
+  baselineDistanceM: number;
+  criticalStrainDeltaMm: number;
+  description: string;
+}
+
+export const INTER_NODE_PAIRS: readonly InterNodePairConfig[] = [
+  {
+    pairId: 'PAIR-101-102',
+    nodeA: 'SN-101',
+    nodeB: 'SN-102',
+    baselineDistanceM: 42.5,
+    criticalStrainDeltaMm: 35.0,
+    description: 'Panel P-101 extraction rib boundary chord',
+  },
+  {
+    pairId: 'PAIR-102-103',
+    nodeA: 'SN-102',
+    nodeB: 'SN-103',
+    baselineDistanceM: 45.0,
+    criticalStrainDeltaMm: 38.0,
+    description: 'Panel P-101 central goaf depression chord',
+  },
+  {
+    pairId: 'PAIR-105-106',
+    nodeA: 'SN-105',
+    nodeB: 'SN-106',
+    baselineDistanceM: 48.0,
+    criticalStrainDeltaMm: 40.0,
+    description: 'Panel P-102 haulage incline protection chord',
+  },
+  {
+    pairId: 'PAIR-109-110',
+    nodeA: 'SN-109',
+    nodeB: 'SN-110',
+    baselineDistanceM: 50.0,
+    criticalStrainDeltaMm: 42.0,
+    description: 'Panel P-103 railway siding protective barrier chord',
+  },
+] as const;

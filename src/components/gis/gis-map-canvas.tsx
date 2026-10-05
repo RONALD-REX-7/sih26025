@@ -5,6 +5,8 @@ import { GisLayerId, GisInSarPoint } from '@/lib/domain/gis-types';
 import { GIS_BOUNDS, GIS_INSAR_POINTS, GIS_SUBSIDENCE_EVENTS } from '@/lib/data/gis-data';
 import { DEMO_PANELS, DEMO_NODES } from '@/lib/data/mock-data';
 import { RiskState } from '@/lib/domain/risk-states';
+import { INTER_NODE_PAIRS } from '@/lib/domain/constants';
+import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { Compass, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -30,6 +32,7 @@ export function GisMapCanvas({
   const [zoom, setZoom] = useState(1);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [hoveredInSar, setHoveredInSar] = useState<GisInSarPoint | null>(null);
+  const { interNodeMovements } = useSimulatorStore();
 
   // Geographic WGS84 to SVG Canvas transformation
   const width = 800;
@@ -119,6 +122,16 @@ export function GisMapCanvas({
               <stop offset="60%" stopColor="#f59e0b" stopOpacity="0.2" />
               <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
             </radialGradient>
+            {/* Arrowhead Markers for Deformation Vectors */}
+            <marker id="arrow-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444" />
+            </marker>
+            <marker id="arrow-orange" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#f97316" />
+            </marker>
+            <marker id="arrow-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#eab308" />
+            </marker>
           </defs>
 
           <rect width={width} height={height} fill="#0F1E2E" />
@@ -480,6 +493,100 @@ export function GisMapCanvas({
             </g>
           )}
 
+          {/* Inter-Node Movement Chords (Differential Strain Tracking) */}
+          <g>
+            {INTER_NODE_PAIRS.map((pair) => {
+              const nodeA = DEMO_NODES.find((n) => n.node_code === pair.nodeA);
+              const nodeB = DEMO_NODES.find((n) => n.node_code === pair.nodeB);
+              if (!nodeA || !nodeB) return null;
+              const x1 = lonToX(nodeA.longitude);
+              const y1 = latToY(nodeA.latitude);
+              const x2 = lonToX(nodeB.longitude);
+              const y2 = latToY(nodeB.latitude);
+              const liveMovement = interNodeMovements?.find((m) => m.pairId === pair.pairId);
+              const status = liveMovement?.status || 'STABLE';
+              const delta = liveMovement?.deltaMm ?? 0;
+              const chordColor = status === 'CRITICAL_SHEAR' ? '#ef4444' : status === 'DILATING' ? '#f97316' : '#10b981';
+
+              return (
+                <g key={pair.pairId}>
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke={chordColor}
+                    strokeWidth={status === 'CRITICAL_SHEAR' ? 2 : 1}
+                    strokeDasharray={status !== 'STABLE' ? '4,3' : '2,2'}
+                    strokeOpacity={0.75}
+                  />
+                  {status !== 'STABLE' && (
+                    <g transform={`translate(${(x1 + x2) / 2}, ${(y1 + y2) / 2 - 8})`}>
+                      <rect x="-32" y="-8" width="64" height="16" fill="#0f172a" stroke={chordColor} strokeWidth="1" rx="2" />
+                      <text x="0" y="3" fill={chordColor} fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
+                        {delta > 0 ? `+${delta.toFixed(1)}mm` : `${delta.toFixed(1)}mm`}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+
+          {/* Surface Crack Fissure Line (Active when P-101 is Warning or Critical) */}
+          {(liveRiskByNode['SN-102'] === 'Critical' || liveRiskByNode['SN-102'] === 'Warning') && (
+            <g>
+              <path
+                d="M 200,195 L 218,208 L 232,194 L 255,212 L 272,200 L 295,218"
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <rect x="210" y="172" width="168" height="18" fill="#0f172a" stroke="#ef4444" strokeWidth="1" rx="2" />
+              <text x="215" y="184" fill="#f87171" fontSize="9" fontFamily="monospace" fontWeight="bold">
+                CRACK FISSURE: 13.4mm [DETECTED]
+              </text>
+            </g>
+          )}
+
+          {/* Deformation Directional Vectors for Affected Nodes */}
+          {DEMO_NODES.filter((n) => liveRiskByNode[n.node_code] === 'Critical' || liveRiskByNode[n.node_code] === 'Warning').map((n) => {
+            const cx = lonToX(n.longitude);
+            const cy = latToY(n.latitude);
+            const risk = liveRiskByNode[n.node_code];
+            const markerId = risk === 'Critical' ? 'arrow-red' : 'arrow-orange';
+            const color = risk === 'Critical' ? '#ef4444' : '#f97316';
+            // Vector pointing inward toward goaf center (290, 225)
+            const targetX = cx + (290 - cx) * 0.45;
+            const targetY = cy + (225 - cy) * 0.45;
+
+            return (
+              <g key={`vec-${n.id}`}>
+                <line
+                  x1={cx}
+                  y1={cy}
+                  x2={targetX}
+                  y2={targetY}
+                  stroke={color}
+                  strokeWidth="2"
+                  markerEnd={`url(#${markerId})`}
+                />
+                <text
+                  x={targetX + 4}
+                  y={targetY + 4}
+                  fill={color}
+                  fontSize="8"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                >
+                  &Delta;z: -54mm
+                </text>
+              </g>
+            );
+          })}
+
           {/* Scale Bar & Compass Rose in Bottom Corner */}
           <g transform="translate(630, 505)">
             <rect x="0" y="0" width="130" height="28" fill="#0F1E2E" fillOpacity="0.95" stroke="#3a5a78" strokeWidth="0.8" rx="2" />
@@ -496,7 +603,7 @@ export function GisMapCanvas({
 
       {/* Map Legend Bar at Bottom */}
       <div className="px-3 py-2 border-t border-[#D7DEDC] bg-[#F8FAF9] text-xs font-mono-tech text-[#1D2933] flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <span className="font-semibold text-[#173B57]">STATUS:</span>
           <span className="flex items-center gap-1.5 text-xs text-[#52606D]">
             <span className="w-2.5 h-2.5 rounded-full bg-[#2F6B4F] inline-block" />
@@ -519,13 +626,21 @@ export function GisMapCanvas({
             Critical
           </span>
           <span className="flex items-center gap-1.5 text-xs text-[#52606D]">
-            <span className="w-3.5 h-1 bg-[#A85A00] inline-block" />
-            Railway 45m Reserve
+            <span className="w-3.5 h-0.5 border-t border-dashed border-[#f97316] inline-block" />
+            Inter-Node Chord
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-[#52606D]">
+            <span className="text-[#ef4444] font-bold">&rarr;</span>
+            Deform Vector
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-[#52606D]">
+            <span className="text-[#ef4444] font-bold">&sim;</span>
+            Crack Fissure
           </span>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-[#74808A]">
-          <span>Click any station or event marker to inspect</span>
+          <span>WGS84 EPSG:4326 &bull; Geodetic Subterranean Coordinate Space (SIMULATED)</span>
         </div>
       </div>
     </div>

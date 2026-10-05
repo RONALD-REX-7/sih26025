@@ -19,7 +19,7 @@ interface TransducerRecord {
   sensorCode: string;
   nodeCode: string;
   panelCode: string;
-  transducerType: 'TILT_X' | 'TILT_Y' | 'DISP_Z' | 'VIB_RMS' | 'STRAIN';
+  transducerType: 'TILT_X' | 'TILT_Y' | 'DISP_Z' | 'VIB_RMS' | 'STRAIN' | 'CRACK';
   transducerModel: string;
   unit: string;
   nominalValue: number;
@@ -42,6 +42,7 @@ const TRANSDUCER_CONFIGS: Array<{
   { type: 'DISP_Z', model: 'LVDT Borehole Rod Extensometer', unit: 'mm', nominal: 18.5 },
   { type: 'VIB_RMS', model: 'GS-14-L3 14Hz Velocity Geophone', unit: 'mm/s', nominal: 1.2 },
   { type: 'STRAIN', model: 'Vibrating Wire Embedment Gauge 4000', unit: 'µε', nominal: 420.0 },
+  { type: 'CRACK', model: 'Surface Fissure Wire Extensometer', unit: 'mm', nominal: 0.25 },
 ];
 
 export default function SensorsPage() {
@@ -171,11 +172,11 @@ export default function SensorsPage() {
       )}
 
       {/* Summary Metrology Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono-tech text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono-tech text-xs">
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
           <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Total Channels</div>
           <div className="text-lg font-bold text-[#1D2933] mt-0.5">
-            80 <span className="text-xs font-normal text-[#52606D]">channels</span>
+            96 <span className="text-xs font-normal text-[#52606D]">channels</span>
           </div>
         </div>
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
@@ -188,6 +189,12 @@ export default function SensorsPage() {
           <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Borehole Anchors</div>
           <div className="text-lg font-bold text-[#1D2933] mt-0.5">
             16 <span className="text-xs font-normal text-[#52606D]">Extensometers</span>
+          </div>
+        </div>
+        <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
+          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Crack Extensometers</div>
+          <div className="text-lg font-bold text-[#1D2933] mt-0.5">
+            16 <span className="text-xs font-normal text-[#52606D]">Fissure Gauges</span>
           </div>
         </div>
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
@@ -233,7 +240,7 @@ export default function SensorsPage() {
 
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-mono-tech text-[#52606D]">Type:</span>
-            {['ALL', 'TILT_X', 'DISP_Z', 'VIB_RMS', 'STRAIN'].map((type) => (
+            {['ALL', 'TILT_X', 'DISP_Z', 'CRACK', 'VIB_RMS', 'STRAIN'].map((type) => (
               <button
                 key={type}
                 type="button"

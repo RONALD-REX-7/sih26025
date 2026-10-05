@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Layers, Cpu, Database, Radio, ShieldCheck, FileCode, ArrowLeft, Code2, Scale } from 'lucide-react';
+import { Layers, Cpu, Database, Radio, ShieldCheck, FileCode, ArrowLeft, Code2, Scale, GitBranch, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 
@@ -15,7 +15,7 @@ export default function TransparencyPage() {
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#52606D] flex items-center gap-1.5">
               <Code2 className="h-4 w-4 text-[#173B57]" />
-              Engineering Transparency &bull; Open Architecture
+              Engineering Transparency &bull; Open Architecture &bull; SIH26025
             </span>
             <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
@@ -23,7 +23,7 @@ export default function TransparencyPage() {
             System Transparency, Data Provenance &amp; Attributions
           </h1>
           <p className="text-xs text-[#52606D] mt-1">
-            Complete technical disclosure of architecture tiers, dependency licensing, data classification, and statutory benchmarks.
+            Complete technical disclosure of 12-stage data pipeline, audited hardware BOM claims, dependency licensing, and defensible regulatory references.
           </p>
         </div>
 
@@ -87,12 +87,119 @@ export default function TransparencyPage() {
               Tier 4: Statutory Operations &amp; Vector GIS
             </div>
             <p className="text-[#52606D] leading-relaxed">
-              Provides 14 operational surveillance views, a Canvas 2D vector GIS displaying cadastral mine panels and surface railways, Web Audio emergency sirens, and statutory shift handover logs compliant with <strong>DGMS CMR 2017 Regulation 112</strong>.
+              Provides 14 operational surveillance views, a Canvas 2D vector GIS displaying cadastral mine panels and surface railways, Web Audio emergency sirens, and statutory shift handover logs aligned with <strong>DGMS CMR 2017 Regulation 112</strong>.
             </p>
             <div className="font-mono-tech text-[11px] text-[#1D2933] pt-1 border-t border-[#D7DEDC]">
               Cryptographic Audit: SHA-256 Hashed Operational Shift Ledger
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Section 1B: End-to-End 12-Stage Technical Data Flow Panel (Requirement 18) */}
+      <section className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-5 space-y-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D7DEDC] pb-2">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[#173B57] flex items-center gap-2">
+            <GitBranch className="h-4 w-4 text-[#173B57]" />
+            1B. Comprehensive 12-Stage Technical Data-Flow Architecture
+          </h2>
+          <span className="text-[11px] font-mono-tech text-[#52606D]">
+            Physical Edge &rarr; Processing &rarr; Decision Support
+          </span>
+        </div>
+
+        <p className="text-xs text-[#52606D] leading-relaxed">
+          The following pipeline describes the complete MineGuard technical data flow. To uphold engineering honesty, each stage is explicitly classified as <strong>IMPLEMENTED</strong> (demonstrated in software/prototype), <strong>SIMULATED</strong>, or <strong>REFERENCE ARCHITECTURE</strong> (planned physical deployment).
+        </p>
+
+        <div className="space-y-2 text-xs font-mono-tech">
+          {[
+            {
+              stage: '01. SENSOR NODE',
+              desc: 'Subsurface/surface instrument station with ESP32-S3 dual-core microcontroller and sensor power gating.',
+              tag: 'PROTOTYPE BENCH TESTED',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '02. DATA ACQUISITION',
+              desc: '24-bit delta-sigma ADC (TI ADS1220) for vibrating wire transducers + 0.01° BNO085 biaxial inclinometer.',
+              tag: 'VERIFIED DATASHEET',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '03. WIRELESS LINK',
+              desc: 'Sub-GHz LoRa (IN865 band, SX1262) point-to-point transmission with experimental multi-hop surface relay.',
+              tag: 'SIMULATED IN SOFTWARE (RELAY)',
+              tagColor: 'bg-[#FBF6E9] text-[#9A6A00] border-[#9A6A00]/30',
+            },
+            {
+              stage: '04. EDGE GATEWAY',
+              desc: 'Colliery surface LoRaWAN concentrator (SX1302) with cellular/Ethernet backhaul connection.',
+              tag: 'REFERENCE ARCHITECTURE',
+              tagColor: 'bg-[#EDF1F0] text-[#52606D] border-[#D7DEDC]',
+            },
+            {
+              stage: '05. LOCAL BUFFER',
+              desc: 'Store-and-forward edge buffer and browser-side IndexedDB local queue for zero-data-loss offline operation.',
+              tag: 'IMPLEMENTED (LOCAL-FIRST)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '06. SERVER INGESTION',
+              desc: 'Next.js API route handler (/api/telemetry/ingest) with Zod contract validation and CRC-16 checksum verification.',
+              tag: 'IMPLEMENTED (HTTPS API)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '07. FEATURE EXTRACTION',
+              desc: 'Temporal moving averages, baseline EWMA (α=0.20), and 50-sample rolling median absolute deviation (MAD).',
+              tag: 'IMPLEMENTED (EXPLAINABLE)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '08. ANOMALY DETECTION',
+              desc: 'Robust Z-score (|z| > 2.5) outlier thresholding and rate-of-change transient blasting spike rejection filter.',
+              tag: 'IMPLEMENTED (AI/STAT)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '09. SENSOR FUSION',
+              desc: 'Multi-modal concordance (tilt + displacement + vibration + strain + crack) and Pearson bivariate spatial correlation.',
+              tag: 'IMPLEMENTED (SPATIAL)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '10. RISK FORECAST',
+              desc: 'Short-horizon (+30s / +60s) velocity drift projection providing early warning trend before threshold breach.',
+              tag: 'IMPLEMENTED (PROTOTYPE FORECAST)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '11. RISK CLASSIFICATION',
+              desc: 'Deterministic 5-state risk categorization (Normal, Advisory, Watch, Warning, Critical) across colliery panels.',
+              tag: 'IMPLEMENTED (DETERMINISTIC)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+            {
+              stage: '12. ACTION & STATUTORY AUDIT',
+              desc: 'In-app notification, Web Audio acoustic sirens, role perspective views, and SHA-256 statutory shift logs.',
+              tag: 'IMPLEMENTED (AUDITABLE)',
+              tagColor: 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]/30',
+            },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="p-2.5 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+            >
+              <div className="flex items-start sm:items-center gap-2">
+                <span className="font-bold text-[#173B57] min-w-[140px] shrink-0">{item.stage}</span>
+                <span className="text-[#52606D] text-[11px] font-sans">{item.desc}</span>
+              </div>
+              <span className={`px-2 py-0.5 rounded-xs text-[10px] font-bold border shrink-0 ${item.tagColor}`}>
+                {item.tag}
+              </span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -196,34 +303,36 @@ export default function TransparencyPage() {
                 <td className="p-2 font-bold text-[#1D2933]">Zustand</td>
                 <td className="p-2">5.0.15</td>
                 <td className="p-2 text-[#2F6B4F]">MIT</td>
-                <td className="p-2 text-[#52606D] font-sans">High-performance reactive state store for simulation &amp; alerts</td>
-              </tr>
-              <tr>
-                <td className="p-2 font-bold text-[#1D2933]">IBM Plex Sans &amp; Mono</td>
-                <td className="p-2">Google Fonts</td>
-                <td className="p-2 text-[#2F6B4F]">SIL OFL 1.1</td>
-                <td className="p-2 text-[#52606D] font-sans">Self-hosted industrial typography bundled at build time</td>
+                <td className="p-2 text-[#52606D] font-sans">High-performance reactive state store for simulation, offline &amp; alerts</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      {/* Section 4: Hardware BOM & Low-Cost Verification */}
+      {/* Section 4: Hardware BOM & Quantitative Claim Sanity Check (Requirement 15) */}
       <section className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-5 space-y-3 shadow-xs">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-[#173B57] flex items-center gap-2 border-b border-[#D7DEDC] pb-2">
-          <Cpu className="h-4 w-4 text-[#173B57]" />
-          4. Hardware Bill of Materials (BOM) &amp; Cost Analysis
-        </h2>
-        <p className="text-xs text-[#52606D]">
-          Commercial underground monitoring stations imported from overseas cost between <strong>₹1,50,000 to ₹4,50,000 per station</strong>. MINE GUARD achieves an open-architecture fabricated unit cost of <strong>₹4,850 (~$58 USD)</strong>:
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D7DEDC] pb-2">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[#173B57] flex items-center gap-2">
+            <Cpu className="h-4 w-4 text-[#173B57]" />
+            4. Hardware Bill of Materials (BOM) &amp; Cost Analysis
+          </h2>
+          <span className="text-[11px] font-mono-tech text-[#52606D]">
+            Target Cost: &lt; ₹5,000 / Station
+          </span>
+        </div>
+
+        <p className="text-xs text-[#52606D] leading-relaxed">
+          Commercial imported underground monitoring systems are estimated at <strong>₹1.5L to ₹4.5L per multi-point installation</strong> based on public mining equipment procurement benchmarks. MineGuard achieves an open-architecture fabricated target unit cost of <strong>₹4,850 (~$58 USD)</strong>. Every quantitative claim below has been audited and classified:
         </p>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border border-[#D7DEDC] rounded-sm font-mono-tech text-[11px]">
             <thead className="bg-[#F8FAF9] text-[#52606D] border-b border-[#D7DEDC]">
               <tr>
                 <th className="p-2">Subsystem</th>
                 <th className="p-2">Component Selection</th>
+                <th className="p-2">Claim Classification</th>
                 <th className="p-2 text-right">Cost (INR)</th>
                 <th className="p-2 text-right">Cost (USD)</th>
               </tr>
@@ -231,36 +340,61 @@ export default function TransparencyPage() {
             <tbody className="divide-y divide-[#D7DEDC]">
               <tr>
                 <td className="p-2 font-semibold text-[#1D2933]">Processing &amp; LoRa RF</td>
-                <td className="p-2 text-[#52606D]">ESP32-S3-WROOM-1 (16MB Flash) + Semtech SX1262 (IN865)</td>
+                <td className="p-2 text-[#52606D]">ESP32-S3 (16MB Flash) + Semtech SX1262 (IN865)</td>
+                <td className="p-2">
+                  <span className="px-1.5 py-0.5 rounded-xs bg-[#EAF2ED] text-[#2F6B4F] font-bold text-[10px]">
+                    VERIFIED DATASHEET
+                  </span>
+                </td>
                 <td className="p-2 text-right font-bold">₹ 1,180</td>
                 <td className="p-2 text-right">$ 14.20</td>
               </tr>
               <tr>
                 <td className="p-2 font-semibold text-[#1D2933]">Transducers &amp; 24-Bit ADC</td>
                 <td className="p-2 text-[#52606D]">BNO085 0.01&deg; Inclinometer + TI ADS1220 24-bit ADC + Piezo</td>
+                <td className="p-2">
+                  <span className="px-1.5 py-0.5 rounded-xs bg-[#EAF2ED] text-[#2F6B4F] font-bold text-[10px]">
+                    VERIFIED DATASHEET
+                  </span>
+                </td>
                 <td className="p-2 text-right font-bold">₹ 1,420</td>
                 <td className="p-2 text-right">$ 17.10</td>
               </tr>
               <tr>
                 <td className="p-2 font-semibold text-[#1D2933]">Power Conditioning</td>
-                <td className="p-2 text-[#52606D]">3.2V 3200mAh LiFePO4 cell + TI TPS7A2533 Ultra-low noise LDO</td>
+                <td className="p-2 text-[#52606D]">3.2V 3200mAh LiFePO4 + TI TPS7A2533 Ultra-low noise LDO</td>
+                <td className="p-2">
+                  <span className="px-1.5 py-0.5 rounded-xs bg-[#FBF6E9] text-[#9A6A00] font-bold text-[10px]">
+                    ENGINEERING ASSUMPTION
+                  </span>
+                </td>
                 <td className="p-2 text-right font-bold">₹ 680</td>
                 <td className="p-2 text-right">$ 8.20</td>
               </tr>
               <tr>
                 <td className="p-2 font-semibold text-[#1D2933]">Enclosure &amp; Mount</td>
                 <td className="p-2 text-[#52606D]">IP68 Die-cast enclosure + SS304 22mm rockbolt bracket clamp</td>
+                <td className="p-2">
+                  <span className="px-1.5 py-0.5 rounded-xs bg-[#EDF1F0] text-[#173B57] font-bold text-[10px]">
+                    PROTOTYPE RESULT
+                  </span>
+                </td>
                 <td className="p-2 text-right font-bold">₹ 1,150</td>
                 <td className="p-2 text-right">$ 13.85</td>
               </tr>
               <tr>
                 <td className="p-2 font-semibold text-[#1D2933]">PCB &amp; Hardware Glands</td>
                 <td className="p-2 text-[#52606D]">4-Layer FR4 1.6mm PCB + M12 IP68 brass cable glands</td>
+                <td className="p-2">
+                  <span className="px-1.5 py-0.5 rounded-xs bg-[#EDF1F0] text-[#173B57] font-bold text-[10px]">
+                    PROTOTYPE RESULT
+                  </span>
+                </td>
                 <td className="p-2 text-right font-bold">₹ 420</td>
                 <td className="p-2 text-right">$ 5.05</td>
               </tr>
               <tr className="bg-[#F8FAF9] font-bold text-xs text-[#173B57]">
-                <td className="p-2.5" colSpan={2}>Total Fabricated Unit Production Cost</td>
+                <td className="p-2.5" colSpan={3}>Total Fabricated Unit Production Target</td>
                 <td className="p-2.5 text-right font-mono-tech text-sm">₹ 4,850</td>
                 <td className="p-2.5 text-right font-mono-tech text-sm">$ 58.40</td>
               </tr>
@@ -269,27 +403,50 @@ export default function TransparencyPage() {
         </div>
       </section>
 
-      {/* Section 5: Statutory & Scientific Citations */}
+      {/* Section 5: Defensible Statutory References & Legal Disclaimer (Requirement 14) */}
       <section className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-5 space-y-3 shadow-xs">
         <h2 className="text-sm font-bold uppercase tracking-wider text-[#173B57] flex items-center gap-2 border-b border-[#D7DEDC] pb-2">
           <FileCode className="h-4 w-4 text-[#173B57]" />
-          5. Statutory References &amp; Technical Citations
+          5. Statutory References &amp; Regulatory Truthfulness
         </h2>
+
+        {/* Defensibility Notice */}
+        <div className="p-3 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] text-xs text-[#52606D] leading-relaxed">
+          <strong className="text-[#1D2933]">Statutory Disclosure:</strong> MineGuard is an engineering prototype developed for Smart India Hackathon 2026 (SIH26025). The software maps operational workflows to selected statutory parameters. This platform does not claim official certification or statutory compliance determinations by the Directorate General of Mines Safety (DGMS). All references below serve as technical baselines:
+        </div>
+
         <ul className="space-y-2 text-xs text-[#52606D]">
-          <li className="p-2 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC]">
-            <strong>DGMS CMR 2017 Regulation 112:</strong> Strata Control and Monitoring Plan (SCAMP) statutory guidelines for underground coal workings.
+          <li className="p-2.5 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] flex items-start gap-2">
+            <ShieldCheck className="h-4 w-4 text-[#2F6B4F] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-[#1D2933]">DGMS Coal Mines Regulations (CMR) 2017 &bull; Regulation 112:</strong>{' '}
+              Strata Control and Monitoring Plan (SCAMP) guidelines requiring systematic monitoring of roof convergence, pillar strain, and early warning procedures in depillaring districts.
+            </div>
           </li>
-          <li className="p-2 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC]">
-            <strong>DGMS Technical Circular (Coal) No. 04 of 2017:</strong> Instrumental monitoring of strata behavior in depillaring panels.
+          <li className="p-2.5 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] flex items-start gap-2">
+            <ShieldCheck className="h-4 w-4 text-[#2F6B4F] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-[#1D2933]">DGMS Technical Circular (Coal) No. 04 of 2017:</strong>{' '}
+              Instrumental monitoring recommendations for strata behavior in continuous miner and depillaring operations.
+            </div>
           </li>
-          <li className="p-2 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC]">
-            <strong>IS/IEC 60079-11:</strong> Explosive atmospheres — Equipment protection by intrinsic safety &apos;i&apos; standard.
+          <li className="p-2.5 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] flex items-start gap-2">
+            <ShieldCheck className="h-4 w-4 text-[#2F6B4F] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-[#1D2933]">IS/IEC 60079-11 Standard:</strong>{' '}
+              Explosive atmospheres — Equipment protection by intrinsic safety &lsquo;i&rsquo; baseline for underground coal mine telemetry transceivers.
+            </div>
           </li>
-          <li className="p-2 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC]">
-            <strong>CMPDI Subsidence Prediction Guidelines:</strong> Empirical angle of draw (32&deg;) and trough profile parameters for Jharia Coalfield Barakar measures.
+          <li className="p-2.5 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] flex items-start gap-2">
+            <ShieldCheck className="h-4 w-4 text-[#2F6B4F] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-[#1D2933]">CMPDI Subsidence Prediction Reference:</strong>{' '}
+              Empirical angle of draw (32&deg;) and trough profile calculations for Jharia Coalfield Barakar measures used as benchmark comparison.
+            </div>
           </li>
         </ul>
       </section>
     </div>
   );
 }
+

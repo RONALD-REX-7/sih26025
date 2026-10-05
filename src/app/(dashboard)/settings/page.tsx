@@ -31,7 +31,7 @@ export default function SettingsPage() {
             </span>
             <ProvenanceBadge provenance="DEMO" size="sm" />
             <span className="px-2 py-0.5 rounded-sm text-xs font-mono-tech font-semibold bg-[#EAF2ED] text-[#2F6B4F] border border-[#2F6B4F]/30">
-              CMR 2017 Reg 112 Compliant
+              CMR 2017 Reg 112 Reference
             </span>
           </div>
           <h1 className="text-lg font-bold tracking-tight text-[#1D2933]">

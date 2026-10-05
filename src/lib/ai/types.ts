@@ -12,6 +12,7 @@
 import { RiskState } from '@/lib/domain/risk-states';
 import { DataProvenance } from '@/lib/domain/provenance';
 import { SensorType } from '@/lib/domain/constants';
+import { ShortHorizonForecast } from '@/lib/domain/types';
 
 export type AnomalyType =
   | 'SPIKE'
@@ -79,6 +80,7 @@ export interface RiskEvidence {
     | 'WARNING_THRESHOLD'
     | 'CRITICAL_THRESHOLD';
   contributingFactors: ContributingFactor[];
+  forecast?: ShortHorizonForecast;
 }
 
 export interface RiskAssessmentEvent {
@@ -90,6 +92,7 @@ export interface RiskAssessmentEvent {
   confidence: number;
   score: number; // 0.0 (Normal) to 1.0 (Critical)
   evidence: RiskEvidence;
+  forecast?: ShortHorizonForecast;
   modelVersion: string;
   provenance: DataProvenance;
 }

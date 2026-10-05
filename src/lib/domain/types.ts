@@ -229,3 +229,30 @@ export interface AuditEntry {
   ip_address?: string | null;
   created_at: string;
 }
+
+export type InterNodeStrainStatus = 'STABLE' | 'DILATING' | 'COMPRESSING' | 'CRITICAL_SHEAR';
+
+export interface InterNodeMovement {
+  pairId: string;
+  nodeA: string;
+  nodeB: string;
+  baselineDistanceM: number;
+  currentDistanceM: number;
+  deltaMm: number; // relative change in distance
+  rateOfChangeMmPerMin: number;
+  status: InterNodeStrainStatus;
+  provenance: DataProvenance;
+}
+
+export interface ShortHorizonForecast {
+  currentRiskScore: number; // 0.0 to 1.0
+  projectedRiskScore30s: number;
+  projectedRiskScore60s: number;
+  trendDirection: 'STABLE' | 'SLOWLY_ELEVATING' | 'RAPIDLY_ACCELERATING' | 'DE-ESCALATING';
+  projectedRiskState: RiskState;
+  forecastConfidence: number; // 0.0 to 1.0 (illustrative demo-model confidence)
+  timeToWarningThresholdSec: number | null;
+  timeToCriticalThresholdSec: number | null;
+  provenance: DataProvenance;
+}
+

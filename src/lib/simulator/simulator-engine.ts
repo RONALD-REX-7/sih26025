@@ -10,6 +10,8 @@ import { SimulationScenarioId, SCENARIO_DEFINITIONS } from './scenario-definitio
 import { NormalizedTelemetrySample, NodeHealthSample } from '@/lib/telemetry/types';
 import { RiskState } from '@/lib/domain/risk-states';
 import { DEMO_NODES } from '@/lib/data/mock-data';
+import { INTER_NODE_PAIRS } from '@/lib/domain/constants';
+import { InterNodeMovement, InterNodeStrainStatus } from '@/lib/domain/types';
 
 export interface SimulationState {
   scenarioId: SimulationScenarioId;
@@ -20,12 +22,14 @@ export interface SimulationState {
   affectedNodeCodes: string[];
   currentRiskState: RiskState;
   activeEventsCount: number;
+  interNodeMovements?: InterNodeMovement[];
 }
 
 export type SimulationTickListener = (
   samples: NormalizedTelemetrySample[],
   healths: NodeHealthSample[],
-  state: SimulationState
+  state: SimulationState,
+  interNodeMovements?: InterNodeMovement[]
 ) => void;
 
 export class SimulatorEngine {
@@ -41,6 +45,7 @@ export class SimulatorEngine {
     DISP_Z: { value: 18.5, stdDev: 0.15, unit: 'mm' },
     VIB_RMS: { value: 1.2, stdDev: 0.20, unit: 'mm/s' },
     STRAIN: { value: 420.0, stdDev: 5.0, unit: 'microstrain' },
+    CRACK: { value: 0.25, stdDev: 0.04, unit: 'mm' },
   };
 
   constructor(initialSeed = 1025, initialScenario: SimulationScenarioId = 'NORMAL_BASELINE') {
@@ -55,6 +60,7 @@ export class SimulatorEngine {
       affectedNodeCodes: [...def.affectedNodeCodes],
       currentRiskState: 'Normal',
       activeEventsCount: 0,
+      interNodeMovements: [],
     };
   }
 
@@ -153,7 +159,11 @@ export class SimulatorEngine {
   /**
    * Generates a single deterministic tick of data across all 16 nodes and channels
    */
-  public generateTick(): { samples: NormalizedTelemetrySample[]; healths: NodeHealthSample[] } {
+  public generateTick(): {
+    samples: NormalizedTelemetrySample[];
+    healths: NodeHealthSample[];
+    interNodeMovements: InterNodeMovement[];
+  } {
     const timestamp = new Date(Date.now() + this.state.elapsedSec * 1000).toISOString();
     const t = this.state.elapsedSec;
     const samples: NormalizedTelemetrySample[] = [];
@@ -185,8 +195,8 @@ export class SimulatorEngine {
         provenance: 'SIMULATED',
       });
 
-      // Transducer Channels
-      const channels = ['TILT_X', 'TILT_Y', 'DISP_Z', 'VIB_RMS', 'STRAIN'];
+      // Transducer Channels (6 Channels per node)
+      const channels = ['TILT_X', 'TILT_Y', 'DISP_Z', 'VIB_RMS', 'STRAIN', 'CRACK'];
 
       for (const ch of channels) {
         const base = this.BASELINE_VALUES[ch];
@@ -221,14 +231,16 @@ export class SimulatorEngine {
               if (ch === 'DISP_Z') val += flex;
               if (ch === 'TILT_X') val += flex * 3.8;
               if (ch === 'STRAIN') val += flex * 25.0;
+              if (ch === 'CRACK') val += flex * 0.16;
               break;
             }
 
             case 'CRACK_PROGRESS': {
-              // Stepped displacement jump at t=35s
+              // Stepped displacement and fissure aperture jump at t=35s
               if (t >= 35) {
                 if (ch === 'DISP_Z') val += 5.4;
                 if (ch === 'STRAIN') val += 185.0;
+                if (ch === 'CRACK') val += 5.2; // Dilation to ~5.4mm
               }
               if (t >= 35 && t <= 40 && ch === 'VIB_RMS') {
                 val += 4.8; // Acoustic burst
@@ -243,16 +255,19 @@ export class SimulatorEngine {
               if (ch === 'DISP_Z') val += troughDisp;
               if (ch === 'TILT_X') val += troughDisp * 2.8;
               if (ch === 'STRAIN') val += troughDisp * 18.0;
+              if (ch === 'CRACK') val += troughDisp * 0.12;
               break;
             }
 
             case 'ESCALATING_MULTIMODAL_ANOMALY': {
-              if (t >= 30) {
-                const stage = Math.min((t - 30) / 120, 1.0);
-                if (ch === 'TILT_X') val += stage * 65.0; // slope elevation
-                if (ch === 'DISP_Z') val += stage * 36.0; // crosses 50mm
-                if (ch === 'VIB_RMS') val += stage * 5.2;
-                if (ch === 'STRAIN') val += stage * 450.0;
+              if (t >= 15) {
+                // Progressive 60-second hazard ramp
+                const stage = Math.min((t - 15) / 45, 1.0); // full peak at T+60
+                if (ch === 'TILT_X') val += stage * 68.0; // slope elevation
+                if (ch === 'DISP_Z') val += stage * 36.5; // reaches 55mm
+                if (ch === 'VIB_RMS') val += stage * 5.4;
+                if (ch === 'STRAIN') val += stage * 460.0;
+                if (ch === 'CRACK') val += stage * 13.2; // reaches 13.4mm critical fissure opening
               }
               break;
             }
@@ -262,6 +277,7 @@ export class SimulatorEngine {
               const decay = Math.exp(-t / 25.0);
               if (ch === 'DISP_Z') val = base.value + 8.0 * decay;
               if (ch === 'VIB_RMS') val = Math.max(base.value * decay, 0.8);
+              if (ch === 'CRACK') val = base.value + 1.2 * decay;
               break;
             }
           }
@@ -270,7 +286,18 @@ export class SimulatorEngine {
         samples.push({
           nodeId: node.node_code,
           sensorCode: `${node.node_code}-${ch}`,
-          sensorType: ch === 'TILT_X' ? 'tilt_x' : ch === 'TILT_Y' ? 'tilt_y' : ch === 'DISP_Z' ? 'displacement' : ch === 'VIB_RMS' ? 'vibration' : 'strain',
+          sensorType:
+            ch === 'TILT_X'
+              ? 'tilt_x'
+              : ch === 'TILT_Y'
+              ? 'tilt_y'
+              : ch === 'DISP_Z'
+              ? 'displacement'
+              : ch === 'VIB_RMS'
+              ? 'vibration'
+              : ch === 'CRACK'
+              ? 'crack'
+              : 'strain',
           timestamp,
           value: parseFloat(val.toFixed(2)),
           rawAdc: Math.floor(Math.min(Math.max((val + 50) * 30, 0), 4095)),
@@ -283,15 +310,61 @@ export class SimulatorEngine {
       }
     }
 
+    // Inter-Node Relative Movement Computation across configured pairs
+    const interNodeMovements: InterNodeMovement[] = [];
+    for (const pair of INTER_NODE_PAIRS) {
+      const isAffectedA = this.state.affectedNodeCodes.includes(pair.nodeA);
+      const isAffectedB = this.state.affectedNodeCodes.includes(pair.nodeB);
+
+      let deltaMm = (this.prng.next() - 0.5) * 0.4; // baseline ambient fluctuation
+
+      if (isAffectedA || isAffectedB) {
+        if (this.state.scenarioId === 'CRACK_PROGRESS' && t >= 35) {
+          deltaMm += 6.8;
+        } else if (this.state.scenarioId === 'ESCALATING_MULTIMODAL_ANOMALY' && t >= 15) {
+          const stage = Math.min((t - 15) / 45, 1.0);
+          deltaMm += stage * 26.5; // up to 26.5mm relative dilation
+        } else if (this.state.scenarioId === 'GRADUAL_DEFORMATION') {
+          const flex = 14.0 / (1.0 + Math.exp(-0.06 * (t - 60)));
+          deltaMm += flex;
+        } else if (this.state.scenarioId === 'MULTI_NODE_CORRELATED_DEFORMATION') {
+          deltaMm += (t * 0.09);
+        }
+      }
+
+      deltaMm = parseFloat(deltaMm.toFixed(2));
+      const currentDistanceM = parseFloat((pair.baselineDistanceM + deltaMm / 1000).toFixed(4));
+      const rateOfChangeMmPerMin = parseFloat((deltaMm / Math.max(t / 60, 0.2)).toFixed(2));
+
+      let status: InterNodeStrainStatus = 'STABLE';
+      if (deltaMm >= pair.criticalStrainDeltaMm || deltaMm >= 22.0) status = 'CRITICAL_SHEAR';
+      else if (deltaMm >= 8.0) status = 'DILATING';
+      else if (deltaMm <= -4.0) status = 'COMPRESSING';
+
+      interNodeMovements.push({
+        pairId: pair.pairId,
+        nodeA: pair.nodeA,
+        nodeB: pair.nodeB,
+        baselineDistanceM: pair.baselineDistanceM,
+        currentDistanceM,
+        deltaMm,
+        rateOfChangeMmPerMin,
+        status,
+        provenance: 'SIMULATED',
+      });
+    }
+
+    this.state.interNodeMovements = interNodeMovements;
+
     // Broadcast tick to all engine listeners
     for (const listener of this.listeners) {
       try {
-        listener(samples, healths, this.getState());
+        listener(samples, healths, this.getState(), interNodeMovements);
       } catch (err) {
         console.error('SimulatorEngine listener error:', err);
       }
     }
 
-    return { samples, healths };
+    return { samples, healths, interNodeMovements };
   }
 }

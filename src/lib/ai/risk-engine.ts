@@ -38,6 +38,7 @@ const BASELINE_METRICS: Record<string, { mean: number; stdDev: number; unit: str
   DISP_Z: { mean: 18.5, stdDev: 0.15, unit: 'mm' },
   VIB_RMS: { mean: 1.2, stdDev: 0.20, unit: 'mm/s' },
   STRAIN: { mean: 420.0, stdDev: 5.0, unit: 'microstrain' },
+  CRACK: { mean: 0.25, stdDev: 0.04, unit: 'mm' },
 };
 
 // Panel Topologies for underground coal seams
@@ -251,6 +252,23 @@ export class RiskEngine {
       isAnomaly = true;
       anomalyType = 'PERSISTENT_BIAS';
       severity = sample.value > 800 ? 'high' : 'medium';
+    } else if (metric === 'CRACK') {
+      if (sample.value > 12.0) {
+        isAnomaly = true;
+        anomalyType = 'DGMS_THRESHOLD_EXCEEDED';
+        severity = 'critical';
+        confidence = 0.98;
+      } else if (sample.value > 5.0) {
+        isAnomaly = true;
+        anomalyType = 'DGMS_THRESHOLD_EXCEEDED';
+        severity = 'high';
+        confidence = 0.94;
+      } else if (sample.value > 1.5 || absZ >= 3.0) {
+        isAnomaly = true;
+        anomalyType = Math.abs(stats.rateOfChange) > 0.1 ? 'RATE_OF_CHANGE' : 'PERSISTENT_BIAS';
+        severity = 'medium';
+        confidence = 0.88;
+      }
     }
 
     if (isAnomaly) {
@@ -347,12 +365,14 @@ export class RiskEngine {
     }
 
     // 3. Compute Modality Agreement Score (0.0 to 1.0)
-    // Geotechnical displacement events correlate Displacement + Tilt + Strain
+    // Geotechnical subsidence events correlate Displacement + Tilt + Strain + Crack Dilation
     let hasHighDisplacement = false;
     let hasHighTilt = false;
     let hasHighStrain = false;
+    let hasHighCrack = false;
     let hasHighVibration = false;
     let maxDispValue = 18.5;
+    let maxCrackValue = 0.25;
     let maxPersistenceSec = 0;
     let epicenterNode = 'SN-102';
 
@@ -365,6 +385,10 @@ export class RiskEngine {
         hasHighDisplacement = true;
         if (record.value > maxDispValue) maxDispValue = record.value;
       }
+      if (record.sensorType === 'crack') {
+        hasHighCrack = true;
+        if (record.value > maxCrackValue) maxCrackValue = record.value;
+      }
       if (record.sensorType === 'tilt_x' || record.sensorType === 'tilt_y') {
         hasHighTilt = true;
       }
@@ -376,13 +400,16 @@ export class RiskEngine {
       }
     }
 
-    // Agreement calculation
+    // Agreement calculation (concordance across geotechnical modalities)
     let modalityAgreementScore = 0.0;
     const geotechnicalModalityCount =
-      (hasHighDisplacement ? 1 : 0) + (hasHighTilt ? 1 : 0) + (hasHighStrain ? 1 : 0);
+      (hasHighDisplacement ? 1 : 0) +
+      (hasHighTilt ? 1 : 0) +
+      (hasHighStrain ? 1 : 0) +
+      (hasHighCrack ? 1 : 0);
 
-    if (geotechnicalModalityCount === 3) modalityAgreementScore = 0.95;
-    else if (geotechnicalModalityCount === 2) modalityAgreementScore = 0.75;
+    if (geotechnicalModalityCount >= 3) modalityAgreementScore = 0.96;
+    else if (geotechnicalModalityCount === 2) modalityAgreementScore = 0.78;
     else if (geotechnicalModalityCount === 1) modalityAgreementScore = 0.40;
     else if (hasHighVibration) modalityAgreementScore = 0.10; // isolated vibration
 
@@ -408,34 +435,37 @@ export class RiskEngine {
     // Case 1: Critical Geomechanical Breach
     if (
       maxDispValue >= 48.0 ||
+      maxCrackValue >= 12.0 ||
       (maxDispValue >= 40.0 && spatialCorrelationScore >= 0.7 && modalityAgreementScore >= 0.7)
     ) {
       nextRiskState = 'Critical';
       riskScore = 0.95;
       confidence = 0.98;
       dgmsCompliance = 'CRITICAL_THRESHOLD';
-      primaryReason = `Severe persistent subsidence displacement (${maxDispValue.toFixed(1)} mm) exceeding critical geotechnical collapse threshold (> 48.0 mm).`;
-      what = `Surface subsidence reached ${maxDispValue.toFixed(1)} mm with tensile strain and tilt rotation convergence.`;
-      whyRiskChanged = `Sustained acceleration of surface flexure across ${affectedNodeCount} adjacent nodes with cross-modal tilt and displacement confirmation over ${maxPersistenceSec} seconds.`;
-      whatActionRecommended = 'IMMEDIATE EVACUATION of affected underground extraction panels and surface barrier perimeter as per DGMS Emergency Management Protocol.';
+      primaryReason = `Severe persistent subsidence (${maxDispValue.toFixed(1)} mm) and crack aperture (${maxCrackValue.toFixed(1)} mm) exceeding critical collapse threshold.`;
+      what = `Surface subsidence reached ${maxDispValue.toFixed(1)} mm with crack dilation of ${maxCrackValue.toFixed(1)} mm and tensile strain convergence.`;
+      whyRiskChanged = `Sustained multi-station acceleration across ${affectedNodeCount} adjacent nodes with cross-modal crack and displacement agreement over ${maxPersistenceSec} seconds.`;
+      whatActionRecommended = 'IMMEDIATE EVACUATION of affected underground extraction panels and surface barrier perimeter as per CMR 2017 Reg 112 protocol.';
     }
     // Case 2: Warning - Multi-node correlated displacement
     else if (
       (maxDispValue >= 32.0 && spatialCorrelationScore >= 0.6) ||
+      maxCrackValue >= 5.0 ||
       (geotechnicalModalityCount >= 2 && affectedNodeCount >= 2 && maxPersistenceSec >= 8)
     ) {
       nextRiskState = 'Warning';
       riskScore = 0.78;
       confidence = 0.92;
       dgmsCompliance = 'WARNING_THRESHOLD';
-      primaryReason = `Correlated multi-station deformation (${maxDispValue.toFixed(1)} mm) detected across ${affectedNodeCount} adjacent nodes in Panel ${targetPanelCode}.`;
-      what = `Correlated displacement (${maxDispValue.toFixed(1)} mm) and tilt flexure across nodes: ${maxAffectedNodesInPanel.join(', ')}.`;
+      primaryReason = `Correlated multi-station deformation (${maxDispValue.toFixed(1)} mm, Crack: ${maxCrackValue.toFixed(1)} mm) detected across ${affectedNodeCount} adjacent nodes in Panel ${targetPanelCode}.`;
+      what = `Correlated displacement (${maxDispValue.toFixed(1)} mm) and crack aperture (${maxCrackValue.toFixed(1)} mm) across nodes: ${maxAffectedNodesInPanel.join(', ')}.`;
       whyRiskChanged = `Multi-node spatial correlation (${(spatialCorrelationScore * 100).toFixed(0)}%) and cross-modality agreement (${(modalityAgreementScore * 100).toFixed(0)}%) sustained for ${maxPersistenceSec}s.`;
       whatActionRecommended = 'Safety Officer acknowledgement mandatory. Halt heavy haulage and prepare panel evacuation standby protocol.';
     }
     // Case 3: Watch - Persistent single-station deviation or incipient multi-station deformation
     else if (
       maxDispValue >= 22.0 ||
+      maxCrackValue >= 2.0 ||
       (hasHighDisplacement && maxPersistenceSec >= 10) ||
       (hasHighTilt && maxPersistenceSec >= 15)
     ) {
@@ -443,8 +473,8 @@ export class RiskEngine {
       riskScore = 0.52;
       confidence = 0.88;
       dgmsCompliance = 'WATCH_THRESHOLD';
-      primaryReason = `Persistent deformation deviation detected on primary channel (Displacement: ${maxDispValue.toFixed(1)} mm) for ${maxPersistenceSec} seconds.`;
-      what = `Stationary displacement or tilt slope deviation on node ${epicenterNode}. Spatial correlation across adjacent nodes remains low (${(spatialCorrelationScore * 100).toFixed(0)}%).`;
+      primaryReason = `Persistent deformation deviation detected on primary channel (Displacement: ${maxDispValue.toFixed(1)} mm, Crack: ${maxCrackValue.toFixed(1)} mm) for ${maxPersistenceSec} seconds.`;
+      what = `Stationary displacement or crack aperture deviation on node ${epicenterNode}. Spatial correlation across adjacent nodes remains moderate (${(spatialCorrelationScore * 100).toFixed(0)}%).`;
       whyRiskChanged = `Single-station anomaly persisted beyond 10-second stability window. Modality agreement is moderate (${(modalityAgreementScore * 100).toFixed(0)}%).`;
       whatActionRecommended = 'Alert shift geotechnical in-charge. Restrict heavy machinery travel over affected panel zone and inspect roof support.';
     }
@@ -473,22 +503,72 @@ export class RiskEngine {
       }
     }
 
+    // 5b. Short-Horizon Geotechnical Risk Forecast
+    let projectedRiskScore30s = riskScore;
+    let projectedRiskScore60s = riskScore;
+    let trendDirection: 'STABLE' | 'SLOWLY_ELEVATING' | 'RAPIDLY_ACCELERATING' | 'DE-ESCALATING' = 'STABLE';
+    let timeToWarning: number | null = null;
+    let timeToCritical: number | null = null;
+
+    if (riskScore >= 0.75) {
+      trendDirection = 'RAPIDLY_ACCELERATING';
+      projectedRiskScore30s = Math.min(riskScore + 0.15, 1.0);
+      projectedRiskScore60s = Math.min(riskScore + 0.22, 1.0);
+      timeToCritical = riskScore >= 0.9 ? 0 : 15;
+    } else if (riskScore >= 0.40) {
+      trendDirection = 'SLOWLY_ELEVATING';
+      projectedRiskScore30s = Math.min(riskScore + 0.18, 1.0);
+      projectedRiskScore60s = Math.min(riskScore + 0.35, 1.0);
+      timeToWarning = 15;
+      timeToCritical = 45;
+    } else if (riskScore >= 0.20) {
+      trendDirection = 'SLOWLY_ELEVATING';
+      projectedRiskScore30s = Math.min(riskScore + 0.10, 1.0);
+      projectedRiskScore60s = Math.min(riskScore + 0.20, 1.0);
+      timeToWarning = 40;
+    }
+
+    let projectedRiskState: RiskState = 'Normal';
+    if (projectedRiskScore60s >= 0.85) projectedRiskState = 'Critical';
+    else if (projectedRiskScore60s >= 0.65) projectedRiskState = 'Warning';
+    else if (projectedRiskScore60s >= 0.40) projectedRiskState = 'Watch';
+    else if (projectedRiskScore60s >= 0.20) projectedRiskState = 'Advisory';
+
+    const forecast = {
+      currentRiskScore: parseFloat(riskScore.toFixed(2)),
+      projectedRiskScore30s: parseFloat(projectedRiskScore30s.toFixed(2)),
+      projectedRiskScore60s: parseFloat(projectedRiskScore60s.toFixed(2)),
+      trendDirection,
+      projectedRiskState,
+      forecastConfidence: 0.91, // Illustrative demo-model prototype confidence
+      timeToWarningThresholdSec: timeToWarning,
+      timeToCriticalThresholdSec: timeToCritical,
+      provenance: 'SIMULATED' as const,
+    };
+
     // 6. Build Contributing Factors Evidence breakdown
     const contributingFactors: ContributingFactor[] = [
       {
         factor: 'Displacement Gradient (DISP_Z)',
         state: maxDispValue > 40 ? 'critical' : maxDispValue > 25 ? 'elevated' : 'nominal',
-        weight: 0.35,
-        evidence: `Max value: ${maxDispValue.toFixed(1)} mm (Baseline: 18.5 mm, Threshold: 48.0 mm)`,
+        weight: 0.30,
+        evidence: `Max value: ${maxDispValue.toFixed(1)} mm (Baseline: 18.5 mm, Warning: 32.0 mm, Critical: 48.0 mm)`,
       },
       {
-        factor: 'Cross-Modality Agreement (Tilt + Strain)',
+        factor: 'Surface Crack Aperture (CRACK)',
+        state: maxCrackValue > 10 ? 'critical' : maxCrackValue > 3 ? 'elevated' : 'nominal',
+        weight: 0.20,
+        evidence: `Max aperture: ${maxCrackValue.toFixed(1)} mm (Baseline: 0.25 mm, Critical: 12.0 mm)`,
+      },
+      {
+        factor: 'Cross-Modality Agreement (Tilt + Strain + Crack)',
         state: modalityAgreementScore >= 0.7 ? 'elevated' : hasHighVibration ? 'transient' : 'nominal',
         weight: 0.25,
         evidence: `Agreement score: ${(modalityAgreementScore * 100).toFixed(0)}% (Active: ${[
           hasHighDisplacement ? 'Disp' : null,
           hasHighTilt ? 'Tilt' : null,
           hasHighStrain ? 'Strain' : null,
+          hasHighCrack ? 'Crack' : null,
           hasHighVibration ? 'Vib' : null,
         ]
           .filter(Boolean)
@@ -497,13 +577,13 @@ export class RiskEngine {
       {
         factor: 'Spatial Topology Correlation',
         state: spatialCorrelationScore >= 0.7 ? 'critical' : spatialCorrelationScore > 0.3 ? 'elevated' : 'nominal',
-        weight: 0.25,
+        weight: 0.15,
         evidence: `Affected adjacent nodes in ${targetPanelCode}: ${maxAffectedNodesInPanel.join(', ') || 'None'} (Score: ${(spatialCorrelationScore * 100).toFixed(0)}%)`,
       },
       {
         factor: 'Temporal Persistence & Rate-of-Change',
         state: maxPersistenceSec >= 15 ? 'elevated' : 'nominal',
-        weight: 0.15,
+        weight: 0.10,
         evidence: `Persistence: ${maxPersistenceSec}s continuous samples`,
       },
     ];
@@ -538,6 +618,7 @@ export class RiskEngine {
       modalityAgreementScore,
       dgmsComplianceStatus: dgmsCompliance,
       contributingFactors,
+      forecast,
     };
 
     const assessment: RiskAssessmentEvent = {
@@ -549,6 +630,7 @@ export class RiskEngine {
       confidence,
       score: riskScore,
       evidence,
+      forecast,
       modelVersion: 'sih-explainable-ensemble-v1.0',
       provenance: 'SIMULATED',
     };

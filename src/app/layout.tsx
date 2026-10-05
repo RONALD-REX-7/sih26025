@@ -24,8 +24,12 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://mineguard-sih26025.vercel.app'),
   title: 'SIH26025 — Real-Time Underground Mine Subsidence Monitoring & Early Warning System',
   description:
-    'AI-enabled low-cost real-time mine subsidence monitoring, multi-sensor fusion, and early warning platform for Indian coal mines (DGMS compliant prototype).',
+    'AI-enabled low-cost real-time mine subsidence monitoring, multi-sensor fusion, and early warning platform for Indian coal mines (DGMS Reference Prototype).',
+  manifest: '/manifest.json',
 };
+
+import { PwaRegister } from '@/components/pwa/pwa-register';
+import { PerspectiveProvider } from '@/lib/auth/perspective-context';
 
 export default function RootLayout({
   children,
@@ -39,9 +43,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#F4F6F5] text-[#1D2933] font-sans">
         <AuthProvider>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
+          <PerspectiveProvider>
+            <TooltipProvider>
+              <PwaRegister />
+              {children}
+            </TooltipProvider>
+          </PerspectiveProvider>
         </AuthProvider>
       </body>
     </html>

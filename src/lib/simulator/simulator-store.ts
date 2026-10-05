@@ -9,12 +9,15 @@ import { SimulatedTelemetrySource } from '@/lib/telemetry/simulated-source';
 import { RiskState } from '@/lib/domain/risk-states';
 import { RiskEngine } from '@/lib/ai/risk-engine';
 import { RiskEvidence, AnomalyRecord } from '@/lib/ai/types';
+import { InterNodeMovement } from '@/lib/domain/types';
 
 interface HistoryPoint {
   timestamp: string;
   timeSec: number;
   value: number;
 }
+
+export type TimelinePhase = 'T+00' | 'T+15' | 'T+30' | 'T+45' | 'T+60';
 
 export interface SimulatorStore {
   engine: SimulatorEngine | null;
@@ -23,6 +26,9 @@ export interface SimulatorStore {
   latestReadings: Record<string, NormalizedTelemetrySample>;
   historyByChannel: Record<string, HistoryPoint[]>; // Rolling 60s history
   latestHealths: Record<string, NodeHealthSample>;
+  interNodeMovements: InterNodeMovement[];
+  timelinePhase: TimelinePhase;
+  showEvidenceDossier: boolean;
   currentRiskState: RiskState;
   currentEvidence: RiskEvidence | null;
   activeAnomalies: AnomalyRecord[];
@@ -37,6 +43,7 @@ export interface SimulatorStore {
   setScenario: (scenario: SimulationScenarioId) => void;
   setSeed: (seed: number) => void;
   setAffectedNodes: (nodes: string[]) => void;
+  setShowEvidenceDossier: (open: boolean) => void;
 }
 
 export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
@@ -59,8 +66,12 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     DISP_Z: [],
     VIB_RMS: [],
     STRAIN: [],
+    CRACK: [],
   },
   latestHealths: {},
+  interNodeMovements: [],
+  timelinePhase: 'T+00',
+  showEvidenceDossier: false,
   currentRiskState: 'Normal',
   currentEvidence: null,
   activeAnomalies: [],
@@ -93,7 +104,7 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
     });
 
     // Subscribe to engine ticks
-    engine.subscribe((samples, healths, simState) => {
+    engine.subscribe((samples, healths, simState, interNodeMovements) => {
       // Dispatch to telemetry source for ingestion pipeline
       for (const sample of samples) {
         simulatedSource.emitSample(sample);
@@ -112,9 +123,8 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
 
         // Also track primary channel aggregate (e.g. SN-102 primary affected node or SN-101)
         const parts = s.sensorCode.split('-');
-        const channelType = parts[parts.length - 1]; // e.g. DISP_Z
+        const channelType = parts[parts.length - 1]; // e.g. DISP_Z, CRACK
 
-        // If from primary affected node (or SN-102 baseline), push to rolling history
         const isPrimaryTracked =
           s.nodeId === 'SN-102' ||
           (simState.affectedNodeCodes.length > 0 && s.nodeId === simState.affectedNodeCodes[0]);
@@ -130,23 +140,37 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
         }
       }
 
+      // Calculate demonstration timeline phase
+      let phase: TimelinePhase = 'T+00';
+      if (simState.elapsedSec >= 60) phase = 'T+60';
+      else if (simState.elapsedSec >= 45) phase = 'T+45';
+      else if (simState.elapsedSec >= 30) phase = 'T+30';
+      else if (simState.elapsedSec >= 15) phase = 'T+15';
+
+      // Auto-trigger evidence dossier at T+60 in ESCALATING_MULTIMODAL_ANOMALY
+      const isCriticalRamp = simState.scenarioId === 'ESCALATING_MULTIMODAL_ANOMALY';
+      const shouldTriggerDossier = isCriticalRamp && simState.elapsedSec >= 60 && !get().showEvidenceDossier;
+
       set({
         state: simState,
         latestReadings: readingsUpdate,
         historyByChannel: historyUpdate,
         latestHealths: healthsUpdate,
-        // currentRiskState is dynamically driven by the AI riskEngine subscriber
+        interNodeMovements: interNodeMovements || get().interNodeMovements,
+        timelinePhase: phase,
+        showEvidenceDossier: shouldTriggerDossier ? true : get().showEvidenceDossier,
         activeAnomalies: riskEngine.getActiveAnomalies(),
       });
     });
 
     // Run initial baseline tick so UI is primed
-    engine.generateTick();
+    const initialTick = engine.generateTick();
 
     set({
       engine,
       simulatedSource,
       state: engine.getState(),
+      interNodeMovements: initialTick.interNodeMovements,
       currentRiskState: riskEngine.getCurrentRiskState(),
       currentEvidence: riskEngine.getCurrentEvidence(),
     });
@@ -181,7 +205,10 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           DISP_Z: [],
           VIB_RMS: [],
           STRAIN: [],
+          CRACK: [],
         },
+        timelinePhase: 'T+00',
+        showEvidenceDossier: false,
         currentRiskState: 'Normal',
         currentEvidence: riskEngine.getCurrentEvidence(),
         activeAnomalies: [],
@@ -211,7 +238,10 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           DISP_Z: [],
           VIB_RMS: [],
           STRAIN: [],
+          CRACK: [],
         },
+        timelinePhase: 'T+00',
+        showEvidenceDossier: false,
         currentRiskState: 'Normal',
         currentEvidence: riskEngine.getCurrentEvidence(),
         activeAnomalies: [],
@@ -233,7 +263,10 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
           DISP_Z: [],
           VIB_RMS: [],
           STRAIN: [],
+          CRACK: [],
         },
+        timelinePhase: 'T+00',
+        showEvidenceDossier: false,
         currentRiskState: 'Normal',
         currentEvidence: riskEngine.getCurrentEvidence(),
         activeAnomalies: [],
@@ -248,4 +281,9 @@ export const useSimulatorStore = create<SimulatorStore>((set, get) => ({
       set({ state: engine.getState() });
     }
   },
+
+  setShowEvidenceDossier: (open: boolean) => {
+    set({ showEvidenceDossier: open });
+  },
 }));
+

@@ -23,6 +23,7 @@ const MODALITY_LABELS: Record<string, { name: string; unit: string; baseline: st
   TILT_X: { name: 'Biaxial Tilt X', unit: 'arcsec', baseline: '0.00 ± 3.00' },
   TILT_Y: { name: 'Biaxial Tilt Y', unit: 'arcsec', baseline: '0.00 ± 3.00' },
   DISP_Z: { name: 'Extensometer Displacement', unit: 'mm', baseline: '18.50 (< 30.0)' },
+  CRACK: { name: 'Crack / Fissure Extensometer', unit: 'mm', baseline: '0.25 (< 5.00)' },
   VIB_RMS: { name: 'Vibration Velocity PPV', unit: 'mm/s', baseline: '0.10 (< 2.00)' },
   STRAIN: { name: 'Rockmass Strain', unit: 'µε', baseline: '420.0 (< 600)' },
 };
@@ -54,6 +55,9 @@ function getValueStatusColor(channelKey: string, value: number): string {
   } else if (channelKey === 'DISP_Z') {
     if (absVal > 40) return 'text-[#B42318] font-bold';
     if (absVal > 30) return 'text-[#9A6A00] font-semibold';
+  } else if (channelKey === 'CRACK') {
+    if (absVal > 12.0) return 'text-[#B42318] font-bold';
+    if (absVal > 5.0) return 'text-[#9A6A00] font-semibold';
   } else if (channelKey === 'VIB_RMS') {
     if (absVal > 5.0) return 'text-[#B42318] font-bold';
     if (absVal > 2.5) return 'text-[#9A6A00] font-semibold';
@@ -259,6 +263,7 @@ export default function TelemetryPage() {
               <option value="TILT_X">Biaxial Tilt X (arcsec)</option>
               <option value="TILT_Y">Biaxial Tilt Y (arcsec)</option>
               <option value="DISP_Z">Extensometer Displacement (mm)</option>
+              <option value="CRACK">Crack / Fissure Extensometer (mm)</option>
               <option value="VIB_RMS">Vibration Velocity PPV (mm/s)</option>
               <option value="STRAIN">Rockmass Strain (µε)</option>
             </select>
