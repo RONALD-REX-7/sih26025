@@ -10,6 +10,7 @@ import { EventInvestigator } from '@/components/gis/event-investigator';
 import { GeomechanicalProfileView } from '@/components/gis/geomechanical-profile-view';
 import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import { RiskState } from '@/lib/domain/risk-states';
+import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import {
   Layers,
   Eye,
@@ -95,11 +96,12 @@ export default function GisPage() {
       {/* Top Header */}
       <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#52606D] flex items-center gap-1.5">
               <MapPin className="h-4 w-4 text-[#173B57]" />
               Spatial Geospatial Surveillance Workstation
             </span>
+            <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#1D2933]">
             Underground Strata GIS &amp; Spatial Surveillance Canvas

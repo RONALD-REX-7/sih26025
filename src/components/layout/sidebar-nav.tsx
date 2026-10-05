@@ -18,6 +18,7 @@ import {
   Radio,
   Server,
   Play,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAlertStore } from '@/lib/alerts/alert-store';
@@ -67,6 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
       { name: 'Statutory Audit', href: '/audit', icon: ClipboardList },
       { name: 'Form IV Reports', href: '/reports', icon: FileSpreadsheet },
       { name: 'Safety Thresholds', href: '/settings', icon: Settings },
+      { name: 'Transparency & BOM', href: '/transparency', icon: ShieldCheck },
     ],
   },
 ];
@@ -149,7 +151,7 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
       </nav>
 
       {/* Footer Info */}
-      <div className="p-3 border-t border-[#D7DEDC] bg-[#F8FAF9] text-xs text-[#74808A] flex items-center justify-between font-mono-tech">
+      <div className="p-3 border-t border-[#D7DEDC] bg-[#F8FAF9] text-xs text-[#5B6871] flex items-center justify-between font-mono-tech">
         <span>Bhowra-West</span>
         <span>DGMS v1.0</span>
       </div>

@@ -119,7 +119,7 @@ export default function SensorsPage() {
         zeroOffset: parsedOffset,
         status: 'calibrated',
         signatory: signatoryName,
-        notes: `Manual zero-offset tare applied by certified signatory ${signatoryName} per DGMS TC 4/2017.`
+        notes: `Manual zero-offset tare applied by authorized signatory ${signatoryName} per DGMS TC 4/2017.`
       },
     });
 
@@ -203,6 +203,7 @@ export default function SensorsPage() {
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#74808A]" />
           <Input
+            aria-label="Search channel code, station, or model"
             placeholder="Search channel code, station, or model..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -313,15 +314,16 @@ export default function SensorsPage() {
               <span className="font-bold text-sm text-[#1D2933]">
                 TARE ZERO CALIBRATION: {calibratingSensor.sensorCode}
               </span>
-              <button onClick={() => setCalibratingSensor(null)} className="text-[#74808A] hover:text-[#1D2933] cursor-pointer">
+              <button onClick={() => setCalibratingSensor(null)} aria-label="Close calibration dialog" className="text-[#5B6871] hover:text-[#1D2933] cursor-pointer">
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleCommitCalibration} className="space-y-3 font-sans">
               <div>
-                <label className="text-xs font-semibold text-[#52606D] uppercase font-mono-tech">Tare Offset ({calibratingSensor.unit})</label>
+                <label htmlFor="tare-offset" className="text-xs font-semibold text-[#52606D] uppercase font-mono-tech">Tare Offset ({calibratingSensor.unit})</label>
                 <Input
+                  id="tare-offset"
                   value={tareOffset}
                   onChange={(e) => setTareOffset(e.target.value)}
                   className="h-8 text-xs font-mono-tech mt-1 border-[#D7DEDC]"
@@ -330,8 +332,9 @@ export default function SensorsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#52606D] uppercase font-mono-tech">Certified Geotechnical Signatory</label>
+                <label htmlFor="signatory-name" className="text-xs font-semibold text-[#52606D] uppercase font-mono-tech">Authorized Geotechnical Signatory</label>
                 <Input
+                  id="signatory-name"
                   value={signatoryName}
                   onChange={(e) => setSignatoryName(e.target.value)}
                   className="h-8 text-xs font-mono-tech mt-1 border-[#D7DEDC]"

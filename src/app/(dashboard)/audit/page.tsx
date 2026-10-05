@@ -240,6 +240,7 @@ export default function AuditPage() {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#74808A]" />
             <Input
+              aria-label="Search audit records by action, entity ID, or role"
               placeholder="Search action, entity ID, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

@@ -202,10 +202,11 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-3 text-xs">
             <div>
-              <label className="text-[#52606D] block mb-1">
+              <label htmlFor="setting-sampling-interval" className="text-[#52606D] block mb-1">
                 Telemetry sampling interval (milliseconds)
               </label>
               <input
+                id="setting-sampling-interval"
                 type="number"
                 value={pollingInterval}
                 onChange={(e) => setPollingInterval(e.target.value)}
@@ -213,10 +214,11 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="text-[#52606D] block mb-1">
+              <label htmlFor="setting-slope-trigger" className="text-[#52606D] block mb-1">
                 Critical slope trigger threshold (mm/m)
               </label>
               <input
+                id="setting-slope-trigger"
                 type="text"
                 value={displacementLimit}
                 onChange={(e) => setDisplacementLimit(e.target.value)}
@@ -224,10 +226,11 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="text-[#52606D] block mb-1">
+              <label htmlFor="setting-strain-limit" className="text-[#52606D] block mb-1">
                 Tensile strain warning limit (mm/m)
               </label>
               <input
+                id="setting-strain-limit"
                 type="text"
                 value={strainLimit}
                 onChange={(e) => setStrainLimit(e.target.value)}

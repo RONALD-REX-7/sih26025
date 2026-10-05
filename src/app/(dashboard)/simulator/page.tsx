@@ -199,6 +199,7 @@ export default function SimulatorPage() {
           <div className="flex items-center gap-1.5 text-xs font-mono-tech">
             <span className="text-[#52606D]">Seed:</span>
             <Input
+              aria-label="PRNG Simulation Seed"
               value={seedInput}
               onChange={(e) => setSeedInput(e.target.value)}
               className="h-7 w-20 text-xs font-mono-tech bg-[#F4F6F5] border-[#D7DEDC]"
@@ -217,6 +218,7 @@ export default function SimulatorPage() {
               onClick={handleRandomizeSeed}
               className="h-7 text-xs px-2 font-mono-tech text-[#52606D]"
               title="Randomize seed"
+              aria-label="Randomize simulation seed"
             >
               Rand
             </Button>
@@ -225,6 +227,7 @@ export default function SimulatorPage() {
               variant="ghost"
               onClick={handleCopySeed}
               className="h-7 px-2 font-mono-tech text-xs text-[#52606D]"
+              aria-label="Copy simulation seed to clipboard"
             >
               {copiedSeed ? <Check className="h-3.5 w-3.5 text-[#2F6B4F]" /> : <Copy className="h-3.5 w-3.5" />}
             </Button>

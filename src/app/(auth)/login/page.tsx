@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -194,12 +195,39 @@ export default function LoginPage() {
                 Continue to dashboard in demo mode <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
+            <p className="text-[10.5px] text-[#5B6871] text-center pt-1">
+              Note: Credentials authenticate directly with Supabase. No marketing or personal profiling data is collected.
+            </p>
           </form>
         </div>
 
-        {/* Footer DGMS Notice */}
-        <div className="text-center text-xs text-[#74808A] font-mono-tech">
-          DGMS Technical Circular (Coal) No. 04 of 2017 &bull; Smart India Hackathon 2026
+        {/* Prototype Disclaimer & Compliance Links */}
+        <div className="space-y-2 text-center text-xs text-[#5B6871]">
+          <p className="text-[11px] leading-relaxed max-w-sm mx-auto">
+            MINE GUARD is a student engineering prototype developed for Smart India Hackathon 2026 (Ministry of Coal). Not a substitute for DGMS statutory safety inspections.
+          </p>
+
+          <nav aria-label="Legal and Documentation" className="flex items-center justify-center gap-3 text-[11px] pt-1 border-t border-[#D7DEDC]">
+            <Link href="/about" className="hover:text-[#173B57] hover:underline">
+              About &amp; Architecture
+            </Link>
+            <span aria-hidden="true">&bull;</span>
+            <Link href="/transparency" className="hover:text-[#173B57] hover:underline">
+              Transparency
+            </Link>
+            <span aria-hidden="true">&bull;</span>
+            <Link href="/privacy" className="hover:text-[#173B57] hover:underline">
+              Privacy Policy
+            </Link>
+            <span aria-hidden="true">&bull;</span>
+            <Link href="/terms" className="hover:text-[#173B57] hover:underline">
+              Terms of Use
+            </Link>
+          </nav>
+
+          <div className="text-[10.5px] font-mono-tech text-[#5B6871] pt-1">
+            DGMS Technical Circular (Coal) No. 04 of 2017 &bull; Smart India Hackathon 2026
+          </div>
         </div>
       </div>
     </div>

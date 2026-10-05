@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, UserRole } from '@/lib/domain/types';
 import { AcknowledgementPayload } from '@/lib/alerts/alert-types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShieldAlert, CheckCircle2, X, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, X } from 'lucide-react';
 
 interface AcknowledgeModalProps {
   alert: Alert | null;
@@ -32,6 +32,17 @@ export function AcknowledgeModal({ alert, isOpen, onClose, onConfirm }: Acknowle
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statutoryConfirmed, setStatutoryConfirmed] = useState(true);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !alert) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,21 +64,32 @@ export function AcknowledgeModal({ alert, isOpen, onClose, onConfirm }: Acknowle
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ack-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+    >
       <Card className="w-full max-w-xl border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl">
         <CardHeader className="p-4 pb-3 border-b border-slate-100 dark:border-slate-900 flex flex-row items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-600" />
-              <CardTitle className="text-sm font-bold tracking-tight">
+              <ShieldAlert className="h-4 w-4 text-amber-600" aria-hidden="true" />
+              <CardTitle id="ack-modal-title" className="text-sm font-bold tracking-tight">
                 Statutory Incident Sign-Off &amp; Acknowledge
               </CardTitle>
             </div>
             <CardDescription className="text-xs font-mono text-slate-500">
-              DGMS CMR 2017 Reg 112 Mandatory Geotechnical Protocol
+              DGMS CMR 2017 Reg 112 Mandatory Geotechnical Protocol (Demonstration)
             </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0 text-slate-400 hover:text-slate-700">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label="Close acknowledge dialog"
+            className="h-7 w-7 p-0 text-slate-400 hover:text-slate-700"
+          >
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -94,10 +116,11 @@ export function AcknowledgeModal({ alert, isOpen, onClose, onConfirm }: Acknowle
             {/* Operator Credentials Row */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="ack-operator-name" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                   Authorized Signatory Name:
                 </label>
                 <Input
+                  id="ack-operator-name"
                   value={operatorName}
                   onChange={(e) => setOperatorName(e.target.value)}
                   required
@@ -106,10 +129,11 @@ export function AcknowledgeModal({ alert, isOpen, onClose, onConfirm }: Acknowle
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="ack-user-role" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                   Regulatory Role:
                 </label>
                 <select
+                  id="ack-user-role"
                   value={userRole}
                   onChange={(e) => setUserRole(e.target.value as UserRole)}
                   className="w-full h-8 px-2 text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden"
@@ -152,10 +176,11 @@ export function AcknowledgeModal({ alert, isOpen, onClose, onConfirm }: Acknowle
 
             {/* Custom Notes */}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="ack-comments" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                 Geotechnical Shift Notes &amp; Verification Observations:
               </label>
               <textarea
+                id="ack-comments"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Enter physical observations, convergence rate findings, or DGMS communication refs..."
@@ -174,29 +199,27 @@ export function AcknowledgeModal({ alert, isOpen, onClose, onConfirm }: Acknowle
               />
               <span className="flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                I certify under Coal Mines Regulations 2017 that appropriate safety measures are in effect.
+                I record under Coal Mines Regulations 2017 that mitigation measures are enacted.
               </span>
             </label>
 
-            {/* Actions */}
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-900">
+            {/* Audit Commitment Disclosure */}
+            <p className="text-[10px] text-slate-500 font-sans">
+              Disclosure: Submitting commits an immutable operational event to the demonstration audit trail.
+            </p>
+
+            {/* Action Bar */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-900">
               <Button type="button" variant="outline" size="sm" onClick={onClose} className="h-8 text-xs font-mono">
                 Cancel
               </Button>
               <Button
                 type="submit"
                 size="sm"
-                disabled={isSubmitting || !statutoryConfirmed}
-                className="h-8 text-xs font-mono bg-amber-600 hover:bg-amber-700 text-white font-semibold cursor-pointer"
+                disabled={!statutoryConfirmed || isSubmitting}
+                className="h-8 text-xs font-mono bg-amber-600 hover:bg-amber-700 text-white font-semibold"
               >
-                {isSubmitting ? (
-                  'Recording Audit...'
-                ) : (
-                  <>
-                    <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                    Commit Sign-Off &amp; Acknowledge
-                  </>
-                )}
+                {isSubmitting ? 'Signing Off...' : 'Commit Sign-Off & Acknowledge'}
               </Button>
             </div>
           </CardContent>

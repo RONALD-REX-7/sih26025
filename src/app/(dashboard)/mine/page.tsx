@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { DEMO_MINE, DEMO_PANELS } from '@/lib/data/mock-data';
 import { RiskBadge } from '@/components/industrial/risk-badge';
+import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { Button } from '@/components/ui/button';
 import { Layers, MapPin, ExternalLink, ShieldCheck } from 'lucide-react';
 
@@ -13,11 +14,12 @@ export default function MinePage() {
       {/* Top Header */}
       <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#52606D] flex items-center gap-1.5">
               <Layers className="h-4 w-4 text-[#173B57]" />
               Colliery Site &amp; Panel Stratigraphy
             </span>
+            <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#1D2933]">
             {DEMO_MINE.name} &bull; Stratigraphic Profile

@@ -222,6 +222,7 @@ export default function TelemetryPage() {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[#74808A]" />
             <Input
+              aria-label="Search station or channel"
               placeholder="Search station or channel (e.g. SN-102)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

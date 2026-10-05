@@ -67,7 +67,7 @@
   --surface-subtle: #EDF1F0;
   --text-primary: #1D2933;
   --text-secondary: #52606D;
-  --text-muted: #74808A;
+  --text-muted: #5B6871;
   --border-subtle: #D7DEDC;
   --navy: #173B57;
   --navy-dark: #102C42;
@@ -99,6 +99,10 @@
 @layer base {
   * {
     @apply border-border;
+  }
+  *:focus-visible {
+    outline: 2px solid #173B57;
+    outline-offset: 1px;
   }
   body {
     background-color: var(--background);

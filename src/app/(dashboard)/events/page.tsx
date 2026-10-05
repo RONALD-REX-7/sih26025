@@ -92,14 +92,12 @@ export default function EventsPage() {
           </p>
         </div>
 
-        <Link href="/simulator">
-          <button
-            type="button"
-            className="px-3 py-1.5 rounded-sm bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] text-xs font-mono-tech font-semibold inline-flex items-center gap-1.5 cursor-pointer"
-          >
-            <Play className="h-3 w-3 fill-current" />
-            Simulator Workbench &rarr;
-          </button>
+        <Link
+          href="/simulator"
+          className="px-3 py-1.5 rounded-sm bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] text-xs font-mono-tech font-semibold inline-flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#173B57] focus-visible:outline-hidden"
+        >
+          <Play className="h-3 w-3 fill-current" aria-hidden="true" />
+          Simulator Workbench &rarr;
         </Link>
       </div>
 

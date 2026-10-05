@@ -3,6 +3,7 @@
 import React from 'react';
 import { TopHeader } from '@/components/layout/top-header';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { Footer } from '@/components/layout/footer';
 
 export default function DashboardLayout({
   children,
@@ -17,8 +18,11 @@ export default function DashboardLayout({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <TopHeader />
-        <main className="flex-1 p-5 sm:p-6 overflow-y-auto bg-[#F4F6F5]">
-          {children}
+        <main className="flex-1 flex flex-col justify-between p-4 sm:p-6 overflow-y-auto bg-[#F4F6F5]">
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
         </main>
       </div>
     </div>

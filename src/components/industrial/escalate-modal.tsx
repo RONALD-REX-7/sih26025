@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, UserRole } from '@/lib/domain/types';
 import { EscalationPayload } from '@/lib/alerts/alert-types';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,17 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
   const [userRole, setUserRole] = useState<UserRole>('MineManager');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !alert) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,21 +52,32 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="esc-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+    >
       <Card className="w-full max-w-lg border-rose-300 dark:border-rose-900/60 bg-white dark:bg-slate-950 shadow-2xl">
         <CardHeader className="p-4 pb-3 border-b border-rose-100 dark:border-rose-950 flex flex-row items-center justify-between bg-rose-50/40 dark:bg-rose-950/20">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-rose-600 animate-pulse" />
-              <CardTitle className="text-sm font-bold tracking-tight text-rose-900 dark:text-rose-200">
+              <Flame className="h-4 w-4 text-rose-600 animate-pulse" aria-hidden="true" />
+              <CardTitle id="esc-modal-title" className="text-sm font-bold tracking-tight text-rose-900 dark:text-rose-200">
                 Official Geotechnical Incident Escalation
               </CardTitle>
             </div>
             <CardDescription className="text-xs font-mono text-slate-500">
-              Escalate response level to DGMS regulatory &amp; corporate executive command
+              Escalate response level to DGMS regulatory &amp; corporate executive command (Demonstration)
             </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-7 w-7 p-0 text-slate-400 hover:text-slate-700">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label="Close escalation dialog"
+            className="h-7 w-7 p-0 text-slate-400 hover:text-slate-700"
+          >
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -63,9 +85,9 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
         <form onSubmit={handleSubmit}>
           <CardContent className="p-4 space-y-4 text-xs font-mono">
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                 Target Alert:
-              </label>
+              </span>
               <div className="p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">
                 <span className="font-semibold text-slate-900 dark:text-slate-100">{alert.title}</span>
                 <p className="text-slate-500 text-[10px] mt-0.5">ID: {alert.id} &bull; Panel: {alert.panel?.code || 'General'}</p>
@@ -73,10 +95,11 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="esc-reason" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                 Escalation Justification &amp; Geological Findings:
               </label>
               <textarea
+                id="esc-reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 required
@@ -86,10 +109,11 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="esc-recipient" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                 Escalation Recipient Hierarchy:
               </label>
               <Input
+                id="esc-recipient"
                 value={escalatedTo}
                 onChange={(e) => setEscalatedTo(e.target.value)}
                 required
@@ -99,10 +123,11 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="esc-authorizer" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                   Authorizing Official:
                 </label>
                 <Input
+                  id="esc-authorizer"
                   value={authorizedBy}
                   onChange={(e) => setAuthorizedBy(e.target.value)}
                   required
@@ -111,10 +136,11 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="esc-role" className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                   Signatory Role:
                 </label>
                 <select
+                  id="esc-role"
                   value={userRole}
                   onChange={(e) => setUserRole(e.target.value as UserRole)}
                   className="w-full h-8 px-2 text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-slate-800 dark:text-slate-200 focus:outline-hidden"
@@ -126,6 +152,10 @@ export function EscalateModal({ alert, isOpen, onClose, onConfirm }: EscalateMod
                 </select>
               </div>
             </div>
+
+            <p className="text-[10px] text-slate-500 font-sans">
+              Disclosure: Commits a simulated statutory incident escalation record to the audit trail.
+            </p>
 
             <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-900">
               <Button type="button" variant="outline" size="sm" onClick={onClose} className="h-8 text-xs font-mono">

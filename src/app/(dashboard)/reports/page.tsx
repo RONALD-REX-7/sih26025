@@ -105,7 +105,7 @@ export default function ReportsPage() {
             DGMS Statutory Reports &amp; Shift Handover Logbook
           </h1>
           <p className="text-xs text-[#52606D] mt-0.5">
-            Official periodic ground stability certificates and signed shift records under Coal Mines Regulations (CMR) 2017 Reg 112.
+            Demonstration format for periodic ground stability certificates and shift logbooks structured under CMR 2017 Reg 112 guidelines (Demonstration Data).
           </p>
         </div>
 
