@@ -120,7 +120,7 @@ export default function InfrastructurePage() {
       {/* Summary Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#D7DEDC] rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-xs">
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Protected structures
           </div>
           <div className="text-base font-bold text-[#1D2933] mt-0.5 font-mono-tech">
@@ -129,7 +129,7 @@ export default function InfrastructurePage() {
           <div className="text-xs text-[#52606D] mt-0.5">Surface &amp; Subsurface</div>
         </div>
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Perimeter strain limit
           </div>
           <div className="text-base font-bold text-[#1D2933] mt-0.5 font-mono-tech">
@@ -138,7 +138,7 @@ export default function InfrastructurePage() {
           <div className="text-xs text-[#52606D] mt-0.5">Max permissible gradient</div>
         </div>
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Railway siding buffer
           </div>
           <div className="text-base font-bold text-[#173B57] mt-0.5 font-mono-tech">
@@ -147,7 +147,7 @@ export default function InfrastructurePage() {
           <div className="text-xs text-[#52606D] mt-0.5">Indian Railways reserve line</div>
         </div>
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Colliery risk state
           </div>
           <div className="text-base font-bold mt-0.5 flex items-center gap-2">
@@ -224,7 +224,7 @@ export default function InfrastructurePage() {
         <div className="lg:col-span-4 bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-4 space-y-4">
           <div className="flex items-center justify-between border-b border-[#D7DEDC] pb-3">
             <div>
-              <div className="text-xs uppercase tracking-wider text-[#74808A] font-semibold">
+              <div className="text-xs uppercase tracking-wider text-[#5B6871] font-semibold">
                 Asset inspector
               </div>
               <h2 className="text-base font-bold text-[#1D2933] mt-0.5 flex items-center gap-1.5">

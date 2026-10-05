@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert } from '@/lib/domain/types';
 import { useAlertStore } from '@/lib/alerts/alert-store';
 import { RiskBadge } from '@/components/industrial/risk-badge';
+import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { StateContainer } from '@/components/industrial/state-container';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
 import { EscalateModal } from '@/components/industrial/escalate-modal';
@@ -76,11 +77,12 @@ export default function AlertsPage() {
       {/* Top Header */}
       <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#5B6871] flex items-center gap-1.5">
               <Radio className="h-4 w-4 text-[#173B57]" />
               Emergency Response Coordination &bull; DGMS CMR 2017 Reg 112
             </span>
+            <ProvenanceBadge provenance="DEMO" size="sm" />
           </div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[#1D2933]">
             Early Warning &amp; Incident Action Center
@@ -93,19 +95,23 @@ export default function AlertsPage() {
         <div className="flex items-center gap-3">
           {/* Audible Siren Toggle */}
           <button
+            type="button"
             onClick={toggleMuteAlarm}
+            aria-label={isAlarmMuted ? 'Unmute Emergency Siren' : 'Mute Emergency Siren'}
             className={`h-8 px-3 text-xs font-mono-tech font-medium rounded-sm border flex items-center gap-1.5 cursor-pointer transition-colors ${
               isAlarmMuted
-                ? 'border-[#D7DEDC] bg-[#EDF1F0] text-[#74808A]'
+                ? 'border-[#D7DEDC] bg-[#EDF1F0] text-[#5B6871]'
                 : 'border-[#173B57] bg-[#FFFFFF] text-[#173B57]'
             }`}
           >
-            {isAlarmMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            {isAlarmMuted ? <VolumeX className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
             <span>{isAlarmMuted ? 'Alarm Muted' : isAlarmPlaying ? 'Siren Active' : 'Siren Ready'}</span>
           </button>
 
           <button
+            type="button"
             onClick={playTestAlarm}
+            aria-label="Test audible alarm tone"
             className="h-8 px-2.5 text-xs font-mono-tech border border-[#D7DEDC] bg-[#FFFFFF] text-[#52606D] hover:bg-[#EDF1F0] rounded-sm cursor-pointer"
           >
             Test Beep
@@ -123,25 +129,25 @@ export default function AlertsPage() {
       {/* Incident Metric Summary Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono-tech text-xs">
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
-          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Active Directives</div>
+          <div className="text-[11px] font-semibold text-[#5B6871] uppercase tracking-wider">Active Directives</div>
           <div className="text-lg font-bold text-[#B42318] mt-0.5">
             {activeCount} <span className="text-xs font-normal text-[#52606D]">requiring action</span>
           </div>
         </div>
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
-          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Acknowledged</div>
+          <div className="text-[11px] font-semibold text-[#5B6871] uppercase tracking-wider">Acknowledged</div>
           <div className="text-lg font-bold text-[#2F6B4F] mt-0.5">
             {alerts.filter((a) => a.status === 'acknowledged').length} <span className="text-xs font-normal text-[#52606D]">signed off</span>
           </div>
         </div>
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
-          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Escalated</div>
+          <div className="text-[11px] font-semibold text-[#5B6871] uppercase tracking-wider">Escalated</div>
           <div className="text-lg font-bold text-[#A85A00] mt-0.5">
             {alerts.filter((a) => a.status === 'escalated').length} <span className="text-xs font-normal text-[#52606D]">dispatched</span>
           </div>
         </div>
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3 shadow-xs">
-          <div className="text-[11px] font-semibold text-[#74808A] uppercase tracking-wider">Dispatch Log Entries</div>
+          <div className="text-[11px] font-semibold text-[#5B6871] uppercase tracking-wider">Dispatch Log Entries</div>
           <div className="text-lg font-bold text-[#1D2933] mt-0.5">
             {notificationHistory.length} <span className="text-xs font-normal text-[#52606D]">events</span>
           </div>

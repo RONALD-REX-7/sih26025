@@ -102,10 +102,10 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
       </div>
 
       {/* Grouped Navigation */}
-      <nav className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto">
+      <nav aria-label="Main Navigation" className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto">
         {NAV_GROUPS.map((group) => (
           <div key={group.groupName} className="space-y-1">
-            <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[#74808A]">
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[#5B6871]">
               {group.groupName}
             </div>
             <div className="space-y-0.5">
@@ -128,7 +128,7 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
                     )}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-[#FFFFFF]' : 'text-[#74808A]')} />
+                      <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-[#FFFFFF]' : 'text-[#5B6871]')} aria-hidden="true" />
                       <span className="truncate">{item.name}</span>
                     </div>
 
@@ -153,7 +153,7 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
       {/* Footer Info */}
       <div className="p-3 border-t border-[#D7DEDC] bg-[#F8FAF9] text-xs text-[#5B6871] flex items-center justify-between font-mono-tech">
         <span>Bhowra-West</span>
-        <span>DGMS v1.0</span>
+        <span>Demo v1.0</span>
       </div>
     </aside>
   );

@@ -182,7 +182,7 @@ export default function PrivacyPolicyPage() {
             <div className="p-3 rounded-sm bg-[#F8FAF9] border border-[#D7DEDC] font-mono-tech text-xs text-[#1D2933]">
               <strong>SIH 2026 Project Contact:</strong> sih26025.mineguard@gmail.com<br />
               <strong>Institutional Context:</strong> Ministry of Coal &bull; Smart India Hackathon 2026<br />
-              <strong>Open Source Repository:</strong> https://github.com/mineguard-sih26025
+              <strong>Open Source Repository:</strong> https://github.com/RONALD-REX-7/sih26025
             </div>
           </div>
         </section>

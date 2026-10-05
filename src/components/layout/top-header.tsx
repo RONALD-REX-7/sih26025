@@ -132,22 +132,24 @@ export function TopHeader() {
       <div className="flex items-center gap-2">
         {/* Audible Siren Toggle */}
         <button
+          type="button"
           onClick={toggleMuteAlarm}
+          aria-label={isAlarmMuted ? 'Unmute Emergency Siren' : 'Mute Emergency Siren'}
           className={`h-7 px-2 text-xs font-medium rounded-sm border flex items-center gap-1.5 transition-colors cursor-pointer ${
             isAlarmMuted
-              ? 'border-[#D7DEDC] bg-[#EDF1F0] text-[#74808A] hover:bg-[#D7DEDC]'
+              ? 'border-[#D7DEDC] bg-[#EDF1F0] text-[#5B6871] hover:bg-[#D7DEDC]'
               : 'border-[#173B57] bg-[#FFFFFF] text-[#173B57] hover:bg-[#EDF1F0]'
           }`}
           title={isAlarmMuted ? 'Unmute Emergency Siren' : 'Mute Emergency Siren'}
         >
           {isAlarmMuted ? (
             <>
-              <VolumeX className="h-3.5 w-3.5" />
+              <VolumeX className="h-3.5 w-3.5" aria-hidden="true" />
               <span className="hidden md:inline">Siren Muted</span>
             </>
           ) : (
             <>
-              <Volume2 className="h-3.5 w-3.5 text-[#173B57]" />
+              <Volume2 className="h-3.5 w-3.5 text-[#173B57]" aria-hidden="true" />
               <span className="hidden md:inline">Siren Ready</span>
             </>
           )}
@@ -155,13 +157,16 @@ export function TopHeader() {
 
         {/* Persona Switcher */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="h-7 px-2 text-xs font-medium rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-[#1D2933] hover:bg-[#EDF1F0] flex items-center gap-1.5 cursor-pointer">
-            <User className="h-3.5 w-3.5 text-[#173B57]" />
+          <DropdownMenuTrigger
+            className="h-7 px-2 text-xs font-medium rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-[#1D2933] hover:bg-[#EDF1F0] flex items-center gap-1.5 cursor-pointer"
+            aria-label={`Switch persona. Current persona: ${role}`}
+          >
+            <User className="h-3.5 w-3.5 text-[#173B57]" aria-hidden="true" />
             <span className="hidden sm:inline">{role}</span>
-            <ChevronDown className="h-3 w-3 text-[#74808A]" />
+            <ChevronDown className="h-3 w-3 text-[#5B6871]" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 text-xs bg-[#FFFFFF] border-[#D7DEDC] text-[#1D2933]">
-            <DropdownMenuLabel className="text-xs text-[#74808A]">Operational Persona</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs text-[#5B6871]">Operational Persona</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[#D7DEDC]" />
             {USER_ROLES.map((r) => (
               <DropdownMenuItem
@@ -186,7 +191,7 @@ export function TopHeader() {
             size="sm"
             className="h-7 px-2.5 text-xs bg-[#173B57] hover:bg-[#102C42] text-[#FFFFFF] font-medium rounded-sm"
           >
-            <Play className="h-3 w-3 mr-1 fill-current" />
+            <Play className="h-3 w-3 mr-1 fill-current" aria-hidden="true" />
             <span className="hidden sm:inline">Simulator</span>
           </Button>
         </Link>

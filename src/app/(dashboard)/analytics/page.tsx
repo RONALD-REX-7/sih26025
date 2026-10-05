@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { RiskBadge } from '@/components/industrial/risk-badge';
+import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { useSimulatorStore } from '@/lib/simulator/simulator-store';
 import {
   BrainCircuit,
@@ -41,7 +42,7 @@ export default function AnalyticsPage() {
       <div className="bg-[#FFFFFF] p-4 rounded-sm border border-[#D7DEDC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#74808A] flex items-center gap-1.5">
+            <span className="text-xs font-mono-tech font-semibold uppercase tracking-wider text-[#5B6871] flex items-center gap-1.5">
               <BrainCircuit className="h-4 w-4 text-[#173B57]" />
               Statistical Intelligence &bull; Hybrid Detection Engine
             </span>
@@ -55,6 +56,7 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ProvenanceBadge provenance="DEMO" />
           <span className="text-xs font-mono-tech border border-[#D7DEDC] bg-[#EDF1F0] px-2.5 py-1 rounded-sm text-[#52606D]">
             Model: EWMA + Robust Z-Score (v2.1)
           </span>
@@ -76,35 +78,35 @@ export default function AnalyticsPage() {
       {/* Statistical Summary Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3.5 shadow-xs">
-          <div className="text-[11px] font-semibold font-mono-tech text-[#74808A] uppercase tracking-wider">Composite Risk Index</div>
+          <div className="text-[11px] font-semibold font-mono-tech text-[#5B6871] uppercase tracking-wider">Composite Risk Index</div>
           <div className="text-xl font-bold font-mono-tech text-[#1D2933] mt-1">
             {compositeAnomalyScore.toFixed(2)} <span className="text-xs font-normal text-[#52606D]">/ 1.00</span>
           </div>
-          <div className="text-xs font-mono-tech text-[#74808A] mt-1">Baseline nominal: &lt; 0.40</div>
+          <div className="text-xs font-mono-tech text-[#5B6871] mt-1">Baseline nominal: &lt; 0.40</div>
         </div>
 
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3.5 shadow-xs">
-          <div className="text-[11px] font-semibold font-mono-tech text-[#74808A] uppercase tracking-wider">Spatial Correlation</div>
+          <div className="text-[11px] font-semibold font-mono-tech text-[#5B6871] uppercase tracking-wider">Spatial Correlation</div>
           <div className="text-xl font-bold font-mono-tech text-[#1D2933] mt-1">
             r = +{spatialCorrelation.toFixed(2)}
           </div>
-          <div className="text-xs font-mono-tech text-[#74808A] mt-1">Pearson inter-station co-variance</div>
+          <div className="text-xs font-mono-tech text-[#5B6871] mt-1">Pearson inter-station co-variance</div>
         </div>
 
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3.5 shadow-xs">
-          <div className="text-[11px] font-semibold font-mono-tech text-[#74808A] uppercase tracking-wider">Persistence Window</div>
+          <div className="text-[11px] font-semibold font-mono-tech text-[#5B6871] uppercase tracking-wider">Persistence Window</div>
           <div className="text-xl font-bold font-mono-tech text-[#1D2933] mt-1">
             {persistenceSec} <span className="text-xs font-normal text-[#52606D]">seconds</span>
           </div>
-          <div className="text-xs font-mono-tech text-[#74808A] mt-1">Transient vibration filter: 45s</div>
+          <div className="text-xs font-mono-tech text-[#5B6871] mt-1">Transient vibration filter: 45s</div>
         </div>
 
         <div className="bg-[#FFFFFF] border border-[#D7DEDC] rounded-sm p-3.5 shadow-xs">
-          <div className="text-[11px] font-semibold font-mono-tech text-[#74808A] uppercase tracking-wider">Modality Agreement</div>
+          <div className="text-[11px] font-semibold font-mono-tech text-[#5B6871] uppercase tracking-wider">Modality Agreement</div>
           <div className="text-xl font-bold font-mono-tech text-[#1D2933] mt-1">
             {(modalityAgreement * 100).toFixed(0)}%
           </div>
-          <div className="text-xs font-mono-tech text-[#74808A] mt-1">Tilt &bull; Disp &bull; PPV agreement</div>
+          <div className="text-xs font-mono-tech text-[#5B6871] mt-1">Tilt &bull; Disp &bull; PPV agreement</div>
         </div>
       </div>
 
@@ -142,7 +144,7 @@ export default function AnalyticsPage() {
               <Network className="h-4 w-4 text-[#173B57]" />
               Pearson Spatial Correlation Matrix ({selectedPanel})
             </span>
-            <span className="text-xs font-mono-tech text-[#74808A]">Inter-Station Concordance</span>
+            <span className="text-xs font-mono-tech text-[#5B6871]">Inter-Station Concordance</span>
           </div>
 
           <div className="p-4 overflow-x-auto">
@@ -184,7 +186,7 @@ export default function AnalyticsPage() {
                 ))}
               </tbody>
             </table>
-            <p className="text-xs text-[#74808A] font-mono-tech mt-2">
+            <p className="text-xs text-[#5B6871] font-mono-tech mt-2">
               Values $r \ge 0.80$ indicate multi-station spatial deformation basin formation rather than single-sensor transient drift.
             </p>
           </div>
@@ -197,7 +199,7 @@ export default function AnalyticsPage() {
               <Activity className="h-4 w-4 text-[#173B57]" />
               Transducer Concordance ({nodePrefix})
             </span>
-            <span className="text-xs font-mono-tech text-[#74808A]">Live Ingestion</span>
+            <span className="text-xs font-mono-tech text-[#5B6871]">Demonstration Model</span>
           </div>
 
           <div className="p-4 space-y-3 text-xs">
@@ -208,7 +210,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="text-right font-mono-tech">
                 <span className="font-bold text-[#1D2933]">{tiltVal.toFixed(2)} arcsec</span>
-                <p className="text-xs text-[#74808A]">Limit: 3.0 mm/m</p>
+                <p className="text-xs text-[#5B6871]">Limit: 3.0 mm/m</p>
               </div>
             </div>
 
@@ -221,7 +223,7 @@ export default function AnalyticsPage() {
                 <span className={dispVal > 30 ? 'font-bold text-[#B42318]' : 'font-bold text-[#1D2933]'}>
                   {dispVal.toFixed(2)} mm
                 </span>
-                <p className="text-xs text-[#74808A]">Threshold: 30.0 mm</p>
+                <p className="text-xs text-[#5B6871]">Threshold: 30.0 mm</p>
               </div>
             </div>
 
@@ -232,7 +234,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="text-right font-mono-tech">
                 <span className="font-bold text-[#1D2933]">{vibVal.toFixed(2)} mm/s</span>
-                <p className="text-xs text-[#74808A]">Limit: 5.0 mm/s</p>
+                <p className="text-xs text-[#5B6871]">Limit: 5.0 mm/s</p>
               </div>
             </div>
 
@@ -243,7 +245,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="text-right font-mono-tech">
                 <span className="font-bold text-[#1D2933]">{strainVal.toFixed(1)} µε</span>
-                <p className="text-xs text-[#74808A]">Nominal: &lt; 600 µε</p>
+                <p className="text-xs text-[#5B6871]">Nominal: &lt; 600 µε</p>
               </div>
             </div>
           </div>

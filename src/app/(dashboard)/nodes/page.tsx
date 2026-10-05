@@ -139,7 +139,7 @@ export default function NodesPage() {
             Sensor Node Fleet &amp; Hardware Inventory
           </h1>
           <p className="text-xs text-[#52606D] mt-0.5">
-            ESP32-S3 edge controllers with SX1262 LoRaWAN wireless telemetry deployed across underground Panels P-101 to P-104.
+            ESP32-S3 edge controllers with SX1262 LoRaWAN wireless telemetry (Demonstration Fleet across underground Panels P-101 to P-104).
           </p>
         </div>
 
@@ -167,7 +167,7 @@ export default function NodesPage() {
       {/* Fleet Summary Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#D7DEDC] rounded-sm border border-[#D7DEDC] bg-[#FFFFFF] text-xs">
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Deployed stations
           </div>
           <div className="text-base font-bold text-[#1D2933] mt-0.5 font-mono-tech">
@@ -177,7 +177,7 @@ export default function NodesPage() {
         </div>
 
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Active telemetry
           </div>
           <div className="text-base font-bold text-[#2F6B4F] mt-0.5 font-mono-tech">
@@ -187,7 +187,7 @@ export default function NodesPage() {
         </div>
 
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Maintenance bay
           </div>
           <div className="text-base font-bold text-[#9A6A00] mt-0.5 font-mono-tech">
@@ -197,7 +197,7 @@ export default function NodesPage() {
         </div>
 
         <div className="p-3">
-          <div className="text-xs text-[#74808A] uppercase tracking-wider font-semibold">
+          <div className="text-xs text-[#5B6871] uppercase tracking-wider font-semibold">
             Mean battery level
           </div>
           <div className="text-base font-bold text-[#1D2933] mt-0.5 font-mono-tech">
@@ -266,7 +266,7 @@ export default function NodesPage() {
                   </td>
                   <td className="py-2.5 px-3.5 text-right text-[#52606D]">
                     <span className="inline-flex items-center gap-1">
-                      <Wifi className="h-3 w-3 text-[#74808A]" />
+                      <Wifi className="h-3 w-3 text-[#5B6871]" />
                       {node.current_health?.signal_rssi ?? -74} dBm
                     </span>
                   </td>

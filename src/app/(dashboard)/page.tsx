@@ -10,6 +10,7 @@ import { DEMO_NODES } from '@/lib/data/mock-data';
 import { GisLayerId } from '@/lib/domain/gis-types';
 import { RiskState } from '@/lib/domain/risk-states';
 import { RiskBadge } from '@/components/industrial/risk-badge';
+import { ProvenanceBadge } from '@/components/industrial/provenance-badge';
 import { RiskEvidencePanel } from '@/components/industrial/risk-evidence-panel';
 import { GisMapCanvas } from '@/components/gis/gis-map-canvas';
 import { AcknowledgeModal } from '@/components/industrial/acknowledge-modal';
@@ -132,6 +133,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
+          <ProvenanceBadge provenance="DEMO" />
           {isSimActive && (
             <span className="text-xs font-mono-tech bg-[#FBF6E9] border border-[#9A6A00]/40 text-[#9A6A00] px-2 py-0.5 rounded-sm font-semibold">
               SIMULATING ({simState.speed}x)
@@ -302,10 +304,10 @@ export default function DashboardOverviewPage() {
         <div className="px-4 py-3 border-b border-[#D7DEDC] bg-[#F8FAF9] flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-semibold text-[#173B57] tracking-tight">
-              Station Fleet Telemetry & Transducer Status
+              Station Fleet Telemetry &amp; Transducer Status
             </h2>
             <p className="text-xs text-[#52606D]">
-              Real-time multi-channel sensor readings across Bhowra-West monitoring network (16 Stations, 80 Transducers)
+              Multi-channel sensor readings across Bhowra-West demonstration network (16 Stations, 80 Transducers &bull; Pre-calibrated Benchmark)
             </p>
           </div>
 

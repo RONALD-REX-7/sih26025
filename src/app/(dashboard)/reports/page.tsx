@@ -144,11 +144,11 @@ export default function ReportsPage() {
         </div>
 
         <div className="p-3">
-          <div className="text-xs uppercase tracking-wider text-[#74808A] font-semibold">
+          <div className="text-xs uppercase tracking-wider text-[#5B6871] font-semibold">
             Shift handovers
           </div>
           <div className="text-base font-bold tabular-nums text-[#2F6B4F] mt-0.5 font-mono-tech">
-            100% Signed
+            All Demo Records Signed
           </div>
           <div className="text-xs text-[#52606D] mt-0.5">Overman &amp; surveyor double-sign-off</div>
         </div>
@@ -378,28 +378,28 @@ export default function ReportsPage() {
               Directorate General of Mines Safety &bull; Eastern Zone
             </div>
             <h2 className="text-xl font-bold text-[#1D2933]">
-              FORM IV: STATUTORY GROUND MOVEMENT CERTIFICATE
+              FORM IV: STATUTORY GROUND MOVEMENT CERTIFICATE (DEMONSTRATION TEMPLATE)
             </h2>
             <p className="text-xs text-[#52606D]">
-              Prescribed under Coal Mines Regulations 2017, Regulation 112 &bull; Strata Control Advisory
+              Prescribed format under Coal Mines Regulations 2017, Regulation 112 &bull; Strata Control Advisory (Demonstration Benchmark)
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-xs font-mono-tech border-b border-[#D7DEDC] pb-4">
             <div>
-              <span className="text-[#74808A]">Colliery Name: </span>
+              <span className="text-[#5B6871]">Colliery Name: </span>
               <span className="font-bold text-[#1D2933]">Bhowra-West Colliery (Seam VII)</span>
             </div>
             <div>
-              <span className="text-[#74808A]">Filing Certificate: </span>
+              <span className="text-[#5B6871]">Filing Certificate: </span>
               <span className="font-bold text-[#1D2933]">{selectedReport.reportNumber}</span>
             </div>
             <div>
-              <span className="text-[#74808A]">Target Extraction Panel: </span>
+              <span className="text-[#5B6871]">Target Extraction Panel: </span>
               <span className="font-bold text-[#1D2933]">{selectedReport.panelCode}</span>
             </div>
             <div>
-              <span className="text-[#74808A]">Submission Date: </span>
+              <span className="text-[#5B6871]">Submission Date: </span>
               <span className="font-bold text-[#1D2933]">{selectedReport.generationDate}</span>
             </div>
           </div>
@@ -454,10 +454,10 @@ export default function ReportsPage() {
 
           <div className="space-y-2 pt-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#1D2933]">
-              II. Statutory Certification &amp; Sign-off
+              II. Simulated Statutory Sign-off (Demonstration Workflow)
             </h3>
             <p className="text-xs text-[#52606D] leading-relaxed">
-              This is to officially certify that continuous multi-channel telemetry from the designated underground stations was analyzed per DGMS Circular No. 04 of 2017. The assessed ground stability condition is determined to be <span className="font-bold text-[#1D2933]">{selectedReport.safetyStatus.toUpperCase()}</span>.
+              This demonstration record certifies that simulated multi-channel telemetry from the designated underground stations was analyzed in accordance with DGMS Circular No. 04 of 2017 format. The assessed ground stability condition is determined to be <span className="font-bold text-[#1D2933]">{selectedReport.safetyStatus.toUpperCase()}</span>.
             </p>
           </div>
 
@@ -465,12 +465,12 @@ export default function ReportsPage() {
             <div>
               <div className="font-bold text-[#1D2933]">{selectedReport.authorizedSignatory.name}</div>
               <div className="text-[#52606D]">{selectedReport.authorizedSignatory.role}</div>
-              <div className="text-[#74808A] font-mono-tech">First Class Mine Manager Cert #MM-9104</div>
+              <div className="text-[#5B6871] font-mono-tech">First Class Mine Manager Cert #MM-9104 (Demonstration)</div>
             </div>
             <div className="text-right">
-              <div className="font-mono-tech text-[#52606D]">Digital Signature Verified</div>
-              <div className="font-mono-tech text-xs text-[#74808A]">SHA-256: 8fbc492a...e018d9</div>
-              <div className="text-[#2F6B4F] font-bold">DGMS Compliant Sign-off</div>
+              <div className="font-mono-tech text-[#52606D]">Digital Signature (Simulated)</div>
+              <div className="font-mono-tech text-xs text-[#5B6871]">SHA-256: 8fbc492a...e018d9</div>
+              <div className="text-[#2F6B4F] font-bold">Demonstration Sign-off</div>
             </div>
           </div>
         </div>
