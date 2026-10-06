@@ -53,7 +53,7 @@ export function TopHeader() {
       case 'Watch':
         return 'bg-[#FCF2E9] text-[#A85A00] border-[#A85A00]';
       case 'Advisory':
-        return 'bg-[#FBF6E9] text-[#9A6A00] border-[#9A6A00]';
+        return 'bg-[#FBF6E9] text-[#7E5500] border-[#7E5500]';
       default:
         return 'bg-[#EAF2ED] text-[#2F6B4F] border-[#2F6B4F]';
     }
@@ -119,7 +119,7 @@ export function TopHeader() {
               className={`flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-xs font-semibold ${
                 criticalCount > 0
                   ? 'bg-[#FBEBE9] text-[#B42318]'
-                  : 'bg-[#FBF6E9] text-[#9A6A00]'
+                  : 'bg-[#FBF6E9] text-[#7E5500]'
               }`}
             >
               <span>{activeCount} {activeCount === 1 ? 'Alert' : 'Alerts'}</span>

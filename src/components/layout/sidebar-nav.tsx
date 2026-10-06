@@ -134,7 +134,7 @@ export function SidebarNav({ className, onItemClick }: SidebarNavProps) {
                       <span
                         className={cn(
                           'px-1.5 py-0.5 rounded-sm text-xs font-mono-tech font-bold',
-                          criticalCount > 0 ? 'bg-[#FBEBE9] text-[#B42318]' : 'bg-[#FBF6E9] text-[#9A6A00]'
+                          criticalCount > 0 ? 'bg-[#FBEBE9] text-[#B42318]' : 'bg-[#FBF6E9] text-[#7E5500]'
                         )}
                       >
                         {activeCount}

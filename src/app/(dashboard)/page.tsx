@@ -133,7 +133,7 @@ export default function DashboardOverviewPage() {
 
         <div className="flex items-center gap-3 shrink-0">
           {isSimActive && (
-            <span className="text-xs font-mono-tech bg-[#FBF6E9] border border-[#9A6A00]/40 text-[#9A6A00] px-2 py-0.5 rounded-sm font-semibold">
+            <span className="text-xs font-mono-tech bg-[#FBF6E9] border border-[#7E5500]/40 text-[#7E5500] px-2 py-0.5 rounded-sm font-semibold">
               SIMULATING ({simState.speed}x)
             </span>
           )}
@@ -153,7 +153,7 @@ export default function DashboardOverviewPage() {
               ? 'border-[#91180E] bg-[#FBEBE9] text-[#91180E]'
               : activeAlert.severity === 'high'
               ? 'border-[#B42318] bg-[#FDF0ED] text-[#B42318]'
-              : 'border-[#9A6A00] bg-[#FBF6E9] text-[#9A6A00]'
+              : 'border-[#7E5500] bg-[#FBF6E9] text-[#7E5500]'
           }`}
         >
           <div className="flex items-start gap-3">

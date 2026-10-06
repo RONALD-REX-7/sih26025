@@ -2,9 +2,11 @@
 
 > **Smart India Hackathon 2026 — Problem Statement ID: SIH26025**  
 > **Nodal Ministry:** Ministry of Coal / Coal India Limited (CIL)  
-> **Benchmark Colliery:** Moonidih Underground Project, BCCL, Jharia Coalfield, Jharkhand, India  
+> **Geotechnical Baseline:** Moonidih Underground Project (BCCL, Jharia Coalfield — Deep Longwall Profile)  
+> **Interactive Demonstration Scenario:** Bhowra-West Colliery (Seam VII Leasehold, Jharia Coalfield — 16 Nodes / 80 Transducers)  
 > **Regulatory Baseline:** Directorate General of Mines Safety (DGMS) CMR 2017 (Reg 112 & 114)  
-> **Live Deployment:** [https://mineguard-sih26025.vercel.app](https://mineguard-sih26025.vercel.app)
+> **Live Interactive Demonstrator:** [https://mineguard-sih26025.vercel.app](https://mineguard-sih26025.vercel.app)  
+> ⚠️ **Simulated Scenario Disclosure**: Telemetry feeds, deformation curves, and station metrics on the dashboard represent a calibrated synthetic simulation modeled after Jharia strata equations for SIH demonstration.
 
 ---
 

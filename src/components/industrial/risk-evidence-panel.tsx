@@ -47,7 +47,7 @@ export function RiskEvidencePanel({
       case 'Watch':
         return 'bg-[#FCF2E9] border-[#A85A00] text-[#A85A00]';
       case 'Advisory':
-        return 'bg-[#FBF6E9] border-[#9A6A00] text-[#9A6A00]';
+        return 'bg-[#FBF6E9] border-[#7E5500] text-[#7E5500]';
       default:
         return 'bg-[#EAF2ED] border-[#2F6B4F] text-[#2F6B4F]';
     }
