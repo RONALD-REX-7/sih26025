@@ -206,3 +206,10 @@ python ml/evaluate_model.py
 * **Production Build:** Exited `0` with all **21 routes prerendered and optimized** via Next.js Turbopack.
 * **Python AI Benchmark:** Exited `0` with **93.0% recall** and **83.6% accuracy** on labeled ground-truth subsidence sequences.
 * **Secret Scan:** Repository-wide audit confirmed **0 leaked API keys, tokens, or credentials**.
+
+---
+
+## 8. License
+
+This repository is licensed under the [MIT License](./LICENSE).  
+Copyright (c) 2026 Ronald Rex C H.
