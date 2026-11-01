@@ -29,7 +29,7 @@ const DUPLICATE_CACHE_MAX = 5_000;
 export async function POST(req: NextRequest) {
   // 1. Authentication Check
   const apiKey = req.headers.get('x-api-key');
-  const validKey = process.env.TELEMETRY_API_KEY || 'sih26025-edge-telemetry-secret-key';
+  const validKey = process.env.TELEMETRY_API_KEY || 'test-mock-telemetry-key-non-prod';
 
   if (!apiKey || apiKey !== validKey) {
     return NextResponse.json(

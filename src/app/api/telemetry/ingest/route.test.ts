@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from './route';
 
-const API_KEY = 'sih26025-edge-telemetry-secret-key';
+const API_KEY = 'test-mock-telemetry-key-non-prod';
 const BASE_URL = 'http://localhost:3000/api/telemetry/ingest';
 
 describe('SIH26025 Hardware Telemetry Ingestion API (POST /api/telemetry/ingest)', () => {
