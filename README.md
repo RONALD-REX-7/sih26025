@@ -6,7 +6,15 @@
 > **Interactive Demonstration Scenario:** Bhowra-West Colliery (Seam VII Leasehold, Jharia Coalfield — 16 Nodes / 80 Transducers)  
 > **Regulatory Baseline:** Directorate General of Mines Safety (DGMS) CMR 2017 (Reg 112 & 114)  
 > **Live Interactive Demonstrator:** [https://mineguard-sih26025.vercel.app](https://mineguard-sih26025.vercel.app)  
-> ⚠️ **Simulated Scenario Disclosure**: Telemetry feeds, deformation curves, and station metrics on the dashboard represent a calibrated synthetic simulation modeled after Jharia strata equations for SIH demonstration.
+
+---
+
+> [!IMPORTANT]
+> **Owner-Confirmed Engineering Baseline & Evidence Disclosure**:
+> - **Firmware Reality**: ESP32-S3 firmware source code exists, is implemented in C++, and compiles deterministically with PlatformIO.
+> - **Hardware Integration Reality**: Physical hardware is **not fully integrated**. Breakout boards and bench tests have been partially exercised, but the system is **not a completed physical prototype** or a field-validated mine monitoring installation.
+> - **Measurement & Telemetry Reality**: Bench measurements (TEST-01, TEST-02) represent owner-reported prototype readings. Telemetry feeds, deformation curves, and station metrics on the digital platform represent a **calibrated synthetic simulation** modeled after Barakar sandstone/shale geotechnical mechanics for SIH demonstration.
+> - **Classification**: Adheres strictly to the **10-Tier Evidence Taxonomy Standard** documented in [`docs/STATUS.md`](./docs/STATUS.md) and [`docs/TESTING.md`](./docs/TESTING.md).
 
 ---
 
@@ -17,7 +25,7 @@ Underground coal mining in India (both bord-and-pillar depillaring and mechanise
 Existing commercial subsurface monitoring stations imported from abroad cost **₹1,50,000 to ₹4,50,000 per station**, restricting colliery deployments to sparse, isolated locations.
 
 **SIH26025** is a vertically integrated, open-architecture solution that delivers:
-1. **Low-Cost Subsurface Sensing Hardware:** Multi-parametric nodes engineered with precision MEMS inclinometry, 24-bit delta-sigma strain bridge ADC, and sub-GHz LoRa (IN865) achieving a unit fabrication cost of **₹4,850 (~$58 USD)** — a **30x cost reduction**.
+1. **Low-Cost Subsurface Sensing Hardware Design:** Multi-parametric nodes engineered with precision MEMS inclinometry, 24-bit delta-sigma strain bridge ADC, and sub-GHz LoRa (IN865) achieving an itemized fabrication cost estimate of **₹4,850 (~$58 USD)** — a **30x cost reduction** (Tier 1 Design/BOM estimate).
 2. **On-Device Edge TinyML:** Real-time rate-of-change and robust Z-score analysis on an ESP32-S3 microcontroller, dynamically escalating reporting from 300s to 10s upon detecting anomalous ground sag.
 3. **Multi-Station Spatial Correlation & Sensor Fusion:** Eliminates false alarms by requiring Pearson correlation agreement ($r > +0.75$) across adjacent stations and multi-modal agreement between tilt, displacement, strain, and acoustic emission.
 4. **Statutory DGMS Compliance:** Purpose-built around the mandatory requirements of the **Coal Mines Regulations (CMR) 2017 Regulation 112** (Strata Control and Monitoring Plan - SCAMP), featuring digital shift sign-offs and immutable audit trails.
@@ -66,82 +74,37 @@ Existing commercial subsurface monitoring stations imported from abroad cost **�
 
 ---
 
-## 3. Repository Structure
+## 3. Ten-Tier Technical Evidence Classification
 
-```
-sih26025/
-├── hardware/                       # Physical sensing node schematics, BOM, and mechanical spec
-│   ├── README.md                   # Hardware architecture, power budget (3+ yr life), Ex 'i' analysis
-│   ├── bom/
-│   │   ├── BOM.md                  # Itemized component specifications & supplier list (~₹4,850 unit cost)
-│   │   └── bom.csv                 # Machine-readable Bill of Materials CSV
-│   ├── schematics/
-│   │   └── system_schematic.md     # Pinout map, SPI/I2C buses, ADC bridge conditioning, power gating
-│   └── mechanical/
-│       └── enclosure_spec.md       # IP68 enclosure, cable glands, and 22mm rockbolt bracket clamp
-│
-├── firmware/                       # Production ESP32-S3 embedded C++ firmware (PlatformIO)
-│   ├── README.md                   # Build instructions, flashing guide, serial debug format
-│   ├── platformio.ini              # Build environment configuration targeting ESP32-S3
-│   ├── include/
-│   │   ├── config.h                # Hardware pinouts, IN865 LoRa settings, threshold triggers
-│   │   └── tinyml_weights.h        # Auto-generated baseline weights and decision thresholds
-│   └── src/
-│       ├── main.cpp                # System executive, FreeRTOS tasks & deep-sleep cycle manager
-│       ├── sensors/                # Inclinometer (tilt) and 24-bit strain ADC drivers
-│       ├── edge_ai/                # On-device TinyML circular buffer, EWMA & robust Z-score filter
-│       └── telemetry/              # Compact 20-byte binary packet serializer with CRC-16
-│
-├── ml/                             # Edge AI & statistical intelligence pipeline
-│   ├── README.md                   # Python environment setup & pipeline documentation
-│   ├── requirements.txt            # Minimal verified dependencies
-│   ├── MODEL_CARD.md               # Engineering model card (inputs, assumptions, failure modes)
-│   ├── data_generator.py           # Deterministic strata deformation time-series generator
-│   ├── train_anomaly_detector.py   # Baseline calculation & statistical parameter trainer
-│   ├── tinyml_export.py            # C header generator exporting parameters for embedded firmware
-│   └── evaluate_model.py           # Evaluation script computing Precision, Recall, and F1
-│
-├── data/                           # Stratigraphy, baseline and scenario reference datasets
-│   ├── README.md                   # Data classification (SYNTHETIC/REFERENCE), CRS (EPSG:32645), schema
-│   └── samples/
-│       ├── baseline_nominal.json   # 24-hour nominal strata baseline telemetry
-│       ├── subsidence_event.json   # Progressive multi-station subsidence event sequence
-│       ├── moonidih_strata.json    # Stratigraphic borehole profile for Moonidih Colliery
-│       └── generated_subsidence_dataset.json # Ground-truth benchmark dataset
-│
-├── presentation/                   # SIH 2026 hackathon pitch & evaluation material
-│   ├── SIH26025_PITCH_BRIEF.md     # Executive summary, problem-solution alignment, cost analysis
-│   ├── JUDGE_DEMO_WALKTHROUGH.md   # 5-minute repeatable demonstration script for evaluators
-│   └── SYSTEM_ARCHITECTURE_DECK.md # Slide-by-slide architecture deck covering all system layers
-│
-├── docs/                           # Technical documentation & testing procedures
-│   ├── ARCHITECTURE.md             # Complete end-to-end architectural blueprint
-│   ├── STATUS.md                   # Transparent development status matrix
-│   ├── TESTING.md                  # Comprehensive test matrix (sensor, AI, UI, E2E)
-│   ├── REFERENCES.md               # Formal statutory, academic, and technical citations
-│   └── postman/                    # Verified Postman telemetry ingestion API collection
-│
-└── src/                            # Full-Stack Next.js 16 + Supabase Digital Platform
-    ├── app/                        # 12 operational dashboard views, GIS surveillance, Ingest API
-    ├── components/                 # Industrial components, GIS canvas, telemetry charts
-    ├── lib/                        # AI risk engine, deterministic simulator, alert engine, notifications
-    └── (test files)                # 42 passing Vitest unit and integration tests
-```
+In compliance with professional engineering standards, all technical claims associated with SIH26025 are categorized below:
+
+| Technical Claim / Subsystem | Target Figure | Evidence Classification | Verification & Source Details |
+| :--- | :---: | :---: | :--- |
+| **BNO085 Inclinometer Jitter** | $\pm 0.014^\circ$ | **Tier 7** | Owner-reported bench measurement (`docs/TESTING.md` TEST-01). Driver probes 0x4A with MPU6050 fallback at 0x68. Raw telemetry log required for independent verification. |
+| **ADS1220 ADC Linearity** | $R^2 = 0.9998$ | **Tier 7** | Owner-reported bench measurement with decade box (`docs/TESTING.md` TEST-02). Raw calibration curve required. |
+| **ADS1220 Strain Noise Floor** | $0.22\ \mu\epsilon$ | **Tier 7** | Owner-reported bench measurement (`docs/TESTING.md` TEST-02). Raw noise histogram required. |
+| **TinyML Strata Anomaly Recall** | 93.00% Recall / 83.60% Accuracy | **Tier 5** | Independently reproducible mathematical simulation on 1,000 synthetic geotechnical vectors (`ml/evaluate_model.py`, seed=123). |
+| **Unit Fabrication Cost** | ₹4,850 ($58.40 USD) | **Tier 1** | Projected engineering prototype BOM estimate across 13 COTS components (`hardware/bom/BOM.md`). |
+| **LoRa Sub-GHz Range** | 8 km Surface / 2.5 km Underground | **Tier 1 / Tier 7** | Theoretical link budget projection based on SX1262 specs (Tier 1); lab RF bench transmission is owner-reported (Tier 7). |
+| **ESP32-S3 Firmware Build** | 0 Compilation Errors | **Tier 3** | Deterministic PlatformIO build: RAM 6.4%, Flash 9.9% (`firmware/src/`). |
+| **Digital Platform & API Tests**| 42/42 Tests Passing | **Tier 4** | Vitest test suite executing in CI across 9 test suites (`src/`). |
+
+*Full itemized methodology, instruments, and evidence audit trails are documented in [`docs/STATUS.md`](./docs/STATUS.md).*
 
 ---
 
 ## 4. Hardware BOM Summary (Low-Cost Focus)
 
-| Subsystem | Key Components | Unit Cost (INR) | Unit Cost (USD) |
-|---|---|---|---|
-| Core Processing & LoRa | ESP32-S3-WROOM-1 + Semtech SX1262 (IN865) | ₹ 1,180 | $ 14.20 |
-| Transducers & 24-Bit ADC | BNO085 Inclinometer + TI ADS1220 24-bit ADC + Piezo | ₹ 1,420 | $ 17.10 |
-| Power Subsystem | 3.2V 3200mAh LiFePO4 + TI TPS7A2533 Ultra-Low Noise LDO | ₹ 680 | $ 8.20 |
-| Enclosure & Mounting | IP68 Die-cast Enclosure + SS304 Rockbolt Clamp Bracket | ₹ 1,150 | $ 13.85 |
-| PCB & Passives | 4-Layer FR4 1.6mm PCB + M12 IP68 Brass Cable Glands | ₹ 420 | $ 5.05 |
-| **Total Unit Production Cost** | — | **₹ 4,850** | **$ 58.40** |
+| Subsystem | Key Components | Unit Cost (INR) | Unit Cost (USD) | Evidence Tier |
+|---|---|---|---|:---:|
+| Core Processing & LoRa | ESP32-S3-WROOM-1 + Semtech SX1262 (IN865) | ₹ 1,180 | $ 14.20 | Tier 1 (Design BOM) |
+| Transducers & 24-Bit ADC | BNO085 Inclinometer + TI ADS1220 24-bit ADC + Piezo | ₹ 1,420 | $ 17.10 | Tier 1 (Design BOM) |
+| Power Subsystem | 3.2V 3200mAh LiFePO4 + TI TPS7A2533 Ultra-Low Noise LDO | ₹ 680 | $ 8.20 | Tier 1 (Design BOM) |
+| Enclosure & Mounting | IP68 Die-cast Enclosure + SS304 Rockbolt Clamp Bracket | ₹ 1,150 | $ 13.85 | Tier 1 (Design BOM) |
+| PCB & Passives | 4-Layer FR4 1.6mm PCB + M12 IP68 Brass Cable Glands | ₹ 420 | $ 5.05 | Tier 1 (Design BOM) |
+| **Total Unit Production Cost** | — | **₹ 4,850** | **$ 58.40** | **Tier 1 (Design BOM)** |
 
-*Complete itemized specifications, part numbers, and suppliers are documented in [BOM.md](file:///hardware/bom/BOM.md).*
+*Complete itemized specifications, part numbers, and suppliers are documented in [BOM.md](./hardware/bom/BOM.md).*
 
 ---
 
@@ -174,7 +137,7 @@ Access the operations dashboard at `http://localhost:3000`.
 
 ```bash
 cd firmware
-pio run                          # Compile firmware
+pio run                          # Compile firmware (Tier 3 verified)
 pio run --target upload          # Flash to ESP32-S3
 pio device monitor               # Open serial debug monitor (115200 baud)
 ```
@@ -182,7 +145,7 @@ pio device monitor               # Open serial debug monitor (115200 baud)
 ### 5.3 Machine Learning Pipeline (Python)
 
 ```bash
-# Generate synthetic strata data, train baseline, and benchmark performance
+# Generate synthetic strata data, train baseline, and benchmark performance (Tier 5 verified)
 python ml/data_generator.py
 python ml/train_anomaly_detector.py
 python ml/tinyml_export.py
@@ -198,6 +161,7 @@ python ml/evaluate_model.py
 > 1. **Anomaly Detection vs Collapse Prediction:** The SIH26025 platform detects abnormal acceleration in roof sag, borehole displacement, and rockbolt strain relative to calibrated baselines. It **does NOT** claim deterministic prediction of the exact hour or second of catastrophic mine collapse.
 > 2. **Decision Support Only:** The system serves as early-warning decision support. Final evacuation and support intensification decisions remain the statutory responsibility of the certified Mine Manager and Safety Officer under DGMS CMR 2017.
 > 3. **Intrinsic Safety Certification Boundary:** The hardware circuitry is designed with low-voltage power rails and current-limiting zener barriers for intrinsic safety (Ex 'i') compliance under IS/IEC 60079-11. However, **formal statutory testing and certification by CIMFR Dhanbad / DGMS has NOT yet been undertaken**. Physical deployment in operational gassy coal faces requires formal statutory certification.
+> 4. **Hardware Prototype Boundary:** Physical hardware is in partial prototype bench testing (Tier 8); full multi-sensor integration (Tier 9) and underground colliery validation (Tier 10) are planned.
 
 ---
 
@@ -206,7 +170,7 @@ python ml/evaluate_model.py
 * **ESLint Verification:** Exited `0` with **0 errors and 0 warnings**.
 * **Vitest Automated Suite:** Exited `0` with **42 of 42 tests passing** across 9 test suites in ~300 ms.
 * **Production Build:** Exited `0` with all **21 routes prerendered and optimized** via Next.js Turbopack.
-* **Python AI Benchmark:** Exited `0` with **93.0% recall** and **83.6% accuracy** on labeled ground-truth subsidence sequences.
+* **Python AI Benchmark:** Exited `0` with **93.00% recall** and **83.60% accuracy** on labeled ground-truth subsidence sequences.
 * **Secret Scan:** Repository-wide audit confirmed **0 leaked API keys, tokens, or credentials**.
 
 ---
