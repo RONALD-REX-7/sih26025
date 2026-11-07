@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="portfolio-identity.svg" alt="MineGuard · SIH26025 — project portfolio banner" width="100%">
+
+[← Back to Ronald Rex's engineering portfolio](https://github.com/RONALD-REX-7)
+
+</div>
+
+---
+
 # SIH26025 — AI-Enabled Low-Cost Real-Time Mine Subsidence Monitoring & Early Warning System
 
 > **Smart India Hackathon 2026 — Problem Statement ID: SIH26025**  
