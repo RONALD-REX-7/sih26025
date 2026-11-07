@@ -185,6 +185,12 @@ python ml/evaluate_model.py
 
 ---
 
+## 👨‍💻 Project Maintainer & Architecture
+
+- **Lead Architect & Maintainer**: [Ronald Rex](https://github.com/RONALD-REX-7) — Embedded firmware architecture, geotechnical IoT telemetry, and ML subsidence detection models.
+
+---
+
 ## 8. License
 
 This repository is licensed under the [MIT License](./LICENSE).  
