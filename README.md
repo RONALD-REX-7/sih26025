@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="portfolio-identity.svg" alt="MineGuard · SIH26025 — project portfolio banner" width="100%">
+
+[← Back to Ronald Rex's engineering portfolio](https://github.com/RONALD-REX-7)
+
+</div>
+
+---
+
 # SIH26025 — AI-Enabled Low-Cost Real-Time Mine Subsidence Monitoring & Early Warning System
 
 > **Smart India Hackathon 2026 — Problem Statement ID: SIH26025**  
@@ -172,6 +182,12 @@ python ml/evaluate_model.py
 * **Production Build:** Exited `0` with all **21 routes prerendered and optimized** via Next.js Turbopack.
 * **Python AI Benchmark:** Exited `0` with **93.00% recall** and **83.60% accuracy** on labeled ground-truth subsidence sequences.
 * **Secret Scan:** Repository-wide audit confirmed **0 leaked API keys, tokens, or credentials**.
+
+---
+
+## 👨‍💻 Project Maintainer & Architecture
+
+- **Lead Architect & Maintainer**: [Ronald Rex](https://github.com/RONALD-REX-7) — Embedded firmware architecture, geotechnical IoT telemetry, and ML subsidence detection models.
 
 ---
 
